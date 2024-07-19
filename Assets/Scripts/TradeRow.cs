@@ -24,6 +24,7 @@ public class TradeRow : MonoBehaviour
         AddCard(CardFactory.GenerateCard("hive queen", game, cardPrefab, this.gameObject), 0);
         AddCard(CardFactory.GenerateCard("stinger", game, cardPrefab, this.gameObject), 1);
         AddCard(CardFactory.GenerateCard("frontier runner", game, cardPrefab, this.gameObject), 2);
+        AddCard(CardFactory.GenerateCard("blob miner", game, cardPrefab, this.gameObject), 3);
     }
 
     // Update is called once per frame

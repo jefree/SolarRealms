@@ -1,22 +1,23 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class CardFactory : MonoBehaviour
 {
 
-    public static void Build(Card card)
+    public static void Build(Card card, Game game)
     {
         switch (card.cardName)
         {
             case "viper":
-                Viper(card);
+                Viper(card, game);
                 break;
 
             case "scout":
-                Scout(card);
+                Scout(card, game);
                 break;
 
-            case "hive queen":
-                HiveQueen(card);
+            case "blob miner":
+                BlobMiner(card, game);
                 break;
 
             default:
@@ -33,7 +34,7 @@ public class CardFactory : MonoBehaviour
         card.cardName = name;
         card.game = game;
 
-        Build(card);
+        Build(card, game);
 
         card.gameObject.SetActive(false);
         card.gameObject.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>($"Cards/{name}");
@@ -41,29 +42,24 @@ public class CardFactory : MonoBehaviour
         return card;
     }
 
-    public static void Viper(Card card)
+    public static void Viper(Card card, Game game)
     {
-        Effect effect = new();
-        effect.card = card;
-
-        effect.combat = 1;
-        card.primaryMainEffect = effect;
+        BaseEffect effect = new(game, combat: 1);
+        card.effects.Add(effect);
     }
 
-    public static void Scout(Card card)
+    public static void Scout(Card card, Game game)
     {
-        Effect effect = new();
-        effect.card = card;
+        BaseEffect effect = new(game, trade: 1);
         effect.trade = 1;
 
-        card.primaryMainEffect = effect;
+        card.effects.Add(effect);
     }
 
-    public static void HiveQueen(Card card)
+    public static void BlobMiner(Card card, Game game)
     {
-        var effect = new Effect();
-        effect.combat = 7;
-
-        var drawEffect = new DrawEffect();
+        card.cost = 2;
+        card.effects.Add(new BaseEffect(game, trade: 3));
+        card.effects.Add(new Effect.TradeRowScrap(game));
     }
 }

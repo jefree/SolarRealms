@@ -164,6 +164,8 @@ public class Player : MonoBehaviour
             deck.Push(CardFactory.GenerateCard("viper", game, cardPrefab, this.gameObject));
         }
 
+        deck.Push(CardFactory.GenerateCard("blob miner", game, cardPrefab, this.gameObject));
+
         // deck.Push(generateCard("frontier runner")); 
 
         return deck;

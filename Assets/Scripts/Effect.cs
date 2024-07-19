@@ -1,5 +1,11 @@
-public class Effect {
-    public Card card;
+using System.Reflection;
+using Effect;
+using Unity.VisualScripting;
+using UnityEditor.PackageManager;
+
+public class BaseEffect : Effect.IEffect
+{
+    //Card card;
     public int combat;
     public int trade;
     public int authority;
@@ -8,8 +14,22 @@ public class Effect {
     bool onDoubleAlly;
     bool optional; // card text says "You may ..."
     bool returnAfterScrap; // this card return to discard pile after activate scrap effect
+    public Game game;
 
-    public void Resolve(Game game) 
+    public BaseEffect(Game game, int combat = 0, int trade = 0, int authority = 0)
+    {
+        this.game = game;
+        this.combat = combat;
+        this.trade = trade;
+        this.authority = authority;
+    }
+
+    public void Activate()
+    {
+        Resolve();
+    }
+
+    public void Resolve()
     {
         Player activePlayer = game.activePlayer;
 
@@ -18,7 +38,7 @@ public class Effect {
         activePlayer.authority += authority;
 
         game.EffectResolved(this);
-    }    
+    }
     /*
     Next is the list of found effects and where it could belong to in terms of Effect types
 
@@ -64,50 +84,101 @@ public class Effect {
     */
 }
 
-// Condition is NOT an Effect
-class Condition {
-    int count;
-    int type; // Ship or Base
-}
-
-class DrawEffect : Effect {
+/*
+class DrawEffect : Effect
+{
     int count;
     bool upToo;
     bool thenDiscard;
 }
 
-class DestroyEffect : Effect  {
+class DestroyEffect : Effect
+{
     int count;
 }
 
-class ScrapEffect : Effect {
+class ScrapEffect : Effect
+{
     bool fromHand;
     bool fromDiscardPile;
     int count;
     bool upTo;
 }
 
-class OpponentDiscardEffect : Effect {
+class OpponentDiscardEffect : Effect
+{
     int count;
 }
 
-class AcquireEffect : Effect {
+class AcquireEffect : Effect
+{
     int count;
     int type; // Ship or Base
     int cost;
     bool toDeck;
 }
 
-class DiscardCombatEffect : Effect {
+class DiscardCombatEffect : Effect
+{
     int combatPerCard;
 }
 
-class RecoverEffect : Effect {
+class RecoverEffect : Effect
+{
     int count; // how many cards to recover
     int type; // Ship or Base
 }
 
-class NextToDeck : Effect {
+class NextToDeck : Effect
+{
     int count;
     int type; // Ship or Base
 }
+*/
+
+namespace Effect
+{
+    public interface IEffect
+    {
+
+        void Activate();
+        void Resolve();
+    }
+
+    public interface ICardReceiver : IEffect
+    {
+        void SetCard(Card card);
+    }
+
+    public class TradeRowScrap : IEffect, ICardReceiver
+    {
+
+        Game game;
+        Card card;
+        EffectResolver.ChooseCard resolver;
+
+        public TradeRowScrap(Game game)
+        {
+            this.game = game;
+            resolver = new(game, Location.TRADE_ROW);
+        }
+
+        public void Activate()
+        {
+            resolver.Start();
+        }
+
+        public void Resolve()
+        {
+            game.ScrapCard(card);
+            game.EffectResolved(this);
+        }
+
+        public void SetCard(Card card)
+        {
+            this.card = card;
+            Resolve();
+        }
+    }
+}
+

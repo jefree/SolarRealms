@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using EffectResolver;
 using UnityEngine;
 
 public enum Faction
@@ -14,12 +15,7 @@ public enum Faction
 public class Card : MonoBehaviour
 {
     public string cardName;
-    public Effect primaryMainEffect;
-    public Effect primaryOptionalEffect;
-    public Effect allyEffect;
-    public Effect doubleAllyEffect;
-    public Effect scrapEffect;
-
+    public List<Effect.IEffect> effects = new();
     string secondaryText; // ??
     public int cost;
     public int defense;
@@ -36,6 +32,15 @@ public class Card : MonoBehaviour
     }
     void OnMouseDown()
     {
+
+        if (
+            game.state == GameState.CHOOSE_CARD
+        )
+        {
+            game.ChooseCard(this);
+            return;
+        }
+
         if (
             game.state == GameState.PLAY_CARD &&
             location == Location.HAND
@@ -43,6 +48,7 @@ public class Card : MonoBehaviour
         {
             Debug.Log("Playing Card");
             game.PlayCard(this);
+            return;
         }
 
         if (
@@ -52,6 +58,7 @@ public class Card : MonoBehaviour
         {
             Debug.Log("Buying Card");
             game.BuyCard(this);
+            return;
         }
     }
 }

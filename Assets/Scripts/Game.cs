@@ -2,12 +2,15 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using Effect;
 using UnityEngine;
 
 public enum GameState
 {
     PLAY_CARD,
-    RESOLVING_EFFECT
+    RESOLVING_CARD,
+    CHOOSE_CARD
 }
 
 public class Game : MonoBehaviour
@@ -27,7 +30,7 @@ public class Game : MonoBehaviour
     public Player activePlayer;
     public GameState state;
     public Card currentCard;
-    public Effect currentEffect;
+    public Effect.IEffect currentEffect;
     // Start is called before the first frame update
     void Start()
     {
@@ -49,11 +52,15 @@ public class Game : MonoBehaviour
 
     public void PlayCard(Card card)
     {
-        state = GameState.RESOLVING_EFFECT;
+        state = GameState.RESOLVING_CARD;
         currentCard = card;
-        currentEffect = card.primaryMainEffect;
+        ResolveEffect(card.effects.First<Effect.IEffect>());
+    }
 
-        currentEffect.Resolve(this);
+    public void ResolveEffect(Effect.IEffect effect)
+    {
+        currentEffect = effect;
+        currentEffect.Activate();
     }
 
     public void BuyCard(Card card)
@@ -70,19 +77,32 @@ public class Game : MonoBehaviour
         }
     }
 
-    public void EffectResolved(Effect effect)
+    public void ScrapCard(Card card)
     {
-        if (effect == currentEffect)
-        {
-            var card = effect.card;
-            activePlayer.Discard(card);
-
-            PlayNewCard();
-        }
-
+        Destroy(card.gameObject);
     }
 
-    public void PlayNewCard()
+    public void EffectResolved(Effect.IEffect effect)
+    {
+        if (currentEffect == effect)
+        {
+            currentCard.effects.Remove(effect);
+
+            if (currentCard.effects.Count == 0)
+            {
+                activePlayer.Discard(currentCard);
+                currentCard = null;
+                StartPlayNewCard();
+            }
+            else
+            {
+                var nextEffect = currentCard.effects.First<Effect.IEffect>();
+                ResolveEffect(nextEffect);
+            }
+        }
+    }
+
+    public void StartPlayNewCard()
     {
         state = GameState.PLAY_CARD;
         currentEffect = null;
@@ -90,9 +110,19 @@ public class Game : MonoBehaviour
 
     public void EndTurn()
     {
-
         activePlayer.EndTurn();
+    }
 
+    public void StartChooseCard()
+    {
+        state = GameState.CHOOSE_CARD;
+        ShowMessage("Escoge un carta del mercado para deshuesarla");
+    }
+
+    public void ChooseCard(Card card)
+    {
+        var cardReceiver = (Effect.ICardReceiver)currentEffect;
+        cardReceiver.SetCard(card);
     }
 
     public void ShowMessage(string message)
