@@ -1,23 +1,32 @@
 using UnityEngine;
 
-public class CardEffectFactory : MonoBehaviour {
+public class CardFactory : MonoBehaviour
+{
 
-    public static void Build(Card card) {
-        switch(card.cardName) {
-            case "viper": 
-            Viper(card);
-            break;
+    public static void Build(Card card)
+    {
+        switch (card.cardName)
+        {
+            case "viper":
+                Viper(card);
+                break;
 
-            case "scout": 
-            Scout(card);
-            break;
+            case "scout":
+                Scout(card);
+                break;
+
+            case "hive queen":
+                HiveQueen(card);
+                break;
 
             default:
-            break;
+                card.cost = 1;
+                break;
         }
     }
 
-    public static Card GenerateCard(string name, Game game, GameObject cardPrefab, GameObject parent) {
+    public static Card GenerateCard(string name, Game game, GameObject cardPrefab, GameObject parent)
+    {
         GameObject cardGameObject = Instantiate(cardPrefab, parent.transform);
 
         Card card = cardGameObject.GetComponent<Card>();
@@ -32,7 +41,7 @@ public class CardEffectFactory : MonoBehaviour {
         return card;
     }
 
-    public static void Viper(Card card) 
+    public static void Viper(Card card)
     {
         Effect effect = new();
         effect.card = card;
@@ -41,12 +50,20 @@ public class CardEffectFactory : MonoBehaviour {
         card.primaryMainEffect = effect;
     }
 
-    public static void Scout(Card card) 
+    public static void Scout(Card card)
     {
         Effect effect = new();
         effect.card = card;
         effect.trade = 1;
 
         card.primaryMainEffect = effect;
-    }    
+    }
+
+    public static void HiveQueen(Card card)
+    {
+        var effect = new Effect();
+        effect.combat = 7;
+
+        var drawEffect = new DrawEffect();
+    }
 }

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class DiscardPile : MonoBehaviour
@@ -26,7 +27,7 @@ public class DiscardPile : MonoBehaviour
     {
         if (topCard != null)
         {
-            topCard.transform.localPosition = new Vector3(0, 0, 1);
+            topCard.SetActive(false);
         }
 
         topCard = card.gameObject;
@@ -36,5 +37,27 @@ public class DiscardPile : MonoBehaviour
 
         card.location = Location.DISCARD_PILE;
         cards.Add(card);
+    }
+
+    public void RemoveCard(Card card)
+    {
+        card.gameObject.transform.SetParent(null);
+        card.gameObject.SetActive(false);
+
+        cards.Remove(card);
+    }
+
+    public List<Card> RemoveAllCards()
+    {
+        var removedCards = new List<Card>();
+
+        while (cards.Count > 0)
+        {
+            var card = cards.First<Card>();
+            RemoveCard(card);
+            removedCards.Add(card);
+        }
+
+        return removedCards;
     }
 }

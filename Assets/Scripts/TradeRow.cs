@@ -21,19 +21,19 @@ public class TradeRow : MonoBehaviour
         game = gameGO.GetComponent<Game>();
         cards = new();
 
-        AddCard(CardEffectFactory.GenerateCard("hive queen", game, cardPrefab, this.gameObject), 0);
-        AddCard(CardEffectFactory.GenerateCard("stinger", game, cardPrefab, this.gameObject), 1);
-        AddCard(CardEffectFactory.GenerateCard("frontier runner", game, cardPrefab, this.gameObject), 2);
+        AddCard(CardFactory.GenerateCard("hive queen", game, cardPrefab, this.gameObject), 0);
+        AddCard(CardFactory.GenerateCard("stinger", game, cardPrefab, this.gameObject), 1);
+        AddCard(CardFactory.GenerateCard("frontier runner", game, cardPrefab, this.gameObject), 2);
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     void AddCard(Card card, int position)
-    {   
+    {
         card.location = Location.TRADE_ROW;
         cards.Add(card);
 

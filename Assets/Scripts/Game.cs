@@ -4,20 +4,22 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-public enum GameState {
+public enum GameState
+{
     PLAY_CARD,
     RESOLVING_EFFECT
 }
 
 public class Game : MonoBehaviour
 {
-    const int INITIAL_SCOUT_AMOUNT  = 8;
-    const int INITIAL_VIPER_AMOUNT  = 2;
+    const int INITIAL_SCOUT_AMOUNT = 8;
+    const int INITIAL_VIPER_AMOUNT = 2;
     public const float CARD_SIZE = 2.14f;
 
     public GameObject cardPrefab;
     public GameObject playerOneGO;
     public GameObject tradeRowGO;
+    public TMPro.TextMeshProUGUI messageText;
 
 
     public Player playerOne;
@@ -35,6 +37,8 @@ public class Game : MonoBehaviour
         tradeRow = tradeRowGO.GetComponent<TradeRow>();
 
         state = GameState.PLAY_CARD;
+
+        messageText.text = "Juega o compra cartas";
     }
 
     // Update is called once per frame
@@ -43,7 +47,7 @@ public class Game : MonoBehaviour
 
     }
 
-    public void PlayCard(Card card) 
+    public void PlayCard(Card card)
     {
         state = GameState.RESOLVING_EFFECT;
         currentCard = card;
@@ -54,23 +58,45 @@ public class Game : MonoBehaviour
 
     public void BuyCard(Card card)
     {
-        tradeRow.RemoveCard(card);
-        activePlayer.BuyCard(card);
+        if (activePlayer.CanBuyCard(card))
+        {
+            tradeRow.RemoveCard(card);
+            activePlayer.BuyCard(card);
+            ShowMessage($"Compraste {card.cardName}");
+        }
+        else
+        {
+            ShowMessage("No tienes suficiente comercio");
+        }
     }
 
-    public void EffectResolved(Effect effect) 
+    public void EffectResolved(Effect effect)
     {
-        if(effect == currentEffect) {
+        if (effect == currentEffect)
+        {
             var card = effect.card;
             activePlayer.Discard(card);
 
             PlayNewCard();
         }
+
     }
 
     public void PlayNewCard()
     {
         state = GameState.PLAY_CARD;
         currentEffect = null;
+    }
+
+    public void EndTurn()
+    {
+
+        activePlayer.EndTurn();
+
+    }
+
+    public void ShowMessage(string message)
+    {
+        messageText.text = message;
     }
 }

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEditor.UI;
@@ -33,14 +34,14 @@ public class Player : MonoBehaviour
     public TMPro.TextMeshProUGUI tradeScoreText;
     public TMPro.TextMeshProUGUI combatScoreText;
 
-    const int INITIAL_SCOUT_AMOUNT  = 8;
-    const int INITIAL_VIPER_AMOUNT  = 2;
+    const int INITIAL_SCOUT_AMOUNT = 8;
+    const int INITIAL_VIPER_AMOUNT = 2;
     public GameObject cardPrefab;
     public GameObject discardPileGO;
 
     // Start is called before the first frame update
     void Start()
-    {   
+    {
         game = gameGO.GetComponent<Game>();
         deck = generateInitialCards();
         discardPile = discardPileGO.GetComponent<DiscardPile>();
@@ -49,10 +50,8 @@ public class Player : MonoBehaviour
         combat = 0;
         trade = 0;
         authority = 50;
-        
-        for(int i=0; i < INITIAL_HAND_SIZE; i++) {
-           DrawCard();
-        }
+
+        DrawNewHand();
     }
 
     // Update is called once per frame
@@ -69,8 +68,43 @@ public class Player : MonoBehaviour
         AddToHand(card);
     }
 
+    public void DrawNewHand()
+    {
+
+        if (deck.Count < INITIAL_HAND_SIZE)
+        {
+            ShuffleDiscard();
+        }
+
+        for (int i = 0; i < INITIAL_HAND_SIZE; i++)
+        {
+            DrawCard();
+        }
+    }
+
+    public void ShuffleDiscard()
+    {
+        var cards = discardPile.RemoveAllCards();
+        var remainingCards = deck.ToList<Card>();
+
+        deck.Clear();
+
+        foreach (var card in cards)
+        {
+            deck.Push(card);
+            card.gameObject.transform.SetParent(gameObject.transform);
+        }
+
+        foreach (var card in remainingCards)
+        {
+            deck.Push(card);
+            card.gameObject.transform.SetParent(gameObject.transform);
+        }
+    }
+
     public void AddToHand(Card card)
     {
+        card.gameObject.transform.localPosition = new Vector3(0, 0, 0);
         card.gameObject.transform.Translate(new Vector3(hand.Count * Game.CARD_SIZE, 0, 0));
         card.gameObject.SetActive(true);
 
@@ -86,26 +120,48 @@ public class Player : MonoBehaviour
         discardPile.AddCard(card);
     }
 
+    public bool CanBuyCard(Card card)
+    {
+        return trade >= card.cost;
+    }
+
     public void BuyCard(Card card)
     {
+        trade -= card.cost;
         discardPile.AddCard(card);
     }
 
-     Stack<Card> generateInitialCards() {
-         /* 
-          create initial cards for testing
-          turn this into actual creation logic when must of 
-          gameplay is ready to avoid huge manual creation
-        */
+    public void EndTurn()
+    {
+        combat = 0;
+        trade = 0;
+
+        while (hand.Count > 0)
+        {
+            Discard(hand.First<Card>());
+        }
+
+        DrawNewHand();
+    }
+
+    Stack<Card> generateInitialCards()
+    {
+        /* 
+         create initial cards for testing
+         turn this into actual creation logic when must of 
+         gameplay is ready to avoid huge manual creation
+       */
 
         Stack<Card> deck = new();
 
-        for(int i=0; i<INITIAL_SCOUT_AMOUNT; i++) {
-            deck.Push(CardEffectFactory.GenerateCard("scout", game, cardPrefab, this.gameObject)); 
+        for (int i = 0; i < INITIAL_SCOUT_AMOUNT; i++)
+        {
+            deck.Push(CardFactory.GenerateCard("scout", game, cardPrefab, this.gameObject));
         }
 
-        for(int i=0; i<INITIAL_VIPER_AMOUNT; i++) {
-            deck.Push(CardEffectFactory.GenerateCard("viper", game, cardPrefab, this.gameObject)); 
+        for (int i = 0; i < INITIAL_VIPER_AMOUNT; i++)
+        {
+            deck.Push(CardFactory.GenerateCard("viper", game, cardPrefab, this.gameObject));
         }
 
         // deck.Push(generateCard("frontier runner")); 
