@@ -12,14 +12,23 @@ public class Player : MonoBehaviour
     public const int INITIAL_HAND_SIZE = 5;
     public const float CARD_HAND_PADDING = 0.15f;
 
+    [HideInInspector]
     public int combat;
+    [HideInInspector]
     public int trade;
+    [HideInInspector]
     public int authority;
 
+    [HideInInspector]
     public Stack<Card> deck;
-    public Stack<Card> discardPile;
+    [HideInInspector]
     public List<Card> hand;
+    [HideInInspector]
     public Game game;
+    [HideInInspector]
+    public DiscardPile discardPile;
+
+    public GameObject gameGO;
     public TMPro.TextMeshProUGUI authorityScoreText;
     public TMPro.TextMeshProUGUI tradeScoreText;
     public TMPro.TextMeshProUGUI combatScoreText;
@@ -27,12 +36,14 @@ public class Player : MonoBehaviour
     const int INITIAL_SCOUT_AMOUNT  = 8;
     const int INITIAL_VIPER_AMOUNT  = 2;
     public GameObject cardPrefab;
+    public GameObject discardPileGO;
 
     // Start is called before the first frame update
     void Start()
     {   
-
+        game = gameGO.GetComponent<Game>();
         deck = generateInitialCards();
+        discardPile = discardPileGO.GetComponent<DiscardPile>();
         hand = new();
 
         combat = 0;
@@ -40,17 +51,7 @@ public class Player : MonoBehaviour
         authority = 50;
         
         for(int i=0; i < INITIAL_HAND_SIZE; i++) {
-            hand.Add(deck.Pop());
-        }
-
-        float cardSize = hand.First<Card>().gameObject.GetComponent<SpriteRenderer>().bounds.size.x;
-        float halfHandSize = (hand.Count * cardSize) / 2;
-
-        for(int i=0; i < hand.Count; i++)  {
-            Card card = hand[i];
-
-            card.gameObject.transform.position = new Vector3(-halfHandSize + i*cardSize, 0, 0);
-            card.gameObject.SetActive(true);
+           DrawCard();
         }
     }
 
@@ -60,6 +61,34 @@ public class Player : MonoBehaviour
         authorityScoreText.text = $"{authority}";
         tradeScoreText.text = $"{trade}";
         combatScoreText.text = $"{combat}";
+    }
+
+    public void DrawCard()
+    {
+        var card = deck.Pop();
+        AddToHand(card);
+    }
+
+    public void AddToHand(Card card)
+    {
+        card.gameObject.transform.Translate(new Vector3(hand.Count * Game.CARD_SIZE, 0, 0));
+        card.gameObject.SetActive(true);
+
+        card.location = Location.HAND;
+        hand.Add(card);
+    }
+
+    public void Discard(Card card)
+    {
+        hand.Remove(card);
+        card.gameObject.transform.SetParent(null);
+        card.gameObject.SetActive(false);
+        discardPile.AddCard(card);
+    }
+
+    public void BuyCard(Card card)
+    {
+        discardPile.AddCard(card);
     }
 
      Stack<Card> generateInitialCards() {
@@ -72,31 +101,15 @@ public class Player : MonoBehaviour
         Stack<Card> deck = new();
 
         for(int i=0; i<INITIAL_SCOUT_AMOUNT; i++) {
-            deck.Push(generateCard("scout")); 
+            deck.Push(CardEffectFactory.GenerateCard("scout", game, cardPrefab, this.gameObject)); 
         }
 
         for(int i=0; i<INITIAL_VIPER_AMOUNT; i++) {
-            deck.Push(generateCard("viper")); 
+            deck.Push(CardEffectFactory.GenerateCard("viper", game, cardPrefab, this.gameObject)); 
         }
 
         // deck.Push(generateCard("frontier runner")); 
 
         return deck;
-    }
-
-    Card generateCard(string name) {
-        GameObject cardGameObject = Instantiate(cardPrefab);
-
-        Card card = cardGameObject.GetComponent<Card>();
-        card.cardName = name;
-
-        Effect cardEffect = new Effect();
-        cardEffect.combat = 1;
-        card.primaryMainEffect = cardEffect;
-
-        card.gameObject.SetActive(false);
-        card.gameObject.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>($"Cards/{name}");
-
-        return card;
     }
 }

@@ -2,7 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum FACTION {
+public enum Faction
+{
     UNALIGNED,
     TRADE_FEDERATION,
     THE_BLOBS,
@@ -23,14 +24,34 @@ public class Card : MonoBehaviour
     public int cost;
     public int defense;
     public bool outpost;
-    public FACTION faction; // Unaligned, Trade Federation, The blobs, Star Empire, Machine Cult
+    public Faction faction; // Unaligned, Trade Federation, The blobs, Star Empire, Machine Cult
     public int type; // Ship or Base
+    public Game game;
+    public Location location;
 
 
-    public void Start() {
-        
+    public void Start()
+    {
+
     }
-    void OnMouseDown() {
-        Debug.Log(cardName);
+    void OnMouseDown()
+    {
+        if (
+            game.state == GameState.PLAY_CARD &&
+            location == Location.HAND
+        )
+        {
+            Debug.Log("Playing Card");
+            game.PlayCard(this);
+        }
+
+        if (
+            game.state == GameState.PLAY_CARD &&
+            location == Location.TRADE_ROW
+        )
+        {
+            Debug.Log("Buying Card");
+            game.BuyCard(this);
+        }
     }
 }

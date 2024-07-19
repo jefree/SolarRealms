@@ -1,14 +1,24 @@
 public class Effect {
-    public string text;
+    public Card card;
     public int combat;
     public int trade;
     public int authority;
-    bool on_scrap;
-    bool on_ally;
-    bool on_double_ally;
+    bool onScrap;
+    bool onAlly;
+    bool onDoubleAlly;
     bool optional; // card text says "You may ..."
-    bool return_after_scrap; // this card return to discard pile after activate scrap effect
+    bool returnAfterScrap; // this card return to discard pile after activate scrap effect
 
+    public void Resolve(Game game) 
+    {
+        Player activePlayer = game.activePlayer;
+
+        activePlayer.combat += combat;
+        activePlayer.trade += trade;
+        activePlayer.authority += authority;
+
+        game.EffectResolved(this);
+    }    
     /*
     Next is the list of found effects and where it could belong to in terms of Effect types
 
@@ -60,44 +70,44 @@ class Condition {
     int type; // Ship or Base
 }
 
-class DrawEffect {
+class DrawEffect : Effect {
     int count;
-    bool up_to;
-    bool then_discard;
+    bool upToo;
+    bool thenDiscard;
 }
 
-class DestroyEffect {
-    int count;
-}
-
-class ScrapEffect {
-    bool from_hand;
-    bool from_discard_pile;
-    int count;
-    bool up_to;
-}
-
-class OpponentDiscardEffect {
+class DestroyEffect : Effect  {
     int count;
 }
 
-class AcquireEffect {
+class ScrapEffect : Effect {
+    bool fromHand;
+    bool fromDiscardPile;
+    int count;
+    bool upTo;
+}
+
+class OpponentDiscardEffect : Effect {
+    int count;
+}
+
+class AcquireEffect : Effect {
     int count;
     int type; // Ship or Base
     int cost;
-    bool to_deck;
+    bool toDeck;
 }
 
-class DiscardCombatEffect {
-    int combat;
+class DiscardCombatEffect : Effect {
+    int combatPerCard;
 }
 
-class RecoverEffect {
+class RecoverEffect : Effect {
     int count; // how many cards to recover
     int type; // Ship or Base
 }
 
-class NextToDeck {
+class NextToDeck : Effect {
     int count;
     int type; // Ship or Base
 }
