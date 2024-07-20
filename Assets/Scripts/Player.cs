@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using JetBrains.Annotations;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEditor.UI;
@@ -12,6 +13,13 @@ public class Player : MonoBehaviour
 {
     public const int INITIAL_HAND_SIZE = 5;
     public const float CARD_HAND_PADDING = 0.15f;
+    const int INITIAL_SCOUT_AMOUNT = 8;
+    const int INITIAL_VIPER_AMOUNT = 2;
+
+    public Game game;
+    public DiscardPile discardPile;
+    public GameObject cardPrefab;
+    public GameObject playAreaGO;
 
     [HideInInspector]
     public int combat;
@@ -19,33 +27,24 @@ public class Player : MonoBehaviour
     public int trade;
     [HideInInspector]
     public int authority;
-
+    [HideInInspector]
+    public int cardsInPlay;
     [HideInInspector]
     public Stack<Card> deck;
     [HideInInspector]
-    public List<Card> hand;
+    public List<Card> hand = new();
     [HideInInspector]
-    public Game game;
-    [HideInInspector]
-    public DiscardPile discardPile;
+    public List<Card> playArea = new();
 
-    public GameObject gameGO;
+
     public TMPro.TextMeshProUGUI authorityScoreText;
     public TMPro.TextMeshProUGUI tradeScoreText;
     public TMPro.TextMeshProUGUI combatScoreText;
 
-    const int INITIAL_SCOUT_AMOUNT = 8;
-    const int INITIAL_VIPER_AMOUNT = 2;
-    public GameObject cardPrefab;
-    public GameObject discardPileGO;
-
     // Start is called before the first frame update
     void Start()
     {
-        game = gameGO.GetComponent<Game>();
         deck = generateInitialCards();
-        discardPile = discardPileGO.GetComponent<DiscardPile>();
-        hand = new();
 
         combat = 0;
         trade = 0;
@@ -112,10 +111,23 @@ public class Player : MonoBehaviour
         hand.Add(card);
     }
 
-    public void Discard(Card card)
+    public void PlayCard(Card card)
     {
         hand.Remove(card);
-        card.gameObject.transform.SetParent(null);
+        playArea.Add(card);
+
+        card.location = Location.PLAY_AREA;
+
+        card.transform.SetParent(playAreaGO.transform);
+        card.transform.localPosition = new Vector3(cardsInPlay * Game.CARD_SIZE, 0, 0);
+
+        cardsInPlay += 1;
+    }
+
+    public void Discard(Card card)
+    {
+        playArea.Remove(card);
+        card.transform.SetParent(null);
         card.gameObject.SetActive(false);
         discardPile.AddCard(card);
     }
@@ -128,6 +140,8 @@ public class Player : MonoBehaviour
     public void BuyCard(Card card)
     {
         trade -= card.cost;
+
+
         discardPile.AddCard(card);
     }
 
@@ -164,6 +178,7 @@ public class Player : MonoBehaviour
             deck.Push(CardFactory.GenerateCard("viper", game, cardPrefab, this.gameObject));
         }
 
+        deck.Push(CardFactory.GenerateCard("blob miner", game, cardPrefab, this.gameObject));
         deck.Push(CardFactory.GenerateCard("blob miner", game, cardPrefab, this.gameObject));
 
         // deck.Push(generateCard("frontier runner")); 

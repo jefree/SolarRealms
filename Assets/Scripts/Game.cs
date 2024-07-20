@@ -4,13 +4,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Effect;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public enum GameState
 {
     PLAY_CARD,
     RESOLVING_CARD,
-    CHOOSE_CARD
+    CHOOSE_CARD,
+    CHOOSE_EFFECT
 }
 
 public class Game : MonoBehaviour
@@ -20,24 +22,25 @@ public class Game : MonoBehaviour
     public const float CARD_SIZE = 2.14f;
 
     public GameObject cardPrefab;
-    public GameObject playerOneGO;
-    public GameObject tradeRowGO;
     public TMPro.TextMeshProUGUI messageText;
 
 
-    public Player playerOne;
+
     public TradeRow tradeRow;
+    public EffectList effectList;
+    public Player playerOne;
+    [HideInInspector]
     public Player activePlayer;
+    [HideInInspector]
     public GameState state;
+    [HideInInspector]
     public Card currentCard;
+    [HideInInspector]
     public Effect.IEffect currentEffect;
     // Start is called before the first frame update
     void Start()
     {
-        playerOne = playerOneGO.GetComponent<Player>();
         activePlayer = playerOne;
-
-        tradeRow = tradeRowGO.GetComponent<TradeRow>();
 
         state = GameState.PLAY_CARD;
 
@@ -54,7 +57,17 @@ public class Game : MonoBehaviour
     {
         state = GameState.RESOLVING_CARD;
         currentCard = card;
-        ResolveEffect(card.effects.First<Effect.IEffect>());
+
+        activePlayer.PlayCard(card);
+
+        var firstEffect = card.effects.Find(effect => !effect.ManualActivation());
+
+        Debug.Log(firstEffect);
+
+        if (firstEffect != null)
+        {
+            ResolveEffect(firstEffect);
+        }
     }
 
     public void ResolveEffect(Effect.IEffect effect)
@@ -79,25 +92,34 @@ public class Game : MonoBehaviour
 
     public void ScrapCard(Card card)
     {
+        Debug.Log(card);
         Destroy(card.gameObject);
     }
 
     public void EffectResolved(Effect.IEffect effect)
     {
-        if (currentEffect == effect)
-        {
-            currentCard.effects.Remove(effect);
+        if (currentEffect != effect) { return; }
 
-            if (currentCard.effects.Count == 0)
+        currentCard.effects.Remove(effect);
+
+        if (currentCard.effects.Count == 0)
+        {
+            activePlayer.Discard(currentCard);
+            currentCard = null;
+            StartPlayNewCard();
+        }
+        else
+        {
+            var nextEffect = currentCard.effects.Find(effect => !effect.ManualActivation());
+
+            if (nextEffect != null)
             {
-                activePlayer.Discard(currentCard);
-                currentCard = null;
-                StartPlayNewCard();
+                ResolveEffect(nextEffect);
             }
             else
             {
-                var nextEffect = currentCard.effects.First<Effect.IEffect>();
-                ResolveEffect(nextEffect);
+                currentCard = null;
+                StartPlayNewCard();
             }
         }
     }
@@ -123,6 +145,13 @@ public class Game : MonoBehaviour
     {
         var cardReceiver = (Effect.ICardReceiver)currentEffect;
         cardReceiver.SetCard(card);
+    }
+
+    public void ChooseEffect(Card card)
+    {
+        state = GameState.CHOOSE_EFFECT;
+        currentCard = card;
+        effectList.Show(card);
     }
 
     public void ShowMessage(string message)

@@ -3,7 +3,7 @@ using Effect;
 using Unity.VisualScripting;
 using UnityEditor.PackageManager;
 
-public class BaseEffect : Effect.IEffect
+public class BasicEffect : Effect.IEffect
 {
     //Card card;
     public int combat;
@@ -16,7 +16,7 @@ public class BaseEffect : Effect.IEffect
     bool returnAfterScrap; // this card return to discard pile after activate scrap effect
     public Game game;
 
-    public BaseEffect(Game game, int combat = 0, int trade = 0, int authority = 0)
+    public BasicEffect(Game game, int combat = 0, int trade = 0, int authority = 0)
     {
         this.game = game;
         this.combat = combat;
@@ -39,6 +39,7 @@ public class BaseEffect : Effect.IEffect
 
         game.EffectResolved(this);
     }
+
     /*
     Next is the list of found effects and where it could belong to in terms of Effect types
 
@@ -143,6 +144,8 @@ namespace Effect
 
         void Activate();
         void Resolve();
+        bool ManualActivation() { return false; }
+        string Text() { return ""; }
     }
 
     public interface ICardReceiver : IEffect
@@ -176,8 +179,21 @@ namespace Effect
 
         public void SetCard(Card card)
         {
-            this.card = card;
-            Resolve();
+            if (card.location == Location.TRADE_ROW)
+            {
+                this.card = card;
+                Resolve();
+            }
+        }
+
+        public bool ManualActivation()
+        {
+            return true;
+        }
+
+        public string Text()
+        {
+            return "deshuesa una carta del mercado";
         }
     }
 }

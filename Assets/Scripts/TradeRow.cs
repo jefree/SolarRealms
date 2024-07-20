@@ -5,20 +5,14 @@ using UnityEngine;
 public class TradeRow : MonoBehaviour
 {
 
-    public GameObject gameGO;
-
-    [HideInInspector]
-    public GameObject cardPrefab;
-    [HideInInspector]
     public Game game;
+    public GameObject cardPrefab;
     [HideInInspector]
     List<Card> cards;
 
     // Start is called before the first frame update
     void Start()
     {
-
-        game = gameGO.GetComponent<Game>();
         cards = new();
 
         AddCard(CardFactory.GenerateCard("hive queen", game, cardPrefab, this.gameObject), 0);

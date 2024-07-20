@@ -44,13 +44,13 @@ public class CardFactory : MonoBehaviour
 
     public static void Viper(Card card, Game game)
     {
-        BaseEffect effect = new(game, combat: 1);
+        BasicEffect effect = new(game, combat: 1);
         card.effects.Add(effect);
     }
 
     public static void Scout(Card card, Game game)
     {
-        BaseEffect effect = new(game, trade: 1);
+        BasicEffect effect = new(game, trade: 1);
         effect.trade = 1;
 
         card.effects.Add(effect);
@@ -59,7 +59,7 @@ public class CardFactory : MonoBehaviour
     public static void BlobMiner(Card card, Game game)
     {
         card.cost = 2;
-        card.effects.Add(new BaseEffect(game, trade: 3));
+        card.effects.Add(new BasicEffect(game, trade: 3));
         card.effects.Add(new Effect.TradeRowScrap(game));
     }
 }

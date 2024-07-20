@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using EffectResolver;
 using UnityEngine;
+using UnityEngine.SocialPlatforms;
 
 public enum Faction
 {
@@ -25,13 +26,20 @@ public class Card : MonoBehaviour
     public Game game;
     public Location location;
 
-
     public void Start()
     {
 
     }
     void OnMouseDown()
     {
+
+        if (
+            game.state == GameState.PLAY_CARD &&
+            location == Location.PLAY_AREA
+        )
+        {
+            game.ChooseEffect(this);
+        }
 
         if (
             game.state == GameState.CHOOSE_CARD
