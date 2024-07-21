@@ -17,10 +17,14 @@ public class Player : MonoBehaviour
     const int INITIAL_VIPER_AMOUNT = 2;
 
     public Game game;
-    public DiscardPile discardPile;
     public GameObject cardPrefab;
-    public GameObject playAreaGO;
 
+    [HideInInspector]
+    public Hand hand;
+    [HideInInspector]
+    public PlayArea playArea;
+    [HideInInspector]
+    DiscardPile discardPile;
     [HideInInspector]
     public int combat;
     [HideInInspector]
@@ -31,11 +35,6 @@ public class Player : MonoBehaviour
     public int cardsInPlay;
     [HideInInspector]
     public Stack<Card> deck;
-    [HideInInspector]
-    public List<Card> hand = new();
-    [HideInInspector]
-    public List<Card> playArea = new();
-
 
     public TMPro.TextMeshProUGUI authorityScoreText;
     public TMPro.TextMeshProUGUI tradeScoreText;
@@ -44,6 +43,10 @@ public class Player : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        discardPile = transform.Find("DiscardPile").GetComponent<DiscardPile>();
+        playArea = transform.Find("PlayArea").GetComponent<PlayArea>();
+        hand = transform.Find("Hand").GetComponent<Hand>();
+
         deck = generateInitialCards();
 
         combat = 0;
@@ -64,7 +67,7 @@ public class Player : MonoBehaviour
     public void DrawCard()
     {
         var card = deck.Pop();
-        AddToHand(card);
+        hand.AddCard(card);
     }
 
     public void DrawNewHand()
@@ -101,34 +104,15 @@ public class Player : MonoBehaviour
         }
     }
 
-    public void AddToHand(Card card)
-    {
-        card.gameObject.transform.localPosition = new Vector3(0, 0, 0);
-        card.gameObject.transform.Translate(new Vector3(hand.Count * Game.CARD_SIZE, 0, 0));
-        card.gameObject.SetActive(true);
-
-        card.location = Location.HAND;
-        hand.Add(card);
-    }
-
     public void PlayCard(Card card)
     {
-        hand.Remove(card);
-        playArea.Add(card);
-
-        card.location = Location.PLAY_AREA;
-
-        card.transform.SetParent(playAreaGO.transform);
-        card.transform.localPosition = new Vector3(cardsInPlay * Game.CARD_SIZE, 0, 0);
-
-        cardsInPlay += 1;
+        hand.RemoveCard(card);
+        playArea.AddCard(card);
     }
 
-    public void Discard(Card card)
+    public void DiscardCard(Card card)
     {
-        playArea.Remove(card);
-        card.transform.SetParent(null);
-        card.gameObject.SetActive(false);
+        playArea.RemoveCard(card);
         discardPile.AddCard(card);
     }
 
@@ -150,9 +134,19 @@ public class Player : MonoBehaviour
         combat = 0;
         trade = 0;
 
-        while (hand.Count > 0)
+
+        while (hand.Count() > 0)
         {
-            Discard(hand.First<Card>());
+            var card = hand.FirstCard();
+            hand.RemoveCard(card);
+            discardPile.AddCard(card);
+        }
+
+        while (playArea.Count() > 0)
+        {
+            var card = playArea.FirstCard();
+            playArea.RemoveCard(card);
+            discardPile.AddCard(card);
         }
 
         DrawNewHand();

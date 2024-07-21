@@ -41,9 +41,9 @@ public class DiscardPile : MonoBehaviour
 
     public void RemoveCard(Card card)
     {
-        card.gameObject.transform.SetParent(null);
-        card.gameObject.SetActive(false);
+        card.transform.SetParent(null);
 
+        card.location = Location.UNDEFINED;
         cards.Remove(card);
     }
 

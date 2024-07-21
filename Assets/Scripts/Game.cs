@@ -104,7 +104,7 @@ public class Game : MonoBehaviour
 
         if (currentCard.effects.Count == 0)
         {
-            activePlayer.Discard(currentCard);
+            activePlayer.DiscardCard(currentCard);
             currentCard = null;
             StartPlayNewCard();
         }
