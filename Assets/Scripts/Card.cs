@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Effect;
 using EffectResolver;
 using UnityEngine;
 using UnityEngine.SocialPlatforms;
@@ -16,7 +17,11 @@ public enum Faction
 public class Card : MonoBehaviour
 {
     public string cardName;
-    public List<Effect.IEffect> effects = new();
+    public Action mainAction;
+    // public List<Action> allyActions;
+    // public List<Action> doubleAllyActions;
+    public Action scrapAction;
+
     string secondaryText; // ??
     public int cost;
     public int defense;
@@ -26,10 +31,18 @@ public class Card : MonoBehaviour
     public Game game;
     public Location location;
 
-    public void Start()
+    public void Play()
     {
 
+        var firstAction = NextAction();
+        firstAction.Activate();
     }
+
+    public Action NextAction()
+    {
+        return mainAction;
+    }
+
     void OnMouseDown()
     {
 

@@ -3,7 +3,7 @@ using Effect;
 using Unity.VisualScripting;
 using UnityEditor.PackageManager;
 
-public class BasicEffect : Effect.IEffect
+public class BasicEffect : Effect.Base
 {
     //Card card;
     public int combat;
@@ -14,22 +14,20 @@ public class BasicEffect : Effect.IEffect
     bool onDoubleAlly;
     bool optional; // card text says "You may ..."
     bool returnAfterScrap; // this card return to discard pile after activate scrap effect
-    public Game game;
 
-    public BasicEffect(Game game, int combat = 0, int trade = 0, int authority = 0)
+    public BasicEffect(int combat = 0, int trade = 0, int authority = 0)
     {
-        this.game = game;
         this.combat = combat;
         this.trade = trade;
         this.authority = authority;
     }
 
-    public void Activate()
+    public override void Activate(Game game)
     {
-        Resolve();
+        Resolve(game);
     }
 
-    public void Resolve()
+    public override void Resolve(Game game)
     {
         Player activePlayer = game.activePlayer;
 
@@ -139,39 +137,41 @@ class NextToDeck : Effect
 
 namespace Effect
 {
-    public interface IEffect
+    public abstract class Base
     {
+        public bool isManual;
 
-        void Activate();
-        void Resolve();
-        bool ManualActivation() { return false; }
-        string Text() { return ""; }
+        public abstract void Activate(Game game);
+
+        public abstract void Resolve(Game game);
+
+        public virtual string Text() { return ""; }
     }
 
-    public interface ICardReceiver : IEffect
+    public interface ICardReceiver
     {
+
         void SetCard(Card card);
     }
 
-    public class TradeRowScrap : IEffect, ICardReceiver
+    public class TradeRowScrap : Base, ICardReceiver
     {
-
         Game game;
         Card card;
         EffectResolver.ChooseCard resolver;
 
-        public TradeRowScrap(Game game)
+        public TradeRowScrap()
         {
-            this.game = game;
             resolver = new(game, Location.TRADE_ROW);
         }
 
-        public void Activate()
+        public override void Activate(Game game)
         {
+            this.game = game;
             resolver.Start();
         }
 
-        public void Resolve()
+        public override void Resolve(Game game)
         {
             game.ScrapCard(card);
             game.EffectResolved(this);
@@ -182,16 +182,11 @@ namespace Effect
             if (card.location == Location.TRADE_ROW)
             {
                 this.card = card;
-                Resolve();
+                Resolve(this.game);
             }
         }
 
-        public bool ManualActivation()
-        {
-            return true;
-        }
-
-        public string Text()
+        public override string Text()
         {
             return "deshuesa una carta del mercado";
         }

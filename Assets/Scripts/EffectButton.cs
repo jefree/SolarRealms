@@ -7,8 +7,9 @@ using UnityEngine.UI;
 
 public class EffectButton : MonoBehaviour
 {
-    public IEffect effect;
-    public EffectList effectList;
+    public Base effect;
+    public Action action;
+    public EffectListUI ui;
 
     void Start()
     {
@@ -18,6 +19,6 @@ public class EffectButton : MonoBehaviour
 
     void OnClick()
     {
-        effectList.Activate(this);
+        ui.Activate(this);
     }
 }

@@ -27,7 +27,7 @@ public class Game : MonoBehaviour
 
 
     public TradeRow tradeRow;
-    public EffectList effectList;
+    public EffectListUI actionListUI;
     public Player playerOne;
     [HideInInspector]
     public Player activePlayer;
@@ -36,7 +36,7 @@ public class Game : MonoBehaviour
     [HideInInspector]
     public Card currentCard;
     [HideInInspector]
-    public Effect.IEffect currentEffect;
+    Action currentAction;
     // Start is called before the first frame update
     void Start()
     {
@@ -47,33 +47,13 @@ public class Game : MonoBehaviour
         messageText.text = "Juega o compra cartas";
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
     public void PlayCard(Card card)
     {
         state = GameState.RESOLVING_CARD;
         currentCard = card;
 
         activePlayer.PlayCard(card);
-
-        var firstEffect = card.effects.Find(effect => !effect.ManualActivation());
-
-        Debug.Log(firstEffect);
-
-        if (firstEffect != null)
-        {
-            ResolveEffect(firstEffect);
-        }
-    }
-
-    public void ResolveEffect(Effect.IEffect effect)
-    {
-        currentEffect = effect;
-        currentEffect.Activate();
+        card.Play();
     }
 
     public void BuyCard(Card card)
@@ -96,38 +76,38 @@ public class Game : MonoBehaviour
         Destroy(card.gameObject);
     }
 
-    public void EffectResolved(Effect.IEffect effect)
+    public void ResolveAction(Action action)
     {
-        if (currentEffect != effect) { return; }
+        currentAction = action;
+    }
 
-        currentCard.effects.Remove(effect);
+    public void EffectResolved(Effect.Base effect)
+    {
+        currentAction.EffectResolved(effect);
 
-        if (currentCard.effects.Count == 0)
+        if (effect.isManual)
         {
-            activePlayer.DiscardCard(currentCard);
-            currentCard = null;
             StartPlayNewCard();
+            return;
+        }
+
+        var nextAction = currentCard.NextAction();
+
+        if (nextAction != null)
+        {
+            ResolveAction(nextAction);
         }
         else
         {
-            var nextEffect = currentCard.effects.Find(effect => !effect.ManualActivation());
-
-            if (nextEffect != null)
-            {
-                ResolveEffect(nextEffect);
-            }
-            else
-            {
-                currentCard = null;
-                StartPlayNewCard();
-            }
+            StartPlayNewCard();
         }
     }
 
     public void StartPlayNewCard()
     {
         state = GameState.PLAY_CARD;
-        currentEffect = null;
+        currentCard = null;
+        currentAction = null;
     }
 
     public void EndTurn()
@@ -143,7 +123,7 @@ public class Game : MonoBehaviour
 
     public void ChooseCard(Card card)
     {
-        var cardReceiver = (Effect.ICardReceiver)currentEffect;
+        var cardReceiver = (Effect.ICardReceiver)currentAction.currentEffect;
         cardReceiver.SetCard(card);
     }
 
@@ -151,7 +131,7 @@ public class Game : MonoBehaviour
     {
         state = GameState.CHOOSE_EFFECT;
         currentCard = card;
-        effectList.Show(card);
+        actionListUI.Show(card);
     }
 
     public void ShowMessage(string message)

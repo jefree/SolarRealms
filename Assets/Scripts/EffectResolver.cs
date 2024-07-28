@@ -23,7 +23,6 @@ namespace EffectResolver
             if (card.location == location)
             {
                 effect.SetCard(card);
-                effect.Resolve();
 
                 return true;
             }
