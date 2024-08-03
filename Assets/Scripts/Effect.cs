@@ -162,12 +162,18 @@ namespace Effect
 
         public TradeRowScrap()
         {
-            resolver = new(game, Location.TRADE_ROW);
+
         }
 
         public override void Activate(Game game)
         {
             this.game = game;
+
+            if (resolver == null)
+            {
+                resolver = new(game, Location.TRADE_ROW);
+            }
+
             resolver.Start();
         }
 

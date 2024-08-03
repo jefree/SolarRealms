@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Effect;
 using EffectResolver;
 using UnityEngine;
+using UnityEngine.iOS;
 using UnityEngine.SocialPlatforms;
 
 public enum Faction
@@ -33,22 +34,37 @@ public class Card : MonoBehaviour
 
     public void Play()
     {
-
         var firstAction = NextAction();
-        firstAction.Activate();
+        game.ResolveAction(firstAction);
     }
 
     public Action NextAction()
     {
-        return mainAction;
+        var actions = new List<Action> { mainAction };
+
+        return actions.Find(action => !action.activated);
+    }
+
+    public Action NextManualAction()
+    {
+        var actions = new List<Action> { mainAction, scrapAction };
+
+        return actions.Find(action => !action.activated);
+    }
+
+    public void Reset()
+    {
+        var actions = new List<Action> { mainAction, scrapAction };
+        actions.RemoveAll(action => action == null);
+        actions.ForEach(action => action.Reset());
     }
 
     void OnMouseDown()
     {
-
         if (
             game.state == GameState.PLAY_CARD &&
-            location == Location.PLAY_AREA
+            location == Location.PLAY_AREA &&
+            NextManualAction() != null
         )
         {
             game.ChooseEffect(this);
@@ -67,7 +83,6 @@ public class Card : MonoBehaviour
             location == Location.HAND
         )
         {
-            Debug.Log("Playing Card");
             game.PlayCard(this);
             return;
         }
@@ -77,7 +92,6 @@ public class Card : MonoBehaviour
             location == Location.TRADE_ROW
         )
         {
-            Debug.Log("Buying Card");
             game.BuyCard(this);
             return;
         }

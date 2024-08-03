@@ -14,8 +14,6 @@ public class EffectListUI : MonoBehaviour
 
     public void Show(Card card)
     {
-        Debug.Log($"show effects for {card.cardName}");
-
         currentCard = card;
 
         AddEffects(card.mainAction);
@@ -26,7 +24,7 @@ public class EffectListUI : MonoBehaviour
 
     void AddEffects(Action action)
     {
-        foreach (var effect in action.effects)
+        foreach (var effect in action.manualEffects)
         {
             var panelTransform = transform.Find("Panel");
             var effectGO = Instantiate(itemPrefab, panelTransform);
@@ -42,8 +40,7 @@ public class EffectListUI : MonoBehaviour
     {
         Close();
 
-        game.ResolveAction(button.action);
-        button.action.ActivateEffect(button.effect);
+        game.ResolveAction(button.action, button.effect);
     }
 
     public void Close()

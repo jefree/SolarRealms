@@ -4,7 +4,7 @@ using System.Linq;
 
 public class Action
 {
-    public bool activated = true;
+    public bool activated = false;
     public Effect.Base currentEffect;
     Game game;
     public List<Effect.Base> effects = new();
@@ -37,7 +37,7 @@ public class Action
 
     public void ActivateEffect(Effect.Base effect)
     {
-        if (!effects.Contains(effect))
+        if (!effects.Contains(effect) && !manualEffects.Contains(effect))
         {
             throw new ArgumentException("Effect does not belong to this card");
         }
@@ -51,12 +51,10 @@ public class Action
         if (effects.Count == 0)
         {
             currentEffect = null;
-            activated = true;
-
-
+            return;
         }
 
-        currentEffect = effects.Find(effect => !effect.isManual);
+        currentEffect = effects[0];
         currentEffect.Activate(game);
     }
 
@@ -72,18 +70,28 @@ public class Action
             manualEffects.Remove(effect);
             usedManualEffects.Add(effect);
         }
+        else
+        {
+            effects.Remove(effect);
+            usedEffects.Add(effect);
 
-        effects.Remove(effect);
-        usedEffects.Add(effect);
+            ActivateNextEffect();
+        }
 
-        ActivateNextEffect();
+        if (effects.Count == 0 && manualEffects.Count == 0)
+        {
+            activated = true;
+        }
     }
 
     public void Reset()
     {
         activated = false;
-        (effects, usedEffects) = (usedEffects, effects);
-        manualEffects = usedManualEffects.Concat(manualEffects).ToList();
+
+        effects = effects.Concat(usedEffects).ToList();
+        usedEffects.Clear();
+
+        manualEffects = manualEffects.Concat(usedManualEffects).ToList();
         usedManualEffects.Clear();
     }
 

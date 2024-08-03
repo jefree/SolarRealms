@@ -72,13 +72,19 @@ public class Game : MonoBehaviour
 
     public void ScrapCard(Card card)
     {
-        Debug.Log(card);
         Destroy(card.gameObject);
     }
 
     public void ResolveAction(Action action)
     {
         currentAction = action;
+        currentAction.Activate();
+    }
+
+    public void ResolveAction(Action action, Effect.Base effect)
+    {
+        currentAction = action;
+        currentAction.ActivateEffect(effect);
     }
 
     public void EffectResolved(Effect.Base effect)

@@ -1573,7 +1573,7 @@ MonoBehaviour:
   cardPrefab: {fileID: 1546928846508714842, guid: 5f1fac4f9e213804dbe64091b16639d7, type: 3}
   messageText: {fileID: 714181683}
   tradeRow: {fileID: 1756865374}
-  effectList: {fileID: 551087017}
+  actionListUI: {fileID: 551087017}
   playerOne: {fileID: 1621983016}
   activePlayer: {fileID: 0}
   state: 0

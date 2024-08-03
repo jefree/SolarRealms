@@ -93,12 +93,16 @@ public class Player : MonoBehaviour
 
         foreach (var card in cards)
         {
+            card.Reset();
+            card.location = Location.DECK;
             deck.Push(card);
             card.gameObject.transform.SetParent(gameObject.transform);
         }
 
         foreach (var card in remainingCards)
         {
+            card.Reset();
+            card.location = Location.DECK;
             deck.Push(card);
             card.gameObject.transform.SetParent(gameObject.transform);
         }
