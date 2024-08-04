@@ -28,7 +28,9 @@ public class Game : MonoBehaviour
 
     public TradeRow tradeRow;
     public EffectListUI actionListUI;
-    public Player playerOne;
+    public Player[] players;
+    [HideInInspector]
+    int currentPlayerIndex = 0;
     [HideInInspector]
     public Player activePlayer;
     [HideInInspector]
@@ -40,7 +42,7 @@ public class Game : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        activePlayer = playerOne;
+        activePlayer = players[currentPlayerIndex];
 
         state = GameState.PLAY_CARD;
 
@@ -119,6 +121,9 @@ public class Game : MonoBehaviour
     public void EndTurn()
     {
         activePlayer.EndTurn();
+        currentPlayerIndex = (currentPlayerIndex + 1) % players.Length;
+
+        activePlayer = players[currentPlayerIndex];
     }
 
     public void StartChooseCard()
@@ -138,6 +143,17 @@ public class Game : MonoBehaviour
         state = GameState.CHOOSE_EFFECT;
         currentCard = card;
         actionListUI.Show(card);
+    }
+
+    public void AttackPlayer(Player player)
+    {
+        if (player == activePlayer)
+        {
+            return;
+        }
+
+        player.authority -= activePlayer.combat;
+        activePlayer.combat = 0;
     }
 
     public void ShowMessage(string message)

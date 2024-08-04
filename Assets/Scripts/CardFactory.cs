@@ -26,13 +26,15 @@ public class CardFactory : MonoBehaviour
         }
     }
 
-    public static Card GenerateCard(string name, Game game, GameObject cardPrefab, GameObject parent)
+    public static Card GenerateCard(string name, Game game, GameObject cardPrefab, GameObject parent, Player player = null)
     {
         GameObject cardGameObject = Instantiate(cardPrefab, parent.transform);
 
         Card card = cardGameObject.GetComponent<Card>();
         card.cardName = name;
         card.game = game;
+        card.player = player;
+
 
         Build(card, game);
 

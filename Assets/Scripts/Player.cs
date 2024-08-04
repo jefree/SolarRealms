@@ -52,6 +52,7 @@ public class Player : MonoBehaviour
         combat = 0;
         trade = 0;
         authority = 50;
+        authorityScoreText.text = $"{authority}";
 
         DrawNewHand();
     }
@@ -60,6 +61,12 @@ public class Player : MonoBehaviour
     void Update()
     {
         authorityScoreText.text = $"{authority}";
+
+        if (game.activePlayer != this)
+        {
+            return;
+        }
+
         tradeScoreText.text = $"{trade}";
         combatScoreText.text = $"{combat}";
     }
@@ -138,7 +145,6 @@ public class Player : MonoBehaviour
         combat = 0;
         trade = 0;
 
-
         while (hand.Count() > 0)
         {
             var card = hand.FirstCard();
@@ -156,6 +162,11 @@ public class Player : MonoBehaviour
         DrawNewHand();
     }
 
+    public void Attacked()
+    {
+        game.AttackPlayer(this);
+    }
+
     Stack<Card> generateInitialCards()
     {
         /* 
@@ -168,16 +179,16 @@ public class Player : MonoBehaviour
 
         for (int i = 0; i < INITIAL_SCOUT_AMOUNT; i++)
         {
-            deck.Push(CardFactory.GenerateCard("scout", game, cardPrefab, this.gameObject));
+            deck.Push(CardFactory.GenerateCard("scout", game, cardPrefab, this.gameObject, player: this));
         }
 
         for (int i = 0; i < INITIAL_VIPER_AMOUNT; i++)
         {
-            deck.Push(CardFactory.GenerateCard("viper", game, cardPrefab, this.gameObject));
+            deck.Push(CardFactory.GenerateCard("viper", game, cardPrefab, this.gameObject, player: this));
         }
 
-        deck.Push(CardFactory.GenerateCard("blob miner", game, cardPrefab, this.gameObject));
-        deck.Push(CardFactory.GenerateCard("blob miner", game, cardPrefab, this.gameObject));
+        deck.Push(CardFactory.GenerateCard("blob miner", game, cardPrefab, this.gameObject, player: this));
+        deck.Push(CardFactory.GenerateCard("blob miner", game, cardPrefab, this.gameObject, player: this));
 
         // deck.Push(generateCard("frontier runner")); 
 

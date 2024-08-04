@@ -33,6 +33,7 @@ public class Card : MonoBehaviour
     public int type; // Ship or Base
     public Game game;
     public Location location;
+    public Player player;
 
     public void Play()
     {
@@ -70,6 +71,12 @@ public class Card : MonoBehaviour
 
     void OnMouseDown()
     {
+
+        if (player != null && game.activePlayer != player)
+        {
+            return;
+        }
+
         if (
             game.state == GameState.PLAY_CARD &&
             location == Location.PLAY_AREA &&
