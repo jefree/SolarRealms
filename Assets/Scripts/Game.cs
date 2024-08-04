@@ -24,8 +24,6 @@ public class Game : MonoBehaviour
     public GameObject cardPrefab;
     public TMPro.TextMeshProUGUI messageText;
 
-
-
     public TradeRow tradeRow;
     public EffectListUI actionListUI;
     public Player[] players;
@@ -39,7 +37,9 @@ public class Game : MonoBehaviour
     public Card currentCard;
     [HideInInspector]
     Action currentAction;
-    // Start is called before the first frame update
+    [HideInInspector]
+    Queue<Card> playCardsQueue = new();
+
     void Start()
     {
         activePlayer = players[currentPlayerIndex];
@@ -51,11 +51,21 @@ public class Game : MonoBehaviour
 
     public void PlayCard(Card card)
     {
+        playCardsQueue.Enqueue(card);
+
+        if (playCardsQueue.Count == 1)
+        {
+            ResolveCard(playCardsQueue.Dequeue());
+        }
+    }
+
+    void ResolveCard(Card card)
+    {
         state = GameState.RESOLVING_CARD;
         currentCard = card;
 
-        activePlayer.PlayCard(card);
-        card.Play();
+        activePlayer.PlayCard(currentCard);
+        currentCard.Activate();
     }
 
     public void BuyCard(Card card)
@@ -113,17 +123,30 @@ public class Game : MonoBehaviour
 
     public void StartPlayNewCard()
     {
+        if (playCardsQueue.Count > 0)
+        {
+            ResolveCard(playCardsQueue.Dequeue());
+            return;
+        }
+
         state = GameState.PLAY_CARD;
         currentCard = null;
         currentAction = null;
     }
 
+    public void StartTurn()
+    {
+        activePlayer.StartTurn();
+    }
+
     public void EndTurn()
     {
         activePlayer.EndTurn();
-        currentPlayerIndex = (currentPlayerIndex + 1) % players.Length;
 
+        currentPlayerIndex = (currentPlayerIndex + 1) % players.Length;
         activePlayer = players[currentPlayerIndex];
+
+        StartTurn();
     }
 
     public void StartChooseCard()
@@ -152,8 +175,33 @@ public class Game : MonoBehaviour
             return;
         }
 
+        if (player.HasOutpost())
+        {
+            messageText.text = "Primero destruye las bases protectoras";
+            return;
+        }
+
         player.authority -= activePlayer.combat;
         activePlayer.combat = 0;
+    }
+
+    public void AttackBase(Card card)
+    {
+
+        if (!card.outpost && card.player.HasOutpost())
+        {
+            messageText.text = "Primero destruye las bases protectoras";
+            return;
+        }
+
+        if (activePlayer.combat < card.defense)
+        {
+            messageText.text = "no tienes suficiente combate";
+            return;
+        }
+
+        activePlayer.SpendCombat(card.defense);
+        card.player.DestroyBase(card);
     }
 
     public void ShowMessage(string message)

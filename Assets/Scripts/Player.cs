@@ -117,14 +117,11 @@ public class Player : MonoBehaviour
 
     public void PlayCard(Card card)
     {
-        hand.RemoveCard(card);
-        playArea.AddCard(card);
-    }
-
-    public void DiscardCard(Card card)
-    {
-        playArea.RemoveCard(card);
-        discardPile.AddCard(card);
+        if (card.location == Location.HAND)
+        {
+            hand.RemoveCard(card);
+            playArea.AddCard(card);
+        }
     }
 
     public bool CanBuyCard(Card card)
@@ -136,8 +133,13 @@ public class Player : MonoBehaviour
     {
         trade -= card.cost;
 
-
+        card.player = this;
         discardPile.AddCard(card);
+    }
+
+    public void StartTurn()
+    {
+        playArea.ActivateBases();
     }
 
     public void EndTurn()
@@ -145,6 +147,7 @@ public class Player : MonoBehaviour
         combat = 0;
         trade = 0;
 
+        //TODO: improve to let hand handle this removing logic
         while (hand.Count() > 0)
         {
             var card = hand.FirstCard();
@@ -152,12 +155,11 @@ public class Player : MonoBehaviour
             discardPile.AddCard(card);
         }
 
-        while (playArea.Count() > 0)
-        {
-            var card = playArea.FirstCard();
-            playArea.RemoveCard(card);
-            discardPile.AddCard(card);
-        }
+
+        var discardedShips = playArea.DiscardShips();
+        discardedShips.ForEach(card => discardPile.AddCard(card));
+
+        playArea.ResetBases();
 
         DrawNewHand();
     }
@@ -165,6 +167,22 @@ public class Player : MonoBehaviour
     public void Attacked()
     {
         game.AttackPlayer(this);
+    }
+
+    public bool HasOutpost()
+    {
+        return playArea.HasOutpost();
+    }
+
+    public void SpendCombat(int value)
+    {
+        combat -= value;
+    }
+
+    public void DestroyBase(Card card)
+    {
+        playArea.DestroyBase(card);
+        discardPile.AddCard(card);
     }
 
     Stack<Card> generateInitialCards()
@@ -187,8 +205,8 @@ public class Player : MonoBehaviour
             deck.Push(CardFactory.GenerateCard("viper", game, cardPrefab, this.gameObject, player: this));
         }
 
-        deck.Push(CardFactory.GenerateCard("blob miner", game, cardPrefab, this.gameObject, player: this));
-        deck.Push(CardFactory.GenerateCard("blob miner", game, cardPrefab, this.gameObject, player: this));
+        deck.Push(CardFactory.GenerateCard("integration port", game, cardPrefab, this.gameObject, player: this));
+        deck.Push(CardFactory.GenerateCard("infested moon", game, cardPrefab, this.gameObject, player: this));
 
         // deck.Push(generateCard("frontier runner")); 
 

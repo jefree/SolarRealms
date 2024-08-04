@@ -17,6 +17,12 @@ public enum Faction
     MACHINE_CULT
 }
 
+public enum CardType
+{
+    SHIP,
+    BASE
+}
+
 public class Card : MonoBehaviour
 {
     public string cardName;
@@ -25,17 +31,16 @@ public class Card : MonoBehaviour
     // public List<Action> doubleAllyActions;
     public Action scrapAction;
 
-    string secondaryText; // ??
     public int cost;
     public int defense;
     public bool outpost;
     public Faction faction; // Unaligned, Trade Federation, The blobs, Star Empire, Machine Cult
-    public int type; // Ship or Base
+    public CardType type; // Ship or Base
     public Game game;
     public Location location;
     public Player player;
 
-    public void Play()
+    public void Activate()
     {
         var firstAction = NextAction();
         game.ResolveAction(firstAction);
@@ -72,6 +77,17 @@ public class Card : MonoBehaviour
     void OnMouseDown()
     {
 
+        // probably attacking a base
+        if (
+            game.state == GameState.PLAY_CARD &&
+            location == Location.PLAY_AREA &&
+            game.activePlayer != player &&
+            type == CardType.BASE
+        )
+        {
+            game.AttackBase(this);
+        }
+
         if (player != null && game.activePlayer != player)
         {
             return;
@@ -84,6 +100,7 @@ public class Card : MonoBehaviour
         )
         {
             game.ChooseEffect(this);
+            return;
         }
 
         if (
