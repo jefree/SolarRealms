@@ -21,7 +21,7 @@ public class CardFactory : MonoBehaviour
                 break;
 
             default:
-                card.cost = 1;
+                Default(card, game);
                 break;
         }
     }
@@ -40,6 +40,14 @@ public class CardFactory : MonoBehaviour
         card.gameObject.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>($"Cards/{name}");
 
         return card;
+    }
+
+    public static void Default(Card card, Game game)
+    {
+        card.cost = 1;
+
+        //card.mainAction = new Action(game);
+        //card.mainAction.AddEffect(new BasicEffect());
     }
 
     public static void Viper(Card card, Game game)

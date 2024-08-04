@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Effect;
 using EffectResolver;
 using UnityEngine;
@@ -40,23 +42,30 @@ public class Card : MonoBehaviour
 
     public Action NextAction()
     {
-        var actions = new List<Action> { mainAction };
-
-        return actions.Find(action => !action.activated);
+        return Actions(mainAction).Find(action => !action.activated);
     }
 
     public Action NextManualAction()
     {
-        var actions = new List<Action> { mainAction, scrapAction };
-
-        return actions.Find(action => !action.activated);
+        return Actions(mainAction, scrapAction).Find(action => !action.activated);
     }
 
     public void Reset()
     {
-        var actions = new List<Action> { mainAction, scrapAction };
-        actions.RemoveAll(action => action == null);
-        actions.ForEach(action => action.Reset());
+        Actions(mainAction, scrapAction).ForEach(action => action.Reset());
+    }
+
+    List<Action> Actions(params Action[] actions)
+    {
+        var validActions = actions.ToList();
+        validActions.RemoveAll(action => action == null);
+
+        if (validActions.Count == 0)
+        {
+            throw new InvalidOperationException($"card with no actions '{cardName}'");
+        }
+
+        return validActions;
     }
 
     void OnMouseDown()
