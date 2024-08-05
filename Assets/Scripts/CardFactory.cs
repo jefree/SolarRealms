@@ -32,6 +32,10 @@ public class CardFactory : MonoBehaviour
                 HiveQueen(card, game);
                 break;
 
+            case "enforcer mech":
+                EnforcerMech(card, game);
+                break;
+
             default:
                 Default(card, game);
                 break;
@@ -62,12 +66,12 @@ public class CardFactory : MonoBehaviour
         card.type = CardType.SHIP;
 
         card.mainAction = new Action(game);
-        card.mainAction.AddEffect(new BasicEffect());
+        card.mainAction.AddEffect(new Effect.Basic());
     }
 
     public static void Viper(Card card, Game game)
     {
-        BasicEffect effect = new(combat: 1);
+        Effect.Basic effect = new(combat: 1);
         card.type = CardType.SHIP;
         card.mainAction = new Action(game);
         card.mainAction.AddEffect(effect);
@@ -75,7 +79,7 @@ public class CardFactory : MonoBehaviour
 
     public static void Scout(Card card, Game game)
     {
-        BasicEffect effect = new(trade: 1);
+        Effect.Basic effect = new(trade: 1);
         effect.trade = 1;
 
         card.type = CardType.SHIP;
@@ -89,10 +93,10 @@ public class CardFactory : MonoBehaviour
         card.cost = 2;
 
         card.mainAction = new Action(game);
-        card.mainAction.AddEffect(new BasicEffect(trade: 3));
+        card.mainAction.AddEffect(new Effect.Basic(trade: 3));
 
         card.scrapAction = new Action(game);
-        card.scrapAction.AddEffect(new Effect.TradeRowScrap(), isManual: true);
+        card.scrapAction.AddEffect(new Effect.ScrapCard(Location.TRADE_ROW), isManual: true);
     }
 
     static void InfestedMoon(Card card, Game game)
@@ -102,7 +106,7 @@ public class CardFactory : MonoBehaviour
         card.defense = 5;
         card.outpost = false;
         card.mainAction = new Action(game);
-        card.mainAction.AddEffect(new BasicEffect(combat: 3));
+        card.mainAction.AddEffect(new Effect.Basic(combat: 3));
     }
 
     static void IntegrationPort(Card card, Game game)
@@ -112,7 +116,7 @@ public class CardFactory : MonoBehaviour
         card.defense = 5;
         card.outpost = true;
         card.mainAction = new Action(game);
-        card.mainAction.AddEffect(new BasicEffect(trade: 1));
+        card.mainAction.AddEffect(new Effect.Basic(trade: 1));
     }
     static void HiveQueen(Card card, Game game)
     {
@@ -120,6 +124,16 @@ public class CardFactory : MonoBehaviour
         card.cost = 7;
 
         card.mainAction = new Action(game);
-        card.mainAction.AddEffect(new BasicEffect(combat: 7));
+        card.mainAction.AddEffect(new Effect.Basic(combat: 7));
+    }
+
+    static void EnforcerMech(Card card, Game game)
+    {
+        card.type = CardType.SHIP;
+        card.cost = 5;
+
+        card.mainAction = new Action(game);
+        card.mainAction.AddEffect(new Effect.Basic(combat: 5));
+        card.mainAction.AddEffect(new Effect.ScrapCard(Location.HAND), isManual: true);
     }
 }

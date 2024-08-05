@@ -17,7 +17,7 @@ public class TradeRow : MonoBehaviour
 
         AddCard(CardFactory.GenerateCard("hive queen", game, cardPrefab, this.gameObject), 0);
         AddCard(CardFactory.GenerateCard("infested moon", game, cardPrefab, this.gameObject), 1);
-        AddCard(CardFactory.GenerateCard("infested moon", game, cardPrefab, this.gameObject), 2);
+        AddCard(CardFactory.GenerateCard("enforcer mech", game, cardPrefab, this.gameObject), 2);
         AddCard(CardFactory.GenerateCard("blob miner", game, cardPrefab, this.gameObject), 3);
         AddCard(CardFactory.GenerateCard("integration port", game, cardPrefab, this.gameObject), 4);
     }

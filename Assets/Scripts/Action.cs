@@ -46,6 +46,11 @@ public class Action
         currentEffect.Activate(game);
     }
 
+    public bool HasPendingEffects()
+    {
+        return effects.Count > 0;
+    }
+
     void ActivateNextEffect()
     {
         if (effects.Count == 0)

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -135,6 +136,17 @@ public class Player : MonoBehaviour
 
         card.player = this;
         discardPile.AddCard(card);
+    }
+
+    public void ScrapCard(Card card)
+    {
+        if (card.location == Location.HAND)
+        {
+            hand.RemoveCard(card);
+            return;
+        }
+
+        throw new InvalidOperationException("location invalida para deshuesar");
     }
 
     public void StartTurn()

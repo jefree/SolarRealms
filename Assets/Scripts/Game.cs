@@ -9,7 +9,7 @@ using UnityEngine;
 
 public enum GameState
 {
-    PLAY_CARD,
+    DO_BASIC, //play card from hand, activate ship or base, buy card, check discard pile
     RESOLVING_CARD,
     CHOOSE_CARD,
     CHOOSE_EFFECT
@@ -44,7 +44,7 @@ public class Game : MonoBehaviour
     {
         activePlayer = players[currentPlayerIndex];
 
-        state = GameState.PLAY_CARD;
+        state = GameState.DO_BASIC;
 
         messageText.text = "Juega o compra cartas";
     }
@@ -84,7 +84,8 @@ public class Game : MonoBehaviour
 
     public void ScrapCard(Card card)
     {
-        Destroy(card.gameObject);
+        activePlayer.ScrapCard(card);
+        card.gameObject.SetActive(false); // avoiding destroy the game object so animations can work
     }
 
     public void ResolveAction(Action action)
@@ -111,6 +112,8 @@ public class Game : MonoBehaviour
 
         var nextAction = currentCard.NextAction();
 
+        Debug.Log(nextAction);
+
         if (nextAction != null)
         {
             ResolveAction(nextAction);
@@ -129,13 +132,14 @@ public class Game : MonoBehaviour
             return;
         }
 
-        state = GameState.PLAY_CARD;
+        state = GameState.DO_BASIC;
         currentCard = null;
         currentAction = null;
     }
 
     public void StartTurn()
     {
+        state = GameState.DO_BASIC;
         activePlayer.StartTurn();
     }
 

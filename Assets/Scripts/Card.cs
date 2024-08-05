@@ -48,20 +48,25 @@ public class Card : MonoBehaviour
 
     public Action NextAction()
     {
-        return Actions(mainAction).Find(action => !action.activated);
+        return ActualActions(mainAction).Find(action => action.HasPendingEffects());
     }
 
     public Action NextManualAction()
     {
-        return Actions(mainAction, scrapAction).Find(action => !action.activated);
+        return ActualActions(mainAction, scrapAction).Find(action => !action.activated);
     }
 
     public void Reset()
     {
-        Actions(mainAction, scrapAction).ForEach(action => action.Reset());
+        ActualActions(mainAction, scrapAction).ForEach(action => action.Reset());
     }
 
-    List<Action> Actions(params Action[] actions)
+    public List<Action> Actions()
+    {
+        return ActualActions(mainAction, scrapAction);
+    }
+
+    List<Action> ActualActions(params Action[] actions)
     {
         var validActions = actions.ToList();
         validActions.RemoveAll(action => action == null);
@@ -79,7 +84,7 @@ public class Card : MonoBehaviour
 
         // probably attacking a base
         if (
-            game.state == GameState.PLAY_CARD &&
+            game.state == GameState.DO_BASIC &&
             location == Location.PLAY_AREA &&
             game.activePlayer != player &&
             type == CardType.BASE
@@ -93,8 +98,11 @@ public class Card : MonoBehaviour
             return;
         }
 
+        Debug.Log(game.state);
+        Debug.Log(NextManualAction());
+
         if (
-            game.state == GameState.PLAY_CARD &&
+            game.state == GameState.DO_BASIC &&
             location == Location.PLAY_AREA &&
             NextManualAction() != null
         )
@@ -112,7 +120,7 @@ public class Card : MonoBehaviour
         }
 
         if (
-            game.state == GameState.PLAY_CARD &&
+            game.state == GameState.DO_BASIC &&
             location == Location.HAND
         )
         {
@@ -121,7 +129,7 @@ public class Card : MonoBehaviour
         }
 
         if (
-            game.state == GameState.PLAY_CARD &&
+            game.state == GameState.DO_BASIC &&
             location == Location.TRADE_ROW
         )
         {

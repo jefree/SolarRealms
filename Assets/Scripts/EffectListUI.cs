@@ -15,9 +15,7 @@ public class EffectListUI : MonoBehaviour
     public void Show(Card card)
     {
         currentCard = card;
-
-        AddEffects(card.mainAction);
-        AddEffects(card.scrapAction);
+        currentCard.Actions().ForEach(action => AddEffects(action));
 
         gameObject.SetActive(true);
     }
