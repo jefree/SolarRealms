@@ -7,10 +7,12 @@ public class Action
     public bool activated = false;
     public Effect.Base currentEffect;
     Game game;
+    public Card card;
     public List<Effect.Base> effects = new();
     List<Effect.Base> usedEffects = new();
     public List<Effect.Base> manualEffects = new();
     List<Effect.Base> usedManualEffects = new();
+    List<Condition.ICondition> conditions = new();
 
     public Action(Game game)
     {
@@ -35,6 +37,11 @@ public class Action
         }
     }
 
+    public void AddCondition(Condition.ICondition condition)
+    {
+        conditions.Add(condition);
+    }
+
     public void ActivateEffect(Effect.Base effect)
     {
         if (!effects.Contains(effect) && !manualEffects.Contains(effect))
@@ -48,7 +55,7 @@ public class Action
 
     public bool HasPendingEffects()
     {
-        return effects.Count > 0;
+        return SatisfyConditions() && effects.Count > 0;
     }
 
     void ActivateNextEffect()
@@ -87,6 +94,11 @@ public class Action
         {
             activated = true;
         }
+    }
+
+    public bool SatisfyConditions()
+    {
+        return conditions.All(condition => condition.IsSatisfied(game));
     }
 
     public void Reset()

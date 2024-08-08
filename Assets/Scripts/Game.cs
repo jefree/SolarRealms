@@ -51,9 +51,13 @@ public class Game : MonoBehaviour
 
     public void PlayCard(Card card)
     {
-        playCardsQueue.Enqueue(card);
+        activePlayer.PlayCard(card);
 
-        if (playCardsQueue.Count == 1)
+        var queueWasEmpty = playCardsQueue.Count == 0;
+
+        activePlayer.playArea.PendingCards().ForEach(card => playCardsQueue.Enqueue(card));
+
+        if (queueWasEmpty)
         {
             ResolveCard(playCardsQueue.Dequeue());
         }
@@ -64,7 +68,8 @@ public class Game : MonoBehaviour
         state = GameState.RESOLVING_CARD;
         currentCard = card;
 
-        activePlayer.PlayCard(currentCard);
+        Debug.Log($"Resolving: {card.cardName}");
+
         currentCard.Activate();
     }
 
@@ -104,6 +109,8 @@ public class Game : MonoBehaviour
     {
         currentAction.EffectResolved(effect);
 
+        effect.Animate(currentCard);
+
         if (effect.isManual)
         {
             StartPlayNewCard();
@@ -112,7 +119,7 @@ public class Game : MonoBehaviour
 
         var nextAction = currentCard.NextAction();
 
-        Debug.Log(nextAction);
+        Debug.Log($"Next Action: {nextAction}");
 
         if (nextAction != null)
         {

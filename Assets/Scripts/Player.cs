@@ -217,8 +217,8 @@ public class Player : MonoBehaviour
             deck.Push(CardFactory.GenerateCard("viper", game, cardPrefab, this.gameObject, player: this));
         }
 
-        deck.Push(CardFactory.GenerateCard("integration port", game, cardPrefab, this.gameObject, player: this));
         deck.Push(CardFactory.GenerateCard("infested moon", game, cardPrefab, this.gameObject, player: this));
+        deck.Push(CardFactory.GenerateCard("hive queen", game, cardPrefab, this.gameObject, player: this));
 
         // deck.Push(generateCard("frontier runner")); 
 

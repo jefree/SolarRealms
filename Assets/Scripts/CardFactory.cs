@@ -64,6 +64,7 @@ public class CardFactory : MonoBehaviour
     {
         card.cost = 1;
         card.type = CardType.SHIP;
+        card.faction = Faction.UNALIGNED;
 
         card.mainAction = new Action(game);
         card.mainAction.AddEffect(new Effect.Basic());
@@ -71,8 +72,9 @@ public class CardFactory : MonoBehaviour
 
     public static void Viper(Card card, Game game)
     {
-        Effect.Basic effect = new(combat: 1);
         card.type = CardType.SHIP;
+        card.faction = Faction.UNALIGNED;
+        Effect.Basic effect = new(combat: 1);
         card.mainAction = new Action(game);
         card.mainAction.AddEffect(effect);
     }
@@ -83,6 +85,7 @@ public class CardFactory : MonoBehaviour
         effect.trade = 1;
 
         card.type = CardType.SHIP;
+        card.faction = Faction.UNALIGNED;
         card.mainAction = new Action(game);
         card.mainAction.AddEffect(effect);
     }
@@ -90,6 +93,7 @@ public class CardFactory : MonoBehaviour
     public static void BlobMiner(Card card, Game game)
     {
         card.type = CardType.SHIP;
+        card.faction = Faction.MACHINE_CULT;
         card.cost = 2;
 
         card.mainAction = new Action(game);
@@ -101,18 +105,20 @@ public class CardFactory : MonoBehaviour
 
     static void InfestedMoon(Card card, Game game)
     {
-        card.cost = 6;
         card.type = CardType.BASE;
+        card.faction = Faction.THE_BLOBS;
+        card.cost = 6;
         card.defense = 5;
         card.outpost = false;
         card.mainAction = new Action(game);
-        card.mainAction.AddEffect(new Effect.Basic(combat: 3));
+        card.mainAction.AddEffect(new Effect.Basic(combat: 4));
     }
 
     static void IntegrationPort(Card card, Game game)
     {
-        card.cost = 3;
         card.type = CardType.BASE;
+        card.faction = Faction.MACHINE_CULT;
+        card.cost = 3;
         card.defense = 5;
         card.outpost = true;
         card.mainAction = new Action(game);
@@ -121,10 +127,14 @@ public class CardFactory : MonoBehaviour
     static void HiveQueen(Card card, Game game)
     {
         card.type = CardType.SHIP;
+        card.faction = Faction.THE_BLOBS;
         card.cost = 7;
 
         card.mainAction = new Action(game);
         card.mainAction.AddEffect(new Effect.Basic(combat: 7));
+
+        card.allyAction = new AllyCardAction(game, card);
+        card.allyAction.AddEffect(new Effect.Basic(combat: 3));
     }
 
     static void EnforcerMech(Card card, Game game)

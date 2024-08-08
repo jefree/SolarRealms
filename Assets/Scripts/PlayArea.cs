@@ -107,4 +107,25 @@ public class PlayArea : MonoBehaviour
     {
         return bases.Any(card => card.outpost);
     }
+
+    public List<Card> FactionCards(Faction faction)
+    {
+        List<Card> factionCards = new();
+
+        factionCards.AddRange(ships.FindAll(card => card.faction == faction));
+        factionCards.AddRange(bases.FindAll(card => card.faction == faction));
+
+        return factionCards;
+    }
+
+    public List<Card> PendingCards()
+    {
+        List<Card> pendingCards = new();
+
+        pendingCards.AddRange(ships.FindAll(card => card.HasPendingActions()));
+        pendingCards.AddRange(bases.FindAll(card => card.HasPendingActions()));
+
+        return pendingCards;
+    }
+
 }

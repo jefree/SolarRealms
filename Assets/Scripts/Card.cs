@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Threading;
 using System.Collections.Generic;
 using System.Linq;
 using Effect;
@@ -27,7 +28,7 @@ public class Card : MonoBehaviour
 {
     public string cardName;
     public Action mainAction;
-    // public List<Action> allyActions;
+    public Action allyAction;
     // public List<Action> doubleAllyActions;
     public Action scrapAction;
 
@@ -40,6 +41,14 @@ public class Card : MonoBehaviour
     public Location location;
     public Player player;
 
+    public GameObject combatUpPrefab;
+    EffectUp effectUp;
+
+    void Start()
+    {
+        effectUp = Instantiate(combatUpPrefab, transform).GetComponent<EffectUp>();
+    }
+
     public void Activate()
     {
         var firstAction = NextAction();
@@ -48,7 +57,7 @@ public class Card : MonoBehaviour
 
     public Action NextAction()
     {
-        return ActualActions(mainAction).Find(action => action.HasPendingEffects());
+        return ActualActions(mainAction, allyAction).Find(action => action.HasPendingEffects());
     }
 
     public Action NextManualAction()
@@ -77,6 +86,16 @@ public class Card : MonoBehaviour
         }
 
         return validActions;
+    }
+
+    public bool HasPendingActions()
+    {
+        return ActualActions(mainAction, allyAction).Any(action => action.HasPendingEffects());
+    }
+
+    public void ShowEffect(EffectColor color, float value)
+    {
+        effectUp.Enqueue(color, value);
     }
 
     void OnMouseDown()

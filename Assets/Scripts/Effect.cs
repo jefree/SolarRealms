@@ -15,6 +15,11 @@ namespace Effect
 
         public abstract void Resolve(Game game);
 
+        public virtual void Animate(Card card)
+        {
+
+        }
+
         public virtual string Text() { return ""; }
     }
 
@@ -52,6 +57,24 @@ namespace Effect
             activePlayer.authority += authority;
 
             game.EffectResolved(this);
+        }
+
+        public override void Animate(Card card)
+        {
+            if (combat > 0)
+            {
+                card.ShowEffect(EffectColor.COMBAT, combat);
+            }
+
+            if (authority > 0)
+            {
+                card.ShowEffect(EffectColor.AUTHORITY, authority);
+            }
+
+            if (trade > 0)
+            {
+                card.ShowEffect(EffectColor.TRADE, trade);
+            }
         }
     }
 
