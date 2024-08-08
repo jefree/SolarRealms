@@ -1,5 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
+using TMPro;
+using System;
 
 public enum EffectColor
 {
@@ -11,7 +13,7 @@ public enum EffectColor
 public class EffectUp : MonoBehaviour
 {
     TMPro.TextMeshPro textMeshPro;
-    Queue<(EffectColor, float)> queue = new();
+    Queue<(EffectColor, float, CardType)> queue = new();
     float time = 0;
 
     void Start()
@@ -32,9 +34,9 @@ public class EffectUp : MonoBehaviour
         }
     }
 
-    public void Enqueue(EffectColor color, float value)
+    public void Enqueue(EffectColor color, float value, CardType type)
     {
-        queue.Enqueue((color, value));
+        queue.Enqueue((color, value, type));
         gameObject.SetActive(true);
     }
 
@@ -47,7 +49,7 @@ public class EffectUp : MonoBehaviour
             return;
         }
 
-        var (color, value) = queue.Dequeue();
+        var (color, value, type) = queue.Dequeue();
         time = 0.4f;
 
         transform.localPosition = new(0, 2.14f, 0);
@@ -56,7 +58,13 @@ public class EffectUp : MonoBehaviour
         {
             EffectColor.COMBAT => Color.red,
             EffectColor.AUTHORITY => Color.green,
-            EffectColor.TRADE => Color.yellow
+            EffectColor.TRADE => Color.yellow,
+            _ => throw new ArgumentOutOfRangeException($"not valid EffectColor: {color}")
         };
+
+        // temporal fix to rotate animation for bases
+        var rotationZ = type == CardType.BASE ? -90 : 0;
+        Debug.Log(rotationZ);
+        transform.Rotate(0, 0, rotationZ);
     }
 }

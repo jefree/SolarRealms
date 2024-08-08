@@ -219,9 +219,10 @@ public class Player : MonoBehaviour
 
         deck.Push(CardFactory.GenerateCard("infested moon", game, cardPrefab, this.gameObject, player: this));
         deck.Push(CardFactory.GenerateCard("hive queen", game, cardPrefab, this.gameObject, player: this));
-
-        // deck.Push(generateCard("frontier runner")); 
+        deck.Push(CardFactory.GenerateCard("hive queen", game, cardPrefab, this.gameObject, player: this));
 
         return deck;
+
+
     }
 }

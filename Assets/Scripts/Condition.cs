@@ -17,12 +17,29 @@ namespace Condition
 
         public bool IsSatisfied(Game game)
         {
-
             var cards = game.activePlayer.playArea.FactionCards(card.faction);
-
             var result = cards.Contains(card) && cards.Count >= 2;
 
             Debug.Log($"Ally Condition: {result}");
+
+            return result;
+        }
+    }
+
+    public class DoubleAllyCardCondition : ICondition
+    {
+        Card card;
+        public DoubleAllyCardCondition(Card card)
+        {
+            this.card = card;
+        }
+
+        public bool IsSatisfied(Game game)
+        {
+            var cards = game.activePlayer.playArea.FactionCards(card.faction);
+            var result = cards.Contains(card) && cards.Count >= 3;
+
+            Debug.Log($"Double Ally Condition: {result}");
 
             return result;
         }

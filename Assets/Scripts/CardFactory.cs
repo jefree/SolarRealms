@@ -110,6 +110,7 @@ public class CardFactory : MonoBehaviour
         card.cost = 6;
         card.defense = 5;
         card.outpost = false;
+
         card.mainAction = new Action(game);
         card.mainAction.AddEffect(new Effect.Basic(combat: 4));
     }
@@ -135,6 +136,9 @@ public class CardFactory : MonoBehaviour
 
         card.allyAction = new AllyCardAction(game, card);
         card.allyAction.AddEffect(new Effect.Basic(combat: 3));
+
+        card.doubleAllyAction = new DoubleAllyCardAction(game, card);
+        card.doubleAllyAction.AddEffect(new Effect.Basic(combat: 3));
     }
 
     static void EnforcerMech(Card card, Game game)

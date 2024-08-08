@@ -29,7 +29,7 @@ public class Card : MonoBehaviour
     public string cardName;
     public Action mainAction;
     public Action allyAction;
-    // public List<Action> doubleAllyActions;
+    public Action doubleAllyAction;
     public Action scrapAction;
 
     public int cost;
@@ -57,7 +57,7 @@ public class Card : MonoBehaviour
 
     public Action NextAction()
     {
-        return ActualActions(mainAction, allyAction).Find(action => action.HasPendingEffects());
+        return ActualActions(mainAction, allyAction, doubleAllyAction).Find(action => action.HasPendingEffects());
     }
 
     public Action NextManualAction()
@@ -90,12 +90,12 @@ public class Card : MonoBehaviour
 
     public bool HasPendingActions()
     {
-        return ActualActions(mainAction, allyAction).Any(action => action.HasPendingEffects());
+        return ActualActions(mainAction, allyAction, doubleAllyAction).Any(action => action.HasPendingEffects());
     }
 
     public void ShowEffect(EffectColor color, float value)
     {
-        effectUp.Enqueue(color, value);
+        effectUp.Enqueue(color, value, type);
     }
 
     void OnMouseDown()
