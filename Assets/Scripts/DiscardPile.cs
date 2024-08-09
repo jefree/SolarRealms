@@ -61,4 +61,9 @@ public class DiscardPile : MonoBehaviour
 
         return removedCards;
     }
+
+    public int Count()
+    {
+        return cards.Count;
+    }
 }

@@ -51,7 +51,7 @@ public class Player : MonoBehaviour
         deck = generateInitialCards();
 
         combat = 0;
-        trade = 0;
+        trade = 50;
         authority = 50;
         authorityScoreText.text = $"{authority}";
 
@@ -74,18 +74,17 @@ public class Player : MonoBehaviour
 
     public void DrawCard()
     {
+
+        ShuffleDiscard();
+
+        if (deck.Count == 0) { return; }
+
         var card = deck.Pop();
         hand.AddCard(card);
     }
 
     public void DrawNewHand()
     {
-
-        if (deck.Count < INITIAL_HAND_SIZE)
-        {
-            ShuffleDiscard();
-        }
-
         for (int i = 0; i < INITIAL_HAND_SIZE; i++)
         {
             DrawCard();
@@ -94,20 +93,15 @@ public class Player : MonoBehaviour
 
     public void ShuffleDiscard()
     {
-        var cards = discardPile.RemoveAllCards();
-        var remainingCards = deck.ToList<Card>();
+        if (deck.Count > 0)
+        {
+            return;
+        }
 
+        var cards = discardPile.RemoveAllCards();
         deck.Clear();
 
         foreach (var card in cards)
-        {
-            card.Reset();
-            card.location = Location.DECK;
-            deck.Push(card);
-            card.gameObject.transform.SetParent(gameObject.transform);
-        }
-
-        foreach (var card in remainingCards)
         {
             card.Reset();
             card.location = Location.DECK;
@@ -207,7 +201,7 @@ public class Player : MonoBehaviour
 
         Stack<Card> deck = new();
 
-        for (int i = 0; i < INITIAL_SCOUT_AMOUNT; i++)
+        for (int i = 0; i < INITIAL_SCOUT_AMOUNT - 6; i++)
         {
             deck.Push(CardFactory.GenerateCard("scout", game, cardPrefab, this.gameObject, player: this));
         }

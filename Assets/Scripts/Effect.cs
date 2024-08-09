@@ -127,5 +127,20 @@ namespace Effect
             return $"deshuesa una carta de {location}";
         }
     }
+
+    public class DrawCard : Base
+    {
+
+        public override void Activate(Game game)
+        {
+            Resolve(game);
+        }
+
+        public override void Resolve(Game game)
+        {
+            game.activePlayer.DrawCard();
+            game.EffectResolved(this);
+        }
+    }
 }
 

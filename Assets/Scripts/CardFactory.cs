@@ -45,12 +45,11 @@ public class CardFactory : MonoBehaviour
     public static Card GenerateCard(string name, Game game, GameObject cardPrefab, GameObject parent, Player player = null)
     {
         GameObject cardGameObject = Instantiate(cardPrefab, parent.transform);
-
         Card card = cardGameObject.GetComponent<Card>();
+
         card.cardName = name;
         card.game = game;
         card.player = player;
-
 
         Build(card, game);
 
@@ -113,6 +112,12 @@ public class CardFactory : MonoBehaviour
 
         card.mainAction = new Action(game);
         card.mainAction.AddEffect(new Effect.Basic(combat: 4));
+
+        card.allyAction = new AllyCardAction(game, card);
+        card.allyAction.AddEffect(new Effect.DrawCard());
+
+        card.doubleAllyAction = new DoubleAllyCardAction(game, card);
+        card.doubleAllyAction.AddEffect(new Effect.DrawCard());
     }
 
     static void IntegrationPort(Card card, Game game)
