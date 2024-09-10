@@ -25,7 +25,7 @@ public class Player : MonoBehaviour
     [HideInInspector]
     public PlayArea playArea;
     [HideInInspector]
-    DiscardPile discardPile;
+    public DiscardPile discardPile;
     [HideInInspector]
     public int combat;
     [HideInInspector]
@@ -201,7 +201,7 @@ public class Player : MonoBehaviour
 
         Stack<Card> deck = new();
 
-        for (int i = 0; i < INITIAL_SCOUT_AMOUNT - 6; i++)
+        for (int i = 0; i < INITIAL_SCOUT_AMOUNT; i++)
         {
             deck.Push(CardFactory.GenerateCard("scout", game, cardPrefab, this.gameObject, player: this));
         }

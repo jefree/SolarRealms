@@ -101,6 +101,12 @@ public class Card : MonoBehaviour
     void OnMouseDown()
     {
 
+        if (location == Location.DISCARD_PILE)
+        {
+            game.ShowDiscardCards(player);
+            return;
+        }
+
         // probably attacking a base
         if (
             game.state == GameState.DO_BASIC &&

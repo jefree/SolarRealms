@@ -6,15 +6,12 @@ using UnityEngine;
 public class DiscardPile : MonoBehaviour
 {
 
-    [HideInInspector]
-    List<Card> cards;
-    [HideInInspector]
-    public GameObject topCard;
+    public List<Card> cards = new();
+    GameObject topCard;
 
     // Start is called before the first frame update
     void Start()
     {
-        cards = new();
     }
 
     // Update is called once per frame

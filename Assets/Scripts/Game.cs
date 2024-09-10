@@ -26,6 +26,7 @@ public class Game : MonoBehaviour
 
     public TradeRow tradeRow;
     public EffectListUI actionListUI;
+    public DiscardPileList discardPileList;
     public Player[] players;
     [HideInInspector]
     int currentPlayerIndex = 0;
@@ -213,6 +214,11 @@ public class Game : MonoBehaviour
 
         activePlayer.SpendCombat(card.defense);
         card.player.DestroyBase(card);
+    }
+
+    public void ShowDiscardCards(Player player)
+    {
+        discardPileList.Show(player.discardPile);
     }
 
     public void ShowMessage(string message)
