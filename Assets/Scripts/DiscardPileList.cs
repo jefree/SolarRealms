@@ -3,7 +3,6 @@ using UnityEngine;
 
 public class DiscardPileList : MonoBehaviour
 {
-
     Transform panel;
     DiscardPile discardPile;
     List<Card> cards;

@@ -30,7 +30,7 @@ public class DiscardPile : MonoBehaviour
         topCard = card.gameObject;
         topCard.transform.SetParent(gameObject.transform);
         topCard.transform.localPosition = new Vector3(0, 0, 0);
-        topCard.transform.rotation = new Quaternion();
+        topCard.transform.rotation = Quaternion.Euler(0, 0, 0);
         topCard.SetActive(true);
 
         card.location = Location.DISCARD_PILE;

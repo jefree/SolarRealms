@@ -50,7 +50,7 @@ public class PlayArea : MonoBehaviour
     {
         card.transform.SetParent(baseArea);
         card.transform.localPosition = new Vector3(bases.Count * Game.CARD_SIZE, 0, 0);
-        card.transform.localRotation = new(0, 0, 0, 0);
+        card.transform.localRotation = Quaternion.Euler(0, 0, 0);
 
         bases.Add(card);
     }

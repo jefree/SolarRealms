@@ -98,6 +98,16 @@ public class Card : MonoBehaviour
         effectUp.Enqueue(color, value, type);
     }
 
+    public void Hide()
+    {
+        gameObject.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Cards/back");
+    }
+
+    public void Show()
+    {
+        gameObject.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>($"Cards/{cardName}");
+    }
+
     void OnMouseDown()
     {
 
@@ -122,9 +132,6 @@ public class Card : MonoBehaviour
         {
             return;
         }
-
-        Debug.Log(game.state);
-        Debug.Log(NextManualAction());
 
         if (
             game.state == GameState.DO_BASIC &&
@@ -161,5 +168,22 @@ public class Card : MonoBehaviour
             game.BuyCard(this);
             return;
         }
+    }
+
+    void OnMouseEnter()
+    {
+
+        if (location == Location.DISCARD_PILE) { return; }
+
+        transform.localScale = new Vector2(1.5f, 1.5f);
+        gameObject.GetComponent<SpriteRenderer>().sortingOrder = 1;
+    }
+
+    void OnMouseExit()
+    {
+        if (location == Location.DISCARD_PILE) { return; }
+
+        transform.localScale = new Vector2(1f, 1f);
+        gameObject.GetComponent<SpriteRenderer>().sortingOrder = 0;
     }
 }

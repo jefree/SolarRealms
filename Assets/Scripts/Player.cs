@@ -14,12 +14,11 @@ public class Player : MonoBehaviour
 {
     public const int INITIAL_HAND_SIZE = 5;
     public const float CARD_HAND_PADDING = 0.15f;
-    const int INITIAL_SCOUT_AMOUNT = 8;
-    const int INITIAL_VIPER_AMOUNT = 2;
 
     public Game game;
-    public GameObject cardPrefab;
 
+    [HideInInspector]
+    public Deck deck;
     [HideInInspector]
     public Hand hand;
     [HideInInspector]
@@ -34,26 +33,32 @@ public class Player : MonoBehaviour
     public int authority;
     [HideInInspector]
     public int cardsInPlay;
-    [HideInInspector]
-    public Stack<Card> deck;
 
+
+    [HideInInspector]
     public TMPro.TextMeshProUGUI authorityScoreText;
+    [HideInInspector]
     public TMPro.TextMeshProUGUI tradeScoreText;
+    [HideInInspector]
     public TMPro.TextMeshProUGUI combatScoreText;
 
     // Start is called before the first frame update
     void Start()
     {
+        deck = transform.Find("Deck").GetComponent<Deck>();
         discardPile = transform.Find("DiscardPile").GetComponent<DiscardPile>();
         playArea = transform.Find("PlayArea").GetComponent<PlayArea>();
         hand = transform.Find("Hand").GetComponent<Hand>();
 
-        deck = generateInitialCards();
+        tradeScoreText = GameObject.Find("TradeText").GetComponent<TMPro.TextMeshProUGUI>();
+        combatScoreText = GameObject.Find("CombatText").GetComponent<TMPro.TextMeshProUGUI>();
 
         combat = 0;
-        trade = 50;
+        trade = 0;
         authority = 50;
         authorityScoreText.text = $"{authority}";
+
+        Debug.Log("Start Player");
 
         DrawNewHand();
     }
@@ -74,10 +79,9 @@ public class Player : MonoBehaviour
 
     public void DrawCard()
     {
-
         ShuffleDiscard();
 
-        if (deck.Count == 0) { return; }
+        if (deck.Count() == 0) { return; }
 
         var card = deck.Pop();
         hand.AddCard(card);
@@ -93,7 +97,7 @@ public class Player : MonoBehaviour
 
     public void ShuffleDiscard()
     {
-        if (deck.Count > 0)
+        if (deck.Count() > 0)
         {
             return;
         }
@@ -191,32 +195,9 @@ public class Player : MonoBehaviour
         discardPile.AddCard(card);
     }
 
-    Stack<Card> generateInitialCards()
+    public bool IsLocalPlayer()
     {
-        /* 
-         create initial cards for testing
-         turn this into actual creation logic when must of 
-         gameplay is ready to avoid huge manual creation
-       */
-
-        Stack<Card> deck = new();
-
-        for (int i = 0; i < INITIAL_SCOUT_AMOUNT; i++)
-        {
-            deck.Push(CardFactory.GenerateCard("scout", game, cardPrefab, this.gameObject, player: this));
-        }
-
-        for (int i = 0; i < INITIAL_VIPER_AMOUNT; i++)
-        {
-            deck.Push(CardFactory.GenerateCard("viper", game, cardPrefab, this.gameObject, player: this));
-        }
-
-        deck.Push(CardFactory.GenerateCard("infested moon", game, cardPrefab, this.gameObject, player: this));
-        deck.Push(CardFactory.GenerateCard("hive queen", game, cardPrefab, this.gameObject, player: this));
-        deck.Push(CardFactory.GenerateCard("hive queen", game, cardPrefab, this.gameObject, player: this));
-
-        return deck;
-
-
+        return game.localPlayer == this;
     }
 }
+

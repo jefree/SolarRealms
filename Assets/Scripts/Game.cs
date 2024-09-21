@@ -32,8 +32,10 @@ public class Game : MonoBehaviour
     int currentPlayerIndex = 0;
     [HideInInspector]
     public Player activePlayer;
+    public Player localPlayer;
     [HideInInspector]
     public GameState state;
+
     [HideInInspector]
     public Card currentCard;
     [HideInInspector]
@@ -47,7 +49,7 @@ public class Game : MonoBehaviour
 
         state = GameState.DO_BASIC;
 
-        messageText.text = "Juega o compra cartas";
+        ShowMessage("Bienvenido");
     }
 
     public void PlayCard(Card card)
@@ -68,8 +70,6 @@ public class Game : MonoBehaviour
     {
         state = GameState.RESOLVING_CARD;
         currentCard = card;
-
-        Debug.Log($"Resolving: {card.cardName}");
 
         currentCard.Activate();
     }
@@ -147,6 +147,7 @@ public class Game : MonoBehaviour
 
     public void StartTurn()
     {
+        ShowMessage("Next player turn");
         state = GameState.DO_BASIC;
         activePlayer.StartTurn();
     }
@@ -189,7 +190,7 @@ public class Game : MonoBehaviour
 
         if (player.HasOutpost())
         {
-            messageText.text = "Primero destruye las bases protectoras";
+            ShowMessage("Primero destruye las bases protectoras");
             return;
         }
 
@@ -202,13 +203,13 @@ public class Game : MonoBehaviour
 
         if (!card.outpost && card.player.HasOutpost())
         {
-            messageText.text = "Primero destruye las bases protectoras";
+            ShowMessage("Primero destruye las bases protectoras");
             return;
         }
 
         if (activePlayer.combat < card.defense)
         {
-            messageText.text = "no tienes suficiente combate";
+            ShowMessage("no tienes suficiente combate");
             return;
         }
 
@@ -223,6 +224,29 @@ public class Game : MonoBehaviour
 
     public void ShowMessage(string message)
     {
+        StartCoroutine(ShowMessageAndClean(message));
+    }
+
+    public void SetPlayerTwoView()
+    {
+        var one = players[0];
+        var two = players[1];
+
+        (one.transform.position, two.transform.position) = (two.transform.position, one.transform.position);
+        (one.playArea.transform.localPosition, two.playArea.transform.localPosition) = (two.playArea.transform.localPosition, one.playArea.transform.localPosition);
+
+        var aOne = one.transform.Find("Authority/Button").GetComponent<RectTransform>();
+        var aTwo = two.transform.Find("Authority/Button").GetComponent<RectTransform>();
+
+        (aOne.anchoredPosition, aTwo.anchoredPosition) = (aTwo.anchoredPosition, aOne.anchoredPosition);
+    }
+
+    IEnumerator ShowMessageAndClean(string message)
+    {
         messageText.text = message;
+
+        yield return new WaitForSeconds(1.5f);
+
+        messageText.text = "Juega o compra cartas";
     }
 }

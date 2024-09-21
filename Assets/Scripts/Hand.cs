@@ -10,11 +10,16 @@ public class Hand : MonoBehaviour
 
     public void AddCard(Card card)
     {
-        card.transform.SetParent(transform);
+        card.transform.SetParent(transform, false);
         card.gameObject.SetActive(true);
 
         card.location = Location.HAND;
         cards.Add(card);
+
+        if (!card.player.IsLocalPlayer())
+        {
+            //card.Hide();
+        }
 
         RepositionCards();
     }
@@ -26,6 +31,8 @@ public class Hand : MonoBehaviour
 
         cards.Remove(card);
 
+        card.Show();
+
         RepositionCards();
     }
 
@@ -35,7 +42,7 @@ public class Hand : MonoBehaviour
         foreach (var card in cards)
         {
             card.transform.localPosition = new Vector3(0, 0, 0);
-            card.transform.Translate(new Vector3(i * Game.CARD_SIZE, 0, 0));
+            card.transform.Translate(new Vector3(i * Game.CARD_SIZE, 0, 0), Space.World);
 
             i++;
         }
