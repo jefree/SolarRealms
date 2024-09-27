@@ -1,19 +1,15 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
-using JetBrains.Annotations;
-using TMPro;
-using Unity.VisualScripting;
-using UnityEditor.UI;
+using Mirror;
 using UnityEngine;
-using UnityEngine.UI;
 
-public class Player : MonoBehaviour
+public class Player : NetworkBehaviour
 {
     public const int INITIAL_HAND_SIZE = 5;
     public const float CARD_HAND_PADDING = 0.15f;
+
+    [SyncVar]
+    public string playerName;
 
     public Game game;
 
@@ -30,10 +26,11 @@ public class Player : MonoBehaviour
     [HideInInspector]
     public int trade;
     [HideInInspector]
-    public int authority;
-    [HideInInspector]
-    public int cardsInPlay;
+    public new int authority;
 
+
+    [HideInInspector]
+    public Player enemy;
 
     [HideInInspector]
     public TMPro.TextMeshProUGUI authorityScoreText;
@@ -58,14 +55,57 @@ public class Player : MonoBehaviour
         authority = 50;
         authorityScoreText.text = $"{authority}";
 
-        Debug.Log("Start Player");
+        Debug.Log("Player Started");
+    }
+
+    public override void OnStartServer()
+    {
+        game = GameObject.Find("Game").GetComponent<Game>();
+        deck = transform.Find("Deck").GetComponent<Deck>();
+        hand = transform.Find("Hand").GetComponent<Hand>();
+    }
+
+
+    public override void OnStartClient()
+    {
+        Debug.Log("player spawned on client");
+        game = GameObject.Find("Game").GetComponent<Game>();
+
+        Debug.Log($"total players: {game.players.Count}");
+
+        if (isLocalPlayer)
+        {
+            transform.position = new Vector3(-5.35f, -10f, 0);
+        }
+        else
+        {
+            transform.position = new Vector3(-5.35f, 4.8f, 0);
+        }
+
+        CmdPlayerReady();
+    }
+
+    [Command]
+    public void CmdPlayerReady()
+    {
+        game.AddPlayer(this);
+        deck.Init(this);
 
         DrawNewHand();
+    }
+
+    [ClientRpc]
+    public void RpcAddCardToDeck(GameObject cardGO)
+    {
+        var card = cardGO.GetComponent<Card>();
+        Debug.Log($"new card added to deck {card.cardName}");
     }
 
     // Update is called once per frame
     void Update()
     {
+        return;
+
         authorityScoreText.text = $"{authority}";
 
         if (game.activePlayer != this)
@@ -84,6 +124,7 @@ public class Player : MonoBehaviour
         if (deck.Count() == 0) { return; }
 
         var card = deck.Pop();
+
         hand.AddCard(card);
     }
 
@@ -112,6 +153,12 @@ public class Player : MonoBehaviour
             deck.Push(card);
             card.gameObject.transform.SetParent(gameObject.transform);
         }
+    }
+
+    [Command]
+    public void CmdPlayCard(Card card)
+    {
+        Debug.Log($"player {playerName} is playing card {card.cardName}");
     }
 
     public void PlayCard(Card card)
@@ -193,11 +240,6 @@ public class Player : MonoBehaviour
     {
         playArea.DestroyBase(card);
         discardPile.AddCard(card);
-    }
-
-    public bool IsLocalPlayer()
-    {
-        return game.localPlayer == this;
     }
 }
 

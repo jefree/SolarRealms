@@ -447,6 +447,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7509086408094405115}
   - component: {fileID: 6006473640129570922}
+  - component: {fileID: 6899561417837855342}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -486,6 +487,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ccefd68b89c1ca48b253e335a71f8aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  playerName: 
   game: {fileID: 0}
   deck: {fileID: 0}
   hand: {fileID: 0}
@@ -494,10 +499,27 @@ MonoBehaviour:
   combat: 0
   trade: 0
   authority: 0
-  cardsInPlay: 0
+  enemy: {fileID: 0}
   authorityScoreText: {fileID: 3722099456466589454}
   tradeScoreText: {fileID: 0}
   combatScoreText: {fileID: 0}
+--- !u!114 &6899561417837855342
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7085000384102243852}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 0
+  _assetId: 2048046513
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
 --- !u!1 &7748587458989941425
 GameObject:
   m_ObjectHideFlags: 0
@@ -709,9 +731,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5f9cf30ae3877940920ad08a7a04857, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   game: {fileID: 0}
   player: {fileID: 6006473640129570922}
   cardPrefab: {fileID: 1546928846508714842, guid: 5f1fac4f9e213804dbe64091b16639d7, type: 3}
+  plainCardPrefab: {fileID: 8957249362840166661, guid: 5da12d5c486a5784595153df0fc1799c, type: 3}
   countText: {fileID: 4517233620101892229}
 --- !u!1 &8352439531136581502
 GameObject:
@@ -993,3 +1019,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef4ddf16d467034408ef42248699a8a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0

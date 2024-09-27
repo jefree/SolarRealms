@@ -14,7 +14,7 @@ public class TradeRow : MonoBehaviour
     List<Card> cards = new();
 
     // Start is called before the first frame update
-    void Start()
+    void _Start()
     {
         AddCard(CardFactory.GenerateCard("hive queen", game, cardPrefab, gameObject), 0);
         AddCard(CardFactory.GenerateCard("infested moon", game, cardPrefab, gameObject), 1);

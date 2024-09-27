@@ -1,9 +1,28 @@
 using System.Collections.Generic;
+using Mirror;
 using Unity.VisualScripting;
 using UnityEngine;
 
 public class CardFactory : MonoBehaviour
 {
+    [Server]
+    public static Card GenerateCard(string name, Game game, GameObject cardPrefab, GameObject parent, Player player = null)
+    {
+        GameObject cardGameObject = Instantiate(cardPrefab);
+        Card card = cardGameObject.GetComponent<Card>();
+
+        card.cardName = name;
+        card.game = game;
+        card.player = player;
+
+        Build(card, game);
+
+        Debug.Log($"spawning card: {card.cardName} - {card.faction} - {card.cost}");
+        NetworkServer.Spawn(cardGameObject);
+
+        return card;
+    }
+
     public static void Build(Card card, Game game)
     {
         switch (card.cardName)
@@ -40,23 +59,6 @@ public class CardFactory : MonoBehaviour
                 Default(card, game);
                 break;
         }
-    }
-
-    public static Card GenerateCard(string name, Game game, GameObject cardPrefab, GameObject parent, Player player = null)
-    {
-        GameObject cardGameObject = Instantiate(cardPrefab, parent.transform);
-        Card card = cardGameObject.GetComponent<Card>();
-
-        card.cardName = name;
-        card.game = game;
-        card.player = player;
-
-        Build(card, game);
-
-        card.gameObject.SetActive(false);
-        card.gameObject.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>($"Cards/{name}");
-
-        return card;
     }
 
     public static void Default(Card card, Game game)

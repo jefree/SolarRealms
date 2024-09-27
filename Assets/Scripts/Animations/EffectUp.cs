@@ -64,7 +64,6 @@ public class EffectUp : MonoBehaviour
 
         // temporal fix to rotate animation for bases
         var rotationZ = type == CardType.BASE ? -90 : 0;
-        Debug.Log(rotationZ);
         transform.Rotate(0, 0, rotationZ);
     }
 }

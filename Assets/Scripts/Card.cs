@@ -1,15 +1,12 @@
 using System;
-using System.Collections;
-using System.Threading;
 using System.Collections.Generic;
 using System.Linq;
-using Effect;
-using EffectResolver;
+using Mirror;
+using UnityEditor.U2D.Aseprite;
 using UnityEngine;
-using UnityEngine.iOS;
-using UnityEngine.SocialPlatforms;
 
-public enum Faction
+[Serializable]
+public enum Faction : byte
 {
     UNALIGNED,
     TRADE_FEDERATION,
@@ -24,29 +21,43 @@ public enum CardType
     BASE
 }
 
-public class Card : MonoBehaviour
+[Serializable]
+public class Card : NetworkBehaviour
 {
-    public string cardName;
+    [SyncVar] public string cardName;
+    [SyncVar] public int cost;
+    [SyncVar] public Location location;
+    [SyncVar] public Faction faction; // Unaligned, Trade Federation, The blobs, Star Empire, Machine Cult
     public Action mainAction;
     public Action allyAction;
     public Action doubleAllyAction;
     public Action scrapAction;
-
-    public int cost;
     public int defense;
     public bool outpost;
-    public Faction faction; // Unaligned, Trade Federation, The blobs, Star Empire, Machine Cult
     public CardType type; // Ship or Base
     public Game game;
-    public Location location;
     public Player player;
 
     public GameObject combatUpPrefab;
     EffectUp effectUp;
 
+    [Client]
+    void SetCardName(string oldName, string newName)
+    {
+        Debug.Log($"card name change from {oldName} to {newName}");
+
+        // maybe just maybe, this can be avoid if initial spawn send the current values of the card
+        // GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>($"Cards/{newName}");
+    }
+
     void Start()
     {
         effectUp = Instantiate(combatUpPrefab, transform).GetComponent<EffectUp>();
+    }
+
+    public override void OnStartClient()
+    {
+        Debug.Log($"Card Spawned on Client: {cardName} - {faction} - {cost}");
     }
 
     public void Activate()
@@ -156,7 +167,7 @@ public class Card : MonoBehaviour
             location == Location.HAND
         )
         {
-            game.PlayCard(this);
+            player.CmdPlayCard(this);
             return;
         }
 

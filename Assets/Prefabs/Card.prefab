@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 7248885442574751746}
   - component: {fileID: 3160570529833658206}
   - component: {fileID: 2640532182247043824}
+  - component: {fileID: 475830183538857711}
   m_Layer: 0
   m_Name: Card
   m_TagString: Untagged
@@ -111,7 +112,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fed239b3ce06a964084cc18ac1045557, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   cardName: 
+  details:
+    name: 
+    combat: 0
+    trade: 0
   cost: 0
   defense: 0
   outpost: 0
@@ -166,3 +174,20 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 2.14, y: 3}
   m_EdgeRadius: 0
+--- !u!114 &475830183538857711
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1546928846508714842}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 0
+  _assetId: 560116228
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0

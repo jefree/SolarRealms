@@ -1,8 +1,11 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Threading;
+using Mirror;
+using System.Linq;
+using Unity.Collections.LowLevel.Unsafe;
 
-public class Deck : MonoBehaviour
+public class Deck : NetworkBehaviour
 {
 
     const int INITIAL_SCOUT_AMOUNT = 8;
@@ -15,12 +18,42 @@ public class Deck : MonoBehaviour
     public TMPro.TextMeshProUGUI countText;
 
     [HideInInspector]
-    public Stack<Card> cards;
+    public readonly SyncList<Card> cards = new();
 
-    void Start()
+    public override void OnStartClient()
     {
+        cards.Callback += OnUpdateCards;
+
+        foreach (var card in cards)
+        {
+            OnCardInserted(card);
+        }
+    }
+
+    void OnUpdateCards(SyncList<Card>.Operation op, int index, Card oldCard, Card newCard)
+    {
+        switch (op)
+        {
+            case SyncList<Card>.Operation.OP_INSERT:
+                OnCardInserted(newCard);
+                break;
+        }
+
+    }
+
+    // Server & Client
+    void OnCardInserted(Card card)
+    {
+        card.transform.SetParent(transform);
+        card.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>($"Cards/{card.cardName}");
+    }
+
+    public void Init(Player player)
+    {
+        this.player = player;
         game = player.game;
-        cards = generateInitialCards();
+
+        GenerateInitialCards();
     }
 
     public int Count()
@@ -33,15 +66,20 @@ public class Deck : MonoBehaviour
         cards.Clear();
     }
 
+    // Server
     public void Push(Card card)
     {
-        cards.Push(card);
+        cards.Insert(0, card);
         UpdateCountText();
+
+        OnCardInserted(card);
     }
 
     public Card Pop()
     {
-        var card = cards.Pop();
+        var card = cards[0];
+        cards.RemoveAt(0);
+
         UpdateCountText();
 
         return card;
@@ -52,7 +90,8 @@ public class Deck : MonoBehaviour
         countText.text = $"{cards.Count}";
     }
 
-    Stack<Card> generateInitialCards()
+    // Server
+    void GenerateInitialCards()
     {
         /* 
          create initial cards for testing
@@ -60,24 +99,18 @@ public class Deck : MonoBehaviour
          gameplay is ready to avoid huge manual creation
        */
 
-        Stack<Card> deck = new();
-
         for (int i = 0; i < INITIAL_SCOUT_AMOUNT; i++)
         {
-            deck.Push(CardFactory.GenerateCard("scout", game, cardPrefab, this.gameObject, player: player));
+            Push(CardFactory.GenerateCard("scout", game, cardPrefab, this.gameObject, player: player));
         }
 
         for (int i = 0; i < INITIAL_VIPER_AMOUNT; i++)
         {
-            deck.Push(CardFactory.GenerateCard("viper", game, cardPrefab, this.gameObject, player: player));
+            Push(CardFactory.GenerateCard("viper", game, cardPrefab, this.gameObject, player: player));
         }
 
-        deck.Push(CardFactory.GenerateCard("infested moon", game, cardPrefab, this.gameObject, player: player));
-        deck.Push(CardFactory.GenerateCard("hive queen", game, cardPrefab, this.gameObject, player: player));
-        deck.Push(CardFactory.GenerateCard("hive queen", game, cardPrefab, this.gameObject, player: player));
-
-        return deck;
-
-
+        Push(CardFactory.GenerateCard("infested moon", game, cardPrefab, this.gameObject, player: player));
+        Push(CardFactory.GenerateCard("hive queen", game, cardPrefab, this.gameObject, player: player));
+        Push(CardFactory.GenerateCard("hive queen", game, cardPrefab, this.gameObject, player: player));
     }
 }

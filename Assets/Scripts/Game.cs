@@ -1,11 +1,7 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Effect;
-using Unity.VisualScripting;
 using UnityEngine;
+using Mirror;
 
 public enum GameState
 {
@@ -15,7 +11,7 @@ public enum GameState
     CHOOSE_EFFECT
 }
 
-public class Game : MonoBehaviour
+public class Game : NetworkBehaviour
 {
     const int INITIAL_SCOUT_AMOUNT = 8;
     const int INITIAL_VIPER_AMOUNT = 2;
@@ -27,12 +23,11 @@ public class Game : MonoBehaviour
     public TradeRow tradeRow;
     public EffectListUI actionListUI;
     public DiscardPileList discardPileList;
-    public Player[] players;
+    public readonly SyncList<Player> players = new();
     [HideInInspector]
     int currentPlayerIndex = 0;
     [HideInInspector]
     public Player activePlayer;
-    public Player localPlayer;
     [HideInInspector]
     public GameState state;
 
@@ -45,11 +40,26 @@ public class Game : MonoBehaviour
 
     void Start()
     {
-        activePlayer = players[currentPlayerIndex];
-
         state = GameState.DO_BASIC;
-
         ShowMessage("Bienvenido");
+    }
+
+    public void AddPlayer(Player player)
+    {
+        players.Add(player);
+
+        if (players.Count == 1)
+        {
+            activePlayer = player;
+        }
+
+        player.playerName = $"Player {players.Count}";
+    }
+
+    [ClientRpc]
+    public void RpcAddPlayer(Player player)
+    {
+        Debug.Log(player);
     }
 
     public void PlayCard(Card card)
@@ -156,7 +166,7 @@ public class Game : MonoBehaviour
     {
         activePlayer.EndTurn();
 
-        currentPlayerIndex = (currentPlayerIndex + 1) % players.Length;
+        currentPlayerIndex = (currentPlayerIndex + 1) % players.Count;
         activePlayer = players[currentPlayerIndex];
 
         StartTurn();
