@@ -8,36 +8,19 @@ public class Player : NetworkBehaviour
     public const int INITIAL_HAND_SIZE = 5;
     public const float CARD_HAND_PADDING = 0.15f;
 
-    [SyncVar]
-    public string playerName;
+    [SyncVar] public string playerName;
+    [HideInInspector] public DiscardPile discardPile;
+    [HideInInspector, SyncVar] public int combat;
+    [HideInInspector, SyncVar] public int trade;
+    [HideInInspector, SyncVar] public new int authority;
 
     public Game game;
 
-    [HideInInspector]
-    public Deck deck;
-    [HideInInspector]
-    public Hand hand;
-    [HideInInspector]
-    public PlayArea playArea;
-    [HideInInspector]
-    public DiscardPile discardPile;
-    [HideInInspector]
-    public int combat;
-    [HideInInspector]
-    public int trade;
-    [HideInInspector]
-    public new int authority;
-
-
-    [HideInInspector]
-    public Player enemy;
-
-    [HideInInspector]
-    public TMPro.TextMeshProUGUI authorityScoreText;
-    [HideInInspector]
-    public TMPro.TextMeshProUGUI tradeScoreText;
-    [HideInInspector]
-    public TMPro.TextMeshProUGUI combatScoreText;
+    [HideInInspector] public Deck deck;
+    [HideInInspector] public Hand hand;
+    [HideInInspector] public PlayArea playArea;
+    [HideInInspector] public Player enemy;
+    [HideInInspector] public TMPro.TextMeshProUGUI authorityScoreText;
 
     // Start is called before the first frame update
     void Start()
@@ -47,15 +30,10 @@ public class Player : NetworkBehaviour
         playArea = transform.Find("PlayArea").GetComponent<PlayArea>();
         hand = transform.Find("Hand").GetComponent<Hand>();
 
-        tradeScoreText = GameObject.Find("TradeText").GetComponent<TMPro.TextMeshProUGUI>();
-        combatScoreText = GameObject.Find("CombatText").GetComponent<TMPro.TextMeshProUGUI>();
-
         combat = 0;
         trade = 0;
         authority = 50;
         authorityScoreText.text = $"{authority}";
-
-        Debug.Log("Player Started");
     }
 
     public override void OnStartServer()
@@ -65,58 +43,27 @@ public class Player : NetworkBehaviour
         hand = transform.Find("Hand").GetComponent<Hand>();
     }
 
-
+    [Client]
     public override void OnStartClient()
     {
-        Debug.Log("player spawned on client");
         game = GameObject.Find("Game").GetComponent<Game>();
-
-        Debug.Log($"total players: {game.players.Count}");
-
-        if (isLocalPlayer)
-        {
-            transform.position = new Vector3(-5.35f, -10f, 0);
-        }
-        else
-        {
-            transform.position = new Vector3(-5.35f, 4.8f, 0);
-        }
-
-        CmdPlayerReady();
     }
 
-    [Command]
-    public void CmdPlayerReady()
+    public override void OnStartLocalPlayer()
     {
-        game.AddPlayer(this);
-        deck.Init(this);
-
-        DrawNewHand();
-    }
-
-    [ClientRpc]
-    public void RpcAddCardToDeck(GameObject cardGO)
-    {
-        var card = cardGO.GetComponent<Card>();
-        Debug.Log($"new card added to deck {card.cardName}");
+        game.localPlayer = this;
     }
 
     // Update is called once per frame
     void Update()
     {
-        return;
+        if (!isClient)
+            return;
 
         authorityScoreText.text = $"{authority}";
-
-        if (game.activePlayer != this)
-        {
-            return;
-        }
-
-        tradeScoreText.text = $"{trade}";
-        combatScoreText.text = $"{combat}";
     }
 
+    [Server]
     public void DrawCard()
     {
         ShuffleDiscard();
@@ -128,6 +75,7 @@ public class Player : NetworkBehaviour
         hand.AddCard(card);
     }
 
+    [Server]
     public void DrawNewHand()
     {
         for (int i = 0; i < INITIAL_HAND_SIZE; i++)
@@ -136,29 +84,32 @@ public class Player : NetworkBehaviour
         }
     }
 
+    [Server]
     public void ShuffleDiscard()
     {
         if (deck.Count() > 0)
-        {
             return;
-        }
 
         var cards = discardPile.RemoveAllCards();
-        deck.Clear();
 
         foreach (var card in cards)
         {
             card.Reset();
-            card.location = Location.DECK;
             deck.Push(card);
-            card.gameObject.transform.SetParent(gameObject.transform);
         }
     }
 
     [Command]
     public void CmdPlayCard(Card card)
     {
-        Debug.Log($"player {playerName} is playing card {card.cardName}");
+        game.PlayCard(card);
+    }
+
+    [Command]
+    public void CmdAttackPlayer(Player player)
+    {
+
+        game.AttackPlayer(player);
     }
 
     public void PlayCard(Card card)
@@ -173,6 +124,12 @@ public class Player : NetworkBehaviour
     public bool CanBuyCard(Card card)
     {
         return trade >= card.cost;
+    }
+
+    [Command]
+    public void CmdBuyCard(Card card)
+    {
+        game.BuyCard(card);
     }
 
     public void BuyCard(Card card)
@@ -199,8 +156,14 @@ public class Player : NetworkBehaviour
         playArea.ActivateBases();
     }
 
-    public void EndTurn()
+    [Command]
+    public void CmdEndTurn()
     {
+        // probably a cheater
+        // why did i do this ? idk i'm obsessed with server authority
+        if (game.activePlayer != this)
+            return;
+
         combat = 0;
         trade = 0;
 
@@ -212,13 +175,14 @@ public class Player : NetworkBehaviour
             discardPile.AddCard(card);
         }
 
-
         var discardedShips = playArea.DiscardShips();
         discardedShips.ForEach(card => discardPile.AddCard(card));
 
         playArea.ResetBases();
 
         DrawNewHand();
+
+        game.StartTurn();
     }
 
     public void Attacked()

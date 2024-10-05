@@ -1,11 +1,20 @@
 using System;
+using Mirror;
+using UnityEngine;
 
 [Serializable]
 public struct CardInfo
 {
-    public string name;
-    public int combat;
-    public int trade;
+    public uint cardGOID;
+    [System.NonSerialized]
+    public Card card;
 
-    public string publicName => name;
+    public CardInfo(Card card)
+    {
+        cardGOID = card.netId;
+        this.card = card;
+    }
+
 }
+
+public class SyncListCardInfo : SyncList<CardInfo> { }

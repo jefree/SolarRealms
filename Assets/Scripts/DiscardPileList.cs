@@ -25,7 +25,6 @@ public class DiscardPileList : MonoBehaviour
         foreach (var card in cards)
         {
             card.location = Location.DISCARD_PILE;
-            card.gameObject.SetActive(true);
             card.transform.SetParent(panel);
             card.GetComponent<SpriteRenderer>().sortingOrder = 2;
         }

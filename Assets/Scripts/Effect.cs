@@ -1,10 +1,3 @@
-using System.Reflection;
-using Effect;
-using Unity.VisualScripting;
-using UnityEditor.PackageManager;
-
-
-
 namespace Effect
 {
     public abstract class Base
@@ -63,17 +56,17 @@ namespace Effect
         {
             if (combat > 0)
             {
-                card.ShowEffect(EffectColor.COMBAT, combat);
+                card.RpcShowEffect(EffectColor.COMBAT, combat);
             }
 
             if (authority > 0)
             {
-                card.ShowEffect(EffectColor.AUTHORITY, authority);
+                card.RpcShowEffect(EffectColor.AUTHORITY, authority);
             }
 
             if (trade > 0)
             {
-                card.ShowEffect(EffectColor.TRADE, trade);
+                card.RpcShowEffect(EffectColor.TRADE, trade);
             }
         }
     }

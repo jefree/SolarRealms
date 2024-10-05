@@ -1,64 +1,67 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using UnityEngine;
 using Mirror;
 
 public class Hand : NetworkBehaviour
 {
-    readonly SyncList<Card> cards = new();
+    readonly SyncListCard cards = new();
 
     public override void OnStartClient()
     {
-        cards.Callback += OnCardsUpdated;
+
+        cards.Callback += OnUpdateCards;
 
         foreach (var card in cards)
         {
             OnCardAdded(card);
         }
+
     }
 
-    private void OnCardsUpdated(SyncList<Card>.Operation op, int index, Card oldCard, Card newCard)
+    void OnUpdateCards(SyncListCard.Operation op, int index, Card oldCard, Card newCard)
     {
         switch (op)
         {
-            case SyncList<Card>.Operation.OP_ADD:
+            case SyncListCard.Operation.OP_ADD:
                 OnCardAdded(newCard);
+                break;
+            case SyncListCard.Operation.OP_REMOVEAT:
+                OnCardRemoved(oldCard);
                 break;
         }
     }
 
-    // Server
+    [Server]
     public void AddCard(Card card)
     {
         card.location = Location.HAND;
         cards.Add(card);
-
-        OnCardAdded(card);
     }
 
-    //Server & Client
-    public void OnCardAdded(Card card)
+    [Client]
+    void OnCardAdded(Card card)
     {
-        card.transform.SetParent(transform, false);
-        card.gameObject.SetActive(true);
+        card.transform.SetParent(transform);
 
-        //if (!card.player.isLocalPlayer)
-        //{
-        //    card.Hide();
-        //}
+        if (!card.player.isLocalPlayer)
+        {
+            card.Hide();
+        }
 
         RepositionCards();
     }
 
+    [Server]
     public void RemoveCard(Card card)
     {
         card.location = Location.UNDEFINED;
-        card.transform.SetParent(null);
-
         cards.Remove(card);
+    }
 
+    [Client]
+    void OnCardRemoved(Card card)
+    {
         card.Show();
 
         RepositionCards();
@@ -73,10 +76,8 @@ public class Hand : NetworkBehaviour
             card.transform.localPosition = new Vector3(0, 0, 0);
             card.transform.Translate(new Vector3(i * Game.CARD_SIZE, 0, 0), Space.World);
 
-
             i++;
         }
-
     }
 
     public int Count()
@@ -86,6 +87,6 @@ public class Hand : NetworkBehaviour
 
     public Card FirstCard()
     {
-        return cards.First<Card>();
+        return cards.First();
     }
 }

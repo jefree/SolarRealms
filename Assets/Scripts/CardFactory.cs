@@ -17,7 +17,6 @@ public class CardFactory : MonoBehaviour
 
         Build(card, game);
 
-        Debug.Log($"spawning card: {card.cardName} - {card.faction} - {card.cost}");
         NetworkServer.Spawn(cardGameObject);
 
         return card;

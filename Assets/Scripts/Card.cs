@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Mirror;
-using UnityEditor.U2D.Aseprite;
 using UnityEngine;
 
 [Serializable]
@@ -21,6 +20,8 @@ public enum CardType
     BASE
 }
 
+public class SyncListCard : SyncList<Card> { }
+
 [Serializable]
 public class Card : NetworkBehaviour
 {
@@ -28,6 +29,9 @@ public class Card : NetworkBehaviour
     [SyncVar] public int cost;
     [SyncVar] public Location location;
     [SyncVar] public Faction faction; // Unaligned, Trade Federation, The blobs, Star Empire, Machine Cult
+    [SyncVar] public Player player;
+    [SyncVar] public Game game;
+
     public Action mainAction;
     public Action allyAction;
     public Action doubleAllyAction;
@@ -35,29 +39,20 @@ public class Card : NetworkBehaviour
     public int defense;
     public bool outpost;
     public CardType type; // Ship or Base
-    public Game game;
-    public Player player;
 
     public GameObject combatUpPrefab;
     EffectUp effectUp;
 
-    [Client]
-    void SetCardName(string oldName, string newName)
-    {
-        Debug.Log($"card name change from {oldName} to {newName}");
-
-        // maybe just maybe, this can be avoid if initial spawn send the current values of the card
-        // GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>($"Cards/{newName}");
-    }
-
     void Start()
     {
         effectUp = Instantiate(combatUpPrefab, transform).GetComponent<EffectUp>();
+        GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>($"Cards/{cardName}");
     }
 
+    [Client]
     public override void OnStartClient()
     {
-        Debug.Log($"Card Spawned on Client: {cardName} - {faction} - {cost}");
+
     }
 
     public void Activate()
@@ -104,7 +99,8 @@ public class Card : NetworkBehaviour
         return ActualActions(mainAction, allyAction, doubleAllyAction).Any(action => action.HasPendingEffects());
     }
 
-    public void ShowEffect(EffectColor color, float value)
+    [ClientRpc]
+    public void RpcShowEffect(EffectColor color, float value)
     {
         effectUp.Enqueue(color, value, type);
     }
@@ -119,12 +115,21 @@ public class Card : NetworkBehaviour
         gameObject.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>($"Cards/{cardName}");
     }
 
+    [Client]
     void OnMouseDown()
     {
 
         if (location == Location.DISCARD_PILE)
         {
             game.ShowDiscardCards(player);
+            return;
+        }
+
+        if (
+            game.activePlayer != game.localPlayer ||
+            (location == Location.HAND && player != game.localPlayer)
+        )
+        {
             return;
         }
 
@@ -137,11 +142,6 @@ public class Card : NetworkBehaviour
         )
         {
             game.AttackBase(this);
-        }
-
-        if (player != null && game.activePlayer != player)
-        {
-            return;
         }
 
         if (
@@ -176,7 +176,7 @@ public class Card : NetworkBehaviour
             location == Location.TRADE_ROW
         )
         {
-            game.BuyCard(this);
+            game.localPlayer.CmdBuyCard(this);
             return;
         }
     }

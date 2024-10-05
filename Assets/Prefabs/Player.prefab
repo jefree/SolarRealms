@@ -143,6 +143,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c18c3998d21ee2b44852fb533d45e92e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
 --- !u!1 &2940922373070321629
 GameObject:
   m_ObjectHideFlags: 0
@@ -187,7 +190,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 131b8f522c9d56240b51963feac01769, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cards: []
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
 --- !u!1 &3312899516653823793
 GameObject:
   m_ObjectHideFlags: 0
@@ -468,11 +473,11 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 5138846762813791946}
+  - {fileID: 5556096852841073674}
   - {fileID: 2364912247510978464}
   - {fileID: 7745750087704565513}
-  - {fileID: 5138846762813791946}
   - {fileID: 4410503854076146164}
-  - {fileID: 5556096852841073674}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &6006473640129570922
@@ -491,18 +496,16 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   playerName: 
-  game: {fileID: 0}
-  deck: {fileID: 0}
-  hand: {fileID: 0}
-  playArea: {fileID: 0}
   discardPile: {fileID: 0}
   combat: 0
   trade: 0
   authority: 0
+  game: {fileID: 0}
+  deck: {fileID: 0}
+  hand: {fileID: 0}
+  playArea: {fileID: 0}
   enemy: {fileID: 0}
   authorityScoreText: {fileID: 3722099456466589454}
-  tradeScoreText: {fileID: 0}
-  combatScoreText: {fileID: 0}
 --- !u!114 &6899561417837855342
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -737,7 +740,6 @@ MonoBehaviour:
   game: {fileID: 0}
   player: {fileID: 6006473640129570922}
   cardPrefab: {fileID: 1546928846508714842, guid: 5f1fac4f9e213804dbe64091b16639d7, type: 3}
-  plainCardPrefab: {fileID: 8957249362840166661, guid: 5da12d5c486a5784595153df0fc1799c, type: 3}
   countText: {fileID: 4517233620101892229}
 --- !u!1 &8352439531136581502
 GameObject:

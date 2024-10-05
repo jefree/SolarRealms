@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
+using Unity.VisualScripting;
+using Org.BouncyCastle.Crypto.Engines;
 
 public enum GameState
 {
@@ -17,20 +19,28 @@ public class Game : NetworkBehaviour
     const int INITIAL_VIPER_AMOUNT = 2;
     public const float CARD_SIZE = 2.14f;
 
+
+    [HideInInspector, SyncVar]
+    public Player activePlayer;
+
+    public readonly SyncList<Player> players = new();
+    [HideInInspector, SyncVar]
+    public GameState state;
+
     public GameObject cardPrefab;
     public TMPro.TextMeshProUGUI messageText;
 
+    [HideInInspector]
+    public TMPro.TextMeshProUGUI tradeScoreText;
+    [HideInInspector]
+    public TMPro.TextMeshProUGUI combatScoreText;
     public TradeRow tradeRow;
     public EffectListUI actionListUI;
     public DiscardPileList discardPileList;
-    public readonly SyncList<Player> players = new();
+    public Player localPlayer;
+
     [HideInInspector]
     int currentPlayerIndex = 0;
-    [HideInInspector]
-    public Player activePlayer;
-    [HideInInspector]
-    public GameState state;
-
     [HideInInspector]
     public Card currentCard;
     [HideInInspector]
@@ -40,26 +50,53 @@ public class Game : NetworkBehaviour
 
     void Start()
     {
+        tradeScoreText = GameObject.Find("TradeText").GetComponent<TMPro.TextMeshProUGUI>();
+        combatScoreText = GameObject.Find("CombatText").GetComponent<TMPro.TextMeshProUGUI>();
+
         state = GameState.DO_BASIC;
-        ShowMessage("Bienvenido");
+        ShowMessage("Esperando otro jugador");
     }
 
+    void Update()
+    {
+        if (activePlayer == null)
+            return;
+
+        tradeScoreText.text = $"{activePlayer.trade}";
+        combatScoreText.text = $"{activePlayer.combat}";
+    }
+
+    [Server]
     public void AddPlayer(Player player)
     {
         players.Add(player);
+        player.deck.Init(player);
 
-        if (players.Count == 1)
+        if (players.Count == 2)
+        {
+            player.playerName = "Enemy";
+            tradeRow.CreateTradeDeck();
+
+            Invoke("StartGame", 2.0f);
+        }
+        else
         {
             activePlayer = player;
+            player.playerName = "Player";
         }
-
-        player.playerName = $"Player {players.Count}";
     }
 
-    [ClientRpc]
-    public void RpcAddPlayer(Player player)
+    [Server]
+    void StartGame()
     {
-        Debug.Log(player);
+        TargetSetPlayerTwoView(players[1].GetComponent<NetworkIdentity>().connectionToClient);
+
+        tradeRow.Init();
+
+        foreach (var player in players)
+        {
+            player.DrawNewHand();
+        }
     }
 
     public void PlayCard(Card card)
@@ -157,19 +194,23 @@ public class Game : NetworkBehaviour
 
     public void StartTurn()
     {
-        ShowMessage("Next player turn");
-        state = GameState.DO_BASIC;
-        activePlayer.StartTurn();
-    }
-
-    public void EndTurn()
-    {
-        activePlayer.EndTurn();
-
         currentPlayerIndex = (currentPlayerIndex + 1) % players.Count;
         activePlayer = players[currentPlayerIndex];
 
-        StartTurn();
+        ShowMessage("Next player turn");
+
+        state = GameState.DO_BASIC;
+
+        activePlayer.StartTurn();
+    }
+
+    [Client]
+    public void EndTurn()
+    {
+        if (activePlayer != localPlayer)
+            return;
+
+        activePlayer.CmdEndTurn();
     }
 
     public void StartChooseCard()
@@ -194,9 +235,7 @@ public class Game : NetworkBehaviour
     public void AttackPlayer(Player player)
     {
         if (player == activePlayer)
-        {
             return;
-        }
 
         if (player.HasOutpost())
         {
@@ -237,18 +276,30 @@ public class Game : NetworkBehaviour
         StartCoroutine(ShowMessageAndClean(message));
     }
 
-    public void SetPlayerTwoView()
+    [TargetRpc]
+    public void TargetSetPlayerTwoView(NetworkConnectionToClient _target)
     {
+        Debug.Log("Set Player Two View");
+
         var one = players[0];
         var two = players[1];
 
         (one.transform.position, two.transform.position) = (two.transform.position, one.transform.position);
         (one.playArea.transform.localPosition, two.playArea.transform.localPosition) = (two.playArea.transform.localPosition, one.playArea.transform.localPosition);
+        (one.hand.transform.localPosition, two.hand.transform.localPosition) = (two.hand.transform.localPosition, one.hand.transform.localPosition);
+        (one.deck.transform.localPosition, two.deck.transform.localPosition) = (two.deck.transform.localPosition, one.deck.transform.localPosition);
+        (one.discardPile.transform.localPosition, two.discardPile.transform.localPosition) = (two.discardPile.transform.localPosition, one.discardPile.transform.localPosition);
+
 
         var aOne = one.transform.Find("Authority/Button").GetComponent<RectTransform>();
         var aTwo = two.transform.Find("Authority/Button").GetComponent<RectTransform>();
 
         (aOne.anchoredPosition, aTwo.anchoredPosition) = (aTwo.anchoredPosition, aOne.anchoredPosition);
+
+        var dOne = one.transform.Find("Deck/Canvas/DeckCountText").GetComponent<RectTransform>();
+        var dTwo = two.transform.Find("Deck/Canvas/DeckCountText").GetComponent<RectTransform>();
+
+        (dOne.anchoredPosition, dTwo.anchoredPosition) = (dTwo.anchoredPosition, dOne.anchoredPosition);
     }
 
     IEnumerator ShowMessageAndClean(string message)

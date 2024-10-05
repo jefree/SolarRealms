@@ -1,12 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerAuthority : MonoBehaviour
 {
-
     public Player player;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -21,6 +18,15 @@ public class PlayerAuthority : MonoBehaviour
 
     public void OnClick()
     {
-        player.Attacked();
+        if (player == player.game.activePlayer)
+            return;
+
+        if (player.HasOutpost())
+        {
+            player.game.ShowMessage("Primero destruye las bases protectoras");
+            return;
+        }
+
+        player.game.localPlayer.CmdAttackPlayer(player);
     }
 }

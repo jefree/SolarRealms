@@ -1,24 +1,51 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Mirror;
+using UnityEngine.UI;
 
-public class PlayArea : MonoBehaviour
+public class PlayArea : NetworkBehaviour
 {
 
-    List<Card> ships = new();
-    List<Card> bases = new();
+    readonly SyncListCard ships = new();
+    readonly SyncListCard bases = new();
 
     Transform shipArea;
     Transform baseArea;
     Player player;
+
+    public override void OnStartClient()
+    {
+        ships.Callback += OnUpdateShips;
+        bases.Callback += OnUpdateBases;
+    }
 
     void Start()
     {
         player = transform.parent.GetComponent<Player>();
         shipArea = transform.Find("ShipArea");
         baseArea = transform.Find("BaseArea");
+    }
+
+    void OnUpdateShips(SyncListCard.Operation op, int index, Card oldCard, Card newCard)
+    {
+        switch (op)
+        {
+            case SyncListCard.Operation.OP_ADD:
+                OnShipAdded(newCard);
+                break;
+        }
+    }
+
+    void OnUpdateBases(SyncListCard.Operation op, int index, Card oldCard, Card newCard)
+    {
+        switch (op)
+        {
+            case SyncListCard.Operation.OP_ADD:
+                OnBaseAdded(newCard);
+                break;
+        }
     }
 
     public void AddCard(Card card)
@@ -28,31 +55,30 @@ public class PlayArea : MonoBehaviour
         switch (card.type)
         {
             case CardType.SHIP:
-                AddShip(card);
+                ships.Add(card);
                 break;
             case CardType.BASE:
-                AddBase(card);
+                bases.Add(card);
                 break;
             default:
                 throw new InvalidOperationException($"card type not support {card.type}");
         }
     }
 
-    void AddShip(Card card)
+    [Client]
+    void OnShipAdded(Card card)
     {
         card.transform.SetParent(shipArea);
-        card.transform.localPosition = new Vector3(ships.Count * Game.CARD_SIZE, 0, 0);
+        card.transform.localPosition = new Vector3((ships.Count - 1) * Game.CARD_SIZE, 0, 0);
 
-        ships.Add(card);
     }
 
-    void AddBase(Card card)
+    [Client]
+    void OnBaseAdded(Card card)
     {
         card.transform.SetParent(baseArea);
-        card.transform.localPosition = new Vector3(bases.Count * Game.CARD_SIZE, 0, 0);
+        card.transform.localPosition = new Vector3((bases.Count - 1) * Game.CARD_SIZE, 0, 0);
         card.transform.localRotation = Quaternion.Euler(0, 0, 0);
-
-        bases.Add(card);
     }
 
     public List<Card> DiscardShips()
@@ -70,12 +96,18 @@ public class PlayArea : MonoBehaviour
 
     public void ResetBases()
     {
-        bases.ForEach(card => card.Reset());
+        foreach (var card in bases)
+        {
+            card.Reset();
+        }
     }
 
     public void ActivateBases()
     {
-        bases.ForEach(card => player.game.PlayCard(card));
+        foreach (var card in bases)
+        {
+            player.game.PlayCard(card);
+        }
     }
 
     void RemoveShip(Card card)

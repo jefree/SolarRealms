@@ -4,10 +4,10 @@ using System.Threading;
 using Mirror;
 using System.Linq;
 using Unity.Collections.LowLevel.Unsafe;
+using Org.BouncyCastle.Asn1.Cmp;
 
 public class Deck : NetworkBehaviour
 {
-
     const int INITIAL_SCOUT_AMOUNT = 8;
     const int INITIAL_VIPER_AMOUNT = 2;
 
@@ -18,7 +18,7 @@ public class Deck : NetworkBehaviour
     public TMPro.TextMeshProUGUI countText;
 
     [HideInInspector]
-    public readonly SyncList<Card> cards = new();
+    public readonly SyncListCardInfo cards = new();
 
     public override void OnStartClient()
     {
@@ -30,22 +30,46 @@ public class Deck : NetworkBehaviour
         }
     }
 
-    void OnUpdateCards(SyncList<Card>.Operation op, int index, Card oldCard, Card newCard)
+    void OnUpdateCards(SyncListCardInfo.Operation op, int index, CardInfo oldCard, CardInfo newCard)
     {
         switch (op)
         {
-            case SyncList<Card>.Operation.OP_INSERT:
+            case SyncListCardInfo.Operation.OP_INSERT:
                 OnCardInserted(newCard);
                 break;
+
+            case SyncListCardInfo.Operation.OP_REMOVEAT:
+                OnCardRemoved(oldCard);
+                break;
+
         }
+
+        UpdateCountText();
 
     }
 
-    // Server & Client
-    void OnCardInserted(Card card)
+    [Client]
+    void OnCardInserted(CardInfo info)
     {
+        Util.PopulateCardInfo(ref info);
+
+        var card = info.card;
+
         card.transform.SetParent(transform);
-        card.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>($"Cards/{card.cardName}");
+        card.transform.position = new Vector2(100f, 100f);
+    }
+
+    [Client]
+    void OnCardRemoved(CardInfo info)
+    {
+        //Debug.Log("removed");
+
+        /* if (info.card == null)
+            return; */
+
+
+        //info.card.transform.SetParent(null);
+        //info.card.Show();
     }
 
     public void Init(Player player)
@@ -66,31 +90,31 @@ public class Deck : NetworkBehaviour
         cards.Clear();
     }
 
-    // Server
+    [Server]
     public void Push(Card card)
     {
-        cards.Insert(0, card);
-        UpdateCountText();
+        card.location = Location.DECK;
+        var cardInfo = new CardInfo(card);
 
-        OnCardInserted(card);
+        cards.Insert(0, cardInfo);
     }
 
+    [Server]
     public Card Pop()
     {
-        var card = cards[0];
+        var info = cards[0];
         cards.RemoveAt(0);
 
-        UpdateCountText();
-
-        return card;
+        return info.card;
     }
 
+    [Client]
     void UpdateCountText()
     {
         countText.text = $"{cards.Count}";
     }
 
-    // Server
+    [Server]
     void GenerateInitialCards()
     {
         /* 
@@ -98,6 +122,10 @@ public class Deck : NetworkBehaviour
          turn this into actual creation logic when must of 
          gameplay is ready to avoid huge manual creation
        */
+
+        Push(CardFactory.GenerateCard("infested moon", game, cardPrefab, this.gameObject, player: player));
+        //Push(CardFactory.GenerateCard("infested moon", game, cardPrefab, this.gameObject, player: player));
+        Push(CardFactory.GenerateCard("hive queen", game, cardPrefab, this.gameObject, player: player));
 
         for (int i = 0; i < INITIAL_SCOUT_AMOUNT; i++)
         {
@@ -108,9 +136,5 @@ public class Deck : NetworkBehaviour
         {
             Push(CardFactory.GenerateCard("viper", game, cardPrefab, this.gameObject, player: player));
         }
-
-        Push(CardFactory.GenerateCard("infested moon", game, cardPrefab, this.gameObject, player: player));
-        Push(CardFactory.GenerateCard("hive queen", game, cardPrefab, this.gameObject, player: player));
-        Push(CardFactory.GenerateCard("hive queen", game, cardPrefab, this.gameObject, player: player));
     }
 }
