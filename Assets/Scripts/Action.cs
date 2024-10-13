@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 public class Action
 {
-    public bool activated = false;
+    public bool fullyResolved = false;
+    public string actionName = "";
     public Effect.Base currentEffect;
     Game game;
     public Card card;
@@ -14,14 +16,10 @@ public class Action
     List<Effect.Base> usedManualEffects = new();
     List<Condition.ICondition> conditions = new();
 
-    public Action(Game game)
+    public Action(Game game, string name)
     {
         this.game = game;
-    }
-
-    public void Activate()
-    {
-        ActivateNextEffect();
+        actionName = name;
     }
 
     public void AddEffect(Effect.Base effect, bool isManual = false)
@@ -35,11 +33,18 @@ public class Action
             manualEffects.Add(effect);
             effect.isManual = true;
         }
+
+        effect.action = this;
     }
 
     public void AddCondition(Condition.ICondition condition)
     {
         conditions.Add(condition);
+    }
+
+    public void Activate()
+    {
+        ActivateNextEffect();
     }
 
     public void ActivateEffect(Effect.Base effect)
@@ -53,9 +58,11 @@ public class Action
         currentEffect.Activate(game);
     }
 
-    public bool HasPendingEffects()
+    public bool HasPendingEffects(bool manual = false)
     {
-        return SatisfyConditions() && effects.Count > 0;
+        var remainingEffects = manual ? manualEffects.Count : effects.Count;
+
+        return SatisfyConditions() && remainingEffects > 0;
     }
 
     void ActivateNextEffect()
@@ -63,6 +70,9 @@ public class Action
         if (effects.Count == 0)
         {
             currentEffect = null;
+
+            card.ActionResolved(this);
+
             return;
         }
 
@@ -73,14 +83,16 @@ public class Action
     public void EffectResolved(Effect.Base effect)
     {
         if (effect != currentEffect)
-        {
             throw new ArgumentException("Effect is not the current active");
-        }
+
+        Debug.Log($"EFFECT IN ACTION: {actionName}");
 
         if (effect.isManual)
         {
             manualEffects.Remove(effect);
             usedManualEffects.Add(effect);
+
+            game.CardResolved(card);
         }
         else
         {
@@ -92,7 +104,7 @@ public class Action
 
         if (effects.Count == 0 && manualEffects.Count == 0)
         {
-            activated = true;
+            fullyResolved = true;
         }
     }
 
@@ -103,7 +115,7 @@ public class Action
 
     public void Reset()
     {
-        activated = false;
+        fullyResolved = false;
 
         effects = effects.Concat(usedEffects).ToList();
         usedEffects.Clear();
@@ -115,5 +127,19 @@ public class Action
     public string Text()
     {
         return currentEffect.Text();
+    }
+
+    public Effect.Base FindEffect(string id, bool isManual = false)
+    {
+        var effectList = isManual ? manualEffects : effects;
+
+        var effect = effectList.Find(effect => effect.ID() == id);
+
+        if (effect == null)
+        {
+            throw new ArgumentException($"invalid effect id {id} for action {actionName} in card {card.cardName}");
+        }
+
+        return effect;
     }
 }

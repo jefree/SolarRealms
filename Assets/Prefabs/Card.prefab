@@ -116,18 +116,14 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   cardName: 
-  details:
-    name: 
-    combat: 0
-    trade: 0
   cost: 0
+  location: 0
+  faction: 0
+  player: {fileID: 0}
+  game: {fileID: 0}
+  type: 0
   defense: 0
   outpost: 0
-  faction: 0
-  type: 0
-  game: {fileID: 0}
-  location: 0
-  player: {fileID: 0}
   combatUpPrefab: {fileID: 8574800436804753451, guid: 22c9b21b23d826f4a8171536264bbb09, type: 3}
 --- !u!61 &2640532182247043824
 BoxCollider2D:

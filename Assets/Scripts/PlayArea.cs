@@ -119,9 +119,7 @@ public class PlayArea : NetworkBehaviour
     }
     void RemoveBase(Card card)
     {
-        card.transform.SetParent(null);
         card.location = Location.UNDEFINED;
-
         bases.Remove(card);
     }
 

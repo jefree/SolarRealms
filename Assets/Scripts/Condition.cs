@@ -18,6 +18,7 @@ namespace Condition
         public bool IsSatisfied(Game game)
         {
             var cards = game.activePlayer.playArea.FactionCards(card.faction);
+            cards.ForEach(card => Debug.Log($"ALLY {card.cardName}"));
             var result = cards.Contains(card) && cards.Count >= 2;
 
             Debug.Log($"Ally Condition: {result}");

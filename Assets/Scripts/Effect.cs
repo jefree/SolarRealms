@@ -1,12 +1,18 @@
+using System.Collections.Generic;
+
 namespace Effect
 {
     public abstract class Base
     {
         public bool isManual;
 
+        public Action action;
+
         public abstract void Activate(Game game);
 
         public abstract void Resolve(Game game);
+
+        public abstract string ID();
 
         public virtual void Animate(Card card)
         {
@@ -49,7 +55,7 @@ namespace Effect
             activePlayer.trade += trade;
             activePlayer.authority += authority;
 
-            game.EffectResolved(this);
+            action.EffectResolved(this);
         }
 
         public override void Animate(Card card)
@@ -68,6 +74,35 @@ namespace Effect
             {
                 card.RpcShowEffect(EffectColor.TRADE, trade);
             }
+        }
+
+        public override string ID()
+        {
+            return $"Basic C({combat}) A({authority}) T({trade})";
+        }
+
+        public override string Text()
+        {
+
+            List<string> effects = new();
+
+
+            if (combat > 0)
+            {
+                effects.Add($"Combate +{combat}");
+            }
+
+            if (authority > 0)
+            {
+                effects.Add($"Authoridad +{authority}");
+            }
+
+            if (trade > 0)
+            {
+                effects.Add($"Comercio +{trade}");
+            }
+
+            return string.Join(",", effects);
         }
     }
 
@@ -99,7 +134,7 @@ namespace Effect
         public override void Resolve(Game game)
         {
             game.ScrapCard(card);
-            game.EffectResolved(this);
+            action.EffectResolved(this);
         }
 
         public void SetCard(Card card)
@@ -111,7 +146,7 @@ namespace Effect
             }
             else
             {
-                game.ShowMessage("carta no valida");
+                game.ShowNetMessage("carta no valida");
             }
         }
 
@@ -119,11 +154,15 @@ namespace Effect
         {
             return $"deshuesa una carta de {location}";
         }
+
+        public override string ID()
+        {
+            return $"Scrap L({location})";
+        }
     }
 
     public class DrawCard : Base
     {
-
         public override void Activate(Game game)
         {
             Resolve(game);
@@ -132,7 +171,12 @@ namespace Effect
         public override void Resolve(Game game)
         {
             game.activePlayer.DrawCard();
-            game.EffectResolved(this);
+            action.EffectResolved(this);
+        }
+
+        public override string ID()
+        {
+            return "Draw";
         }
     }
 }

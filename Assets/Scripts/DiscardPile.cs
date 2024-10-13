@@ -7,7 +7,7 @@ public class DiscardPile : NetworkBehaviour
 {
 
     public readonly SyncListCard cards = new();
-    GameObject topCard;
+    Card topCard;
 
     // Start is called before the first frame update
     void Start()
@@ -44,18 +44,20 @@ public class DiscardPile : NetworkBehaviour
     }
 
     [Client]
-    void OnCardAdded(Card card)
+    public void OnCardAdded(Card card)
     {
         if (topCard != null)
         {
-            topCard.transform.position = new Vector2(100f, 100f);
+            topCard.transform.localPosition = new Vector2(-10f - 1.5f * cards.Count, 0f);
         }
 
-        topCard = card.gameObject;
+        topCard = card;
         topCard.transform.SetParent(transform);
         topCard.transform.localPosition = Vector2.zero;
         topCard.transform.rotation = Quaternion.Euler(0, 0, 0);
         topCard.transform.localScale = Vector2.one;
+
+        Debug.Log($"+DISCARD({cards.Count}): {card.cardName} {card.location}");
     }
 
     [Server]
@@ -68,7 +70,8 @@ public class DiscardPile : NetworkBehaviour
     [Client]
     void OnCardRemoved(Card card)
     {
-        card.transform.SetParent(null);
+        if (card == topCard)
+            topCard = null;
     }
 
     [Server]

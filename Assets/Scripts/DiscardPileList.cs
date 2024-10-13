@@ -5,12 +5,6 @@ public class DiscardPileList : MonoBehaviour
 {
     Transform panel;
     DiscardPile discardPile;
-    List<Card> cards;
-
-    public void Start()
-    {
-
-    }
 
     public void Show(DiscardPile discardPile)
     {
@@ -20,25 +14,20 @@ public class DiscardPileList : MonoBehaviour
 
         this.discardPile = discardPile;
 
-        cards = discardPile.RemoveAllCards();
-
-        foreach (var card in cards)
+        foreach (var card in discardPile.cards)
         {
-            card.location = Location.DISCARD_PILE;
             card.transform.SetParent(panel);
             card.GetComponent<SpriteRenderer>().sortingOrder = 2;
         }
-
     }
 
     public void Close()
     {
-        foreach (var card in cards)
+        foreach (var card in discardPile.cards)
         {
-            discardPile.AddCard(card);
+            discardPile.OnCardAdded(card);
         }
 
-        cards = null;
         discardPile = null;
         gameObject.SetActive(false);
     }

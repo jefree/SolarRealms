@@ -4,6 +4,7 @@ using UnityEngine;
 using Mirror;
 using Unity.VisualScripting;
 using Org.BouncyCastle.Crypto.Engines;
+using System;
 
 public enum GameState
 {
@@ -24,16 +25,13 @@ public class Game : NetworkBehaviour
     public Player activePlayer;
 
     public readonly SyncList<Player> players = new();
-    [HideInInspector, SyncVar]
-    public GameState state;
+    [HideInInspector, SyncVar] public GameState state;
 
     public GameObject cardPrefab;
     public TMPro.TextMeshProUGUI messageText;
 
-    [HideInInspector]
-    public TMPro.TextMeshProUGUI tradeScoreText;
-    [HideInInspector]
-    public TMPro.TextMeshProUGUI combatScoreText;
+    [HideInInspector] public TMPro.TextMeshProUGUI tradeScoreText;
+    [HideInInspector] public TMPro.TextMeshProUGUI combatScoreText;
     public TradeRow tradeRow;
     public EffectListUI actionListUI;
     public DiscardPileList discardPileList;
@@ -44,8 +42,6 @@ public class Game : NetworkBehaviour
     [HideInInspector]
     public Card currentCard;
     [HideInInspector]
-    Action currentAction;
-    [HideInInspector]
     Queue<Card> playCardsQueue = new();
 
     void Start()
@@ -54,7 +50,7 @@ public class Game : NetworkBehaviour
         combatScoreText = GameObject.Find("CombatText").GetComponent<TMPro.TextMeshProUGUI>();
 
         state = GameState.DO_BASIC;
-        ShowMessage("Esperando otro jugador");
+        ShowLocalMessage("Esperando otro jugador");
     }
 
     void Update()
@@ -105,6 +101,7 @@ public class Game : NetworkBehaviour
 
         var queueWasEmpty = playCardsQueue.Count == 0;
 
+        // enqueue cards with pending effects so remaining effects has a chance to activate if valid
         activePlayer.playArea.PendingCards().ForEach(card => playCardsQueue.Enqueue(card));
 
         if (queueWasEmpty)
@@ -113,6 +110,36 @@ public class Game : NetworkBehaviour
         }
     }
 
+    public void BuyCard(Card card)
+    {
+        if (activePlayer.CanBuyCard(card))
+        {
+            tradeRow.RemoveCard(card);
+            activePlayer.BuyCard(card);
+            ShowNetMessage($"Compraste {card.cardName}");
+        }
+        else
+        {
+            ShowNetMessage("No tienes suficiente comercio");
+        }
+    }
+
+    public void ScrapCard(Card card)
+    {
+        if (card.location == Location.TRADE_ROW)
+        {
+            tradeRow.ScrapCard(card);
+        }
+        else
+        {
+            activePlayer.ScrapCard(card);
+        }
+
+        Destroy(card.gameObject);
+    }
+
+
+    // ResolveCard -> card.Activate -> ResolveAction -> action.Activate -> effect.Activate -> EffectResolved
     void ResolveCard(Card card)
     {
         state = GameState.RESOLVING_CARD;
@@ -121,62 +148,26 @@ public class Game : NetworkBehaviour
         currentCard.Activate();
     }
 
-    public void BuyCard(Card card)
+    public void CardResolved(Card card)
     {
-        if (activePlayer.CanBuyCard(card))
+
+        state = GameState.DO_BASIC;
+        currentCard = null;
+
+        if (playCardsQueue.Count > 0)
         {
-            tradeRow.RemoveCard(card);
-            activePlayer.BuyCard(card);
-            ShowMessage($"Compraste {card.cardName}");
-        }
-        else
-        {
-            ShowMessage("No tienes suficiente comercio");
+            ResolveCard(playCardsQueue.Dequeue());
         }
     }
 
-    public void ScrapCard(Card card)
+    public void ResolveManualEffect(Card card, Action action, Effect.Base effect)
     {
-        activePlayer.ScrapCard(card);
-        card.gameObject.SetActive(false); // avoiding destroy the game object so animations can work
-    }
+        if (currentCard != card)
+            throw new ArgumentException("Effect dont belongs to current active card");
 
-    public void ResolveAction(Action action)
-    {
-        currentAction = action;
-        currentAction.Activate();
-    }
-
-    public void ResolveAction(Action action, Effect.Base effect)
-    {
-        currentAction = action;
-        currentAction.ActivateEffect(effect);
-    }
-
-    public void EffectResolved(Effect.Base effect)
-    {
-        currentAction.EffectResolved(effect);
-
-        effect.Animate(currentCard);
-
-        if (effect.isManual)
-        {
-            StartPlayNewCard();
-            return;
-        }
-
-        var nextAction = currentCard.NextAction();
-
-        Debug.Log($"Next Action: {nextAction}");
-
-        if (nextAction != null)
-        {
-            ResolveAction(nextAction);
-        }
-        else
-        {
-            StartPlayNewCard();
-        }
+        currentCard.currentAction = action;
+        action.currentEffect = effect;
+        effect.action.ActivateEffect(effect);
     }
 
     public void StartPlayNewCard()
@@ -188,8 +179,9 @@ public class Game : NetworkBehaviour
         }
 
         state = GameState.DO_BASIC;
-        currentCard = null;
-        currentAction = null;
+
+
+        ShowNetMessage("Compra o juega una carta");
     }
 
     public void StartTurn()
@@ -197,7 +189,7 @@ public class Game : NetworkBehaviour
         currentPlayerIndex = (currentPlayerIndex + 1) % players.Count;
         activePlayer = players[currentPlayerIndex];
 
-        ShowMessage("Next player turn");
+        ShowNetMessage("Next player turn");
 
         state = GameState.DO_BASIC;
 
@@ -216,20 +208,28 @@ public class Game : NetworkBehaviour
     public void StartChooseCard()
     {
         state = GameState.CHOOSE_CARD;
-        ShowMessage("Escoge un carta del mercado para deshuesarla");
+        ShowNetMessage("Escoge un carta");
     }
 
     public void ChooseCard(Card card)
     {
-        var cardReceiver = (Effect.ICardReceiver)currentAction.currentEffect;
+        var cardReceiver = (Effect.ICardReceiver)currentCard.currentAction.currentEffect;
         cardReceiver.SetCard(card);
     }
 
-    public void ChooseEffect(Card card)
+    public void ShowEffectList(Card card)
     {
+        if (!card.HasPendingActions(manual: true))
+        {
+            ShowNetMessage("Carta sin efectos manuales");
+            return;
+        }
+
         state = GameState.CHOOSE_EFFECT;
         currentCard = card;
-        actionListUI.Show(card);
+
+        var conn = activePlayer.GetComponent<NetworkIdentity>().connectionToClient;
+        TargetShowEffectList(conn, card);
     }
 
     public void AttackPlayer(Player player)
@@ -239,7 +239,7 @@ public class Game : NetworkBehaviour
 
         if (player.HasOutpost())
         {
-            ShowMessage("Primero destruye las bases protectoras");
+            ShowNetMessage("Primero destruye las bases protectoras");
             return;
         }
 
@@ -252,13 +252,13 @@ public class Game : NetworkBehaviour
 
         if (!card.outpost && card.player.HasOutpost())
         {
-            ShowMessage("Primero destruye las bases protectoras");
+            ShowNetMessage("Primero destruye las bases protectoras");
             return;
         }
 
         if (activePlayer.combat < card.defense)
         {
-            ShowMessage("no tienes suficiente combate");
+            ShowNetMessage("no tienes suficiente combate");
             return;
         }
 
@@ -271,16 +271,33 @@ public class Game : NetworkBehaviour
         discardPileList.Show(player.discardPile);
     }
 
-    public void ShowMessage(string message)
+    [Server]
+    public void ShowNetMessage(string message)
+    {
+        var conn = activePlayer.GetComponent<NetworkIdentity>().connectionToClient;
+        TargetShowMessage(conn, message);
+    }
+
+    public void ShowLocalMessage(string message)
     {
         StartCoroutine(ShowMessageAndClean(message));
     }
 
     [TargetRpc]
+    void TargetShowMessage(NetworkConnectionToClient conn, string message)
+    {
+        StartCoroutine(ShowMessageAndClean(message));
+    }
+
+    [TargetRpc]
+    public void TargetShowEffectList(NetworkConnectionToClient conn, Card card)
+    {
+        actionListUI.Show(card);
+    }
+
+    [TargetRpc]
     public void TargetSetPlayerTwoView(NetworkConnectionToClient _target)
     {
-        Debug.Log("Set Player Two View");
-
         var one = players[0];
         var two = players[1];
 

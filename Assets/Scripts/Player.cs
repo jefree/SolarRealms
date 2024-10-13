@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Mirror;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Player : NetworkBehaviour
@@ -112,6 +113,12 @@ public class Player : NetworkBehaviour
         game.AttackPlayer(player);
     }
 
+    [Command]
+    public void CmdAttackBase(Card card)
+    {
+        game.AttackBase(card);
+    }
+
     public void PlayCard(Card card)
     {
         if (card.location == Location.HAND)
@@ -132,6 +139,33 @@ public class Player : NetworkBehaviour
         game.BuyCard(card);
     }
 
+    [Command]
+    public void CmdChooseCard(Card card)
+    {
+        if (game.activePlayer != this)
+            return;
+
+        Debug.Log("Choosing card");
+
+        game.ChooseCard(card);
+    }
+
+    [Command]
+    public void CmdResolveAction(Card card, string actionName, string effectID, bool isManual)
+    {
+        var action = card.FindAction(actionName);
+        var effect = action.FindEffect(effectID, isManual: isManual);
+
+        game.ResolveManualEffect(card, action, effect);
+    }
+
+    [Command]
+    public void CmdShowEffectList(Card card)
+    {
+        game.ShowEffectList(card);
+    }
+
+    [Server]
     public void BuyCard(Card card)
     {
         trade -= card.cost;
@@ -142,13 +176,19 @@ public class Player : NetworkBehaviour
 
     public void ScrapCard(Card card)
     {
-        if (card.location == Location.HAND)
+        switch (card.location)
         {
-            hand.RemoveCard(card);
-            return;
-        }
+            case Location.HAND:
+                hand.RemoveCard(card);
+                break;
 
-        throw new InvalidOperationException("location invalida para deshuesar");
+            case Location.DISCARD_PILE:
+                discardPile.RemoveCard(card);
+                break;
+
+            default:
+                throw new ArgumentException("Scrapped card does not belong to player");
+        }
     }
 
     public void StartTurn()
@@ -204,6 +244,11 @@ public class Player : NetworkBehaviour
     {
         playArea.DestroyBase(card);
         discardPile.AddCard(card);
+    }
+
+    public bool IsOurTurn()
+    {
+        return game.activePlayer == game.localPlayer;
     }
 }
 

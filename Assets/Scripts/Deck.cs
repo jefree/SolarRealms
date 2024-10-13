@@ -49,14 +49,16 @@ public class Deck : NetworkBehaviour
     }
 
     [Client]
-    void OnCardInserted(CardInfo info)
+    public void OnCardInserted(CardInfo info)
     {
         Util.PopulateCardInfo(ref info);
 
         var card = info.card;
 
         card.transform.SetParent(transform);
-        card.transform.position = new Vector2(100f, 100f);
+        card.transform.localPosition = new Vector2(10f + 1.5f * cards.Count, 0f);
+
+        Debug.Log($"+DECK: {card.cardName} {card.location}");
     }
 
     [Client]
@@ -123,18 +125,25 @@ public class Deck : NetworkBehaviour
          gameplay is ready to avoid huge manual creation
        */
 
-        Push(CardFactory.GenerateCard("infested moon", game, cardPrefab, this.gameObject, player: player));
-        //Push(CardFactory.GenerateCard("infested moon", game, cardPrefab, this.gameObject, player: player));
-        Push(CardFactory.GenerateCard("hive queen", game, cardPrefab, this.gameObject, player: player));
+        List<Card> initial = new();
 
         for (int i = 0; i < INITIAL_SCOUT_AMOUNT; i++)
         {
-            Push(CardFactory.GenerateCard("scout", game, cardPrefab, this.gameObject, player: player));
+            initial.Add(CardFactory.GenerateCard("scout", game, cardPrefab, this.gameObject, player: player));
         }
 
         for (int i = 0; i < INITIAL_VIPER_AMOUNT; i++)
         {
-            Push(CardFactory.GenerateCard("viper", game, cardPrefab, this.gameObject, player: player));
+            initial.Add(CardFactory.GenerateCard("viper", game, cardPrefab, this.gameObject, player: player));
+        }
+
+        initial.Add(CardFactory.GenerateCard("blob miner", game, cardPrefab, gameObject, player: player));
+
+        Util.Shuffle(initial);
+
+        foreach (var card in initial)
+        {
+            Push(card);
         }
     }
 }

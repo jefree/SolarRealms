@@ -66,41 +66,45 @@ public class CardFactory : MonoBehaviour
         card.type = CardType.SHIP;
         card.faction = Faction.UNALIGNED;
 
-        card.mainAction = new Action(game);
+        card.mainAction = new Action(game, "main");
         card.mainAction.AddEffect(new Effect.Basic());
+        card.mainAction.card = card;
     }
 
     public static void Viper(Card card, Game game)
     {
         card.type = CardType.SHIP;
         card.faction = Faction.UNALIGNED;
-        Effect.Basic effect = new(combat: 1);
-        card.mainAction = new Action(game);
-        card.mainAction.AddEffect(effect);
+
+        card.mainAction = new Action(game, "main");
+        card.mainAction.AddEffect(new Effect.Basic(combat: 1));
+        card.mainAction.card = card;
     }
 
     public static void Scout(Card card, Game game)
     {
-        Effect.Basic effect = new(trade: 1);
-        effect.trade = 1;
-
         card.type = CardType.SHIP;
         card.faction = Faction.UNALIGNED;
-        card.mainAction = new Action(game);
-        card.mainAction.AddEffect(effect);
+
+        card.mainAction = new Action(game, "main");
+        card.mainAction.AddEffect(new Effect.Basic(trade: 1));
+        card.mainAction.card = card;
     }
 
     public static void BlobMiner(Card card, Game game)
     {
         card.type = CardType.SHIP;
-        card.faction = Faction.MACHINE_CULT;
+        card.faction = Faction.THE_BLOBS;
         card.cost = 2;
 
-        card.mainAction = new Action(game);
+        card.mainAction = new Action(game, "main");
         card.mainAction.AddEffect(new Effect.Basic(trade: 3));
+        card.mainAction.AddEffect(new Effect.ScrapCard(Location.TRADE_ROW), isManual: true);
+        card.mainAction.card = card;
 
-        card.scrapAction = new Action(game);
-        card.scrapAction.AddEffect(new Effect.ScrapCard(Location.TRADE_ROW), isManual: true);
+        card.scrapAction = new Action(game, "scrap");
+        card.scrapAction.AddEffect(new Effect.Basic(combat: 2), isManual: true);
+        card.scrapAction.card = card;
     }
 
     static void InfestedMoon(Card card, Game game)
@@ -111,14 +115,17 @@ public class CardFactory : MonoBehaviour
         card.defense = 5;
         card.outpost = false;
 
-        card.mainAction = new Action(game);
+        card.mainAction = new Action(game, "main");
         card.mainAction.AddEffect(new Effect.Basic(combat: 4));
+        card.mainAction.card = card;
 
-        card.allyAction = new AllyCardAction(game, card);
+        card.allyAction = new AllyCardAction(game, card, "ally");
         card.allyAction.AddEffect(new Effect.DrawCard());
+        card.allyAction.card = card;
 
-        card.doubleAllyAction = new DoubleAllyCardAction(game, card);
+        card.doubleAllyAction = new DoubleAllyCardAction(game, card, "doubleAlly");
         card.doubleAllyAction.AddEffect(new Effect.DrawCard());
+        card.doubleAllyAction.card = card;
     }
 
     static void IntegrationPort(Card card, Game game)
@@ -128,8 +135,9 @@ public class CardFactory : MonoBehaviour
         card.cost = 3;
         card.defense = 5;
         card.outpost = true;
-        card.mainAction = new Action(game);
+        card.mainAction = new Action(game, "main");
         card.mainAction.AddEffect(new Effect.Basic(trade: 1));
+        card.mainAction.card = card;
     }
     static void HiveQueen(Card card, Game game)
     {
@@ -137,14 +145,18 @@ public class CardFactory : MonoBehaviour
         card.faction = Faction.THE_BLOBS;
         card.cost = 7;
 
-        card.mainAction = new Action(game);
+        card.mainAction = new Action(game, "main");
         card.mainAction.AddEffect(new Effect.Basic(combat: 7));
+        card.mainAction.AddEffect(new Effect.DrawCard());
+        card.mainAction.card = card;
 
-        card.allyAction = new AllyCardAction(game, card);
+        card.allyAction = new AllyCardAction(game, card, "ally");
         card.allyAction.AddEffect(new Effect.Basic(combat: 3));
+        card.allyAction.card = card;
 
-        card.doubleAllyAction = new DoubleAllyCardAction(game, card);
+        card.doubleAllyAction = new DoubleAllyCardAction(game, card, "doubleAlly");
         card.doubleAllyAction.AddEffect(new Effect.Basic(combat: 3));
+        card.doubleAllyAction.card = card;
     }
 
     static void EnforcerMech(Card card, Game game)
@@ -152,8 +164,9 @@ public class CardFactory : MonoBehaviour
         card.type = CardType.SHIP;
         card.cost = 5;
 
-        card.mainAction = new Action(game);
+        card.mainAction = new Action(game, "main");
         card.mainAction.AddEffect(new Effect.Basic(combat: 5));
         card.mainAction.AddEffect(new Effect.ScrapCard(Location.HAND), isManual: true);
+        card.mainAction.card = card;
     }
 }

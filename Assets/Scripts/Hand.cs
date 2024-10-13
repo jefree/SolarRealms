@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Mirror;
@@ -62,7 +61,10 @@ public class Hand : NetworkBehaviour
     [Client]
     void OnCardRemoved(Card card)
     {
-        card.Show();
+        Debug.Log($"-HAND({cards.Count}) {card.cardName} {card.location}");
+
+        if (!card.player.isLocalPlayer)
+            card.Show();
 
         RepositionCards();
     }

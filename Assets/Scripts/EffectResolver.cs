@@ -17,17 +17,17 @@ namespace EffectResolver
             game.StartChooseCard();
         }
 
-        public bool SetCard(Card card)
-        {
+        /*  public bool SetCard(Card card)
+         {
 
-            if (card.location == location)
-            {
-                effect.SetCard(card);
+             if (card.location == location)
+             {
+                 effect.SetCard(card);
 
-                return true;
-            }
+                 return true;
+             }
 
-            return false;
-        }
+             return false;
+         } */
     }
 }

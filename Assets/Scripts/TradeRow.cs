@@ -11,7 +11,7 @@ public class TradeRow : NetworkBehaviour
     public Game game;
     public GameObject cardPrefab;
     public int tradeRowSize = 5;
-    [HideInInspector] Stack<Card> tradeDeck = new();
+    [HideInInspector] List<Card> tradeDeck = new();
     [HideInInspector] readonly SyncListCard cards = new();
 
     // Start is called before the first frame update
@@ -65,6 +65,11 @@ public class TradeRow : NetworkBehaviour
         AddToTradeDeck(CardFactory.GenerateCard("infested moon", game, cardPrefab, gameObject));
         AddToTradeDeck(CardFactory.GenerateCard("enforcer mech", game, cardPrefab, gameObject));
         AddToTradeDeck(CardFactory.GenerateCard("blob miner", game, cardPrefab, gameObject));
+        AddToTradeDeck(CardFactory.GenerateCard("blob miner", game, cardPrefab, gameObject));
+        AddToTradeDeck(CardFactory.GenerateCard("blob miner", game, cardPrefab, gameObject));
+        AddToTradeDeck(CardFactory.GenerateCard("blob miner", game, cardPrefab, gameObject));
+
+        Util.Shuffle(tradeDeck);
     }
 
     [Server]
@@ -72,7 +77,8 @@ public class TradeRow : NetworkBehaviour
     {
         for (var i = 0; i < tradeRowSize; i++)
         {
-            AddCard(tradeDeck.Pop(), i);
+            AddCard(tradeDeck[0], i);
+            tradeDeck.RemoveAt(0);
         }
     }
 
@@ -85,8 +91,6 @@ public class TradeRow : NetworkBehaviour
 
     void OnCardInserted(Card card, int position)
     {
-        Debug.Log($"{card.game}");
-
         card.transform.SetParent(transform);
         card.transform.localPosition = new Vector3(position * Game.CARD_SIZE, 0, 0);
     }
@@ -100,7 +104,9 @@ public class TradeRow : NetworkBehaviour
 
         if (tradeDeck.Count > 0)
         {
-            AddCard(tradeDeck.Pop(), freePosition);
+
+            AddCard(tradeDeck[0], freePosition);
+            tradeDeck.RemoveAt(0);
         }
     }
 
@@ -110,15 +116,22 @@ public class TradeRow : NetworkBehaviour
     }
 
     [Server]
+    public void ScrapCard(Card card)
+    {
+        RemoveCard(card);
+    }
+
+    [Server]
     void AddToTradeDeck(Card card)
     {
-        tradeDeck.Push(card);
+        card.location = Location.TRADE_DECK;
+        tradeDeck.Insert(0, card);
         RpcCardAdded(card);
     }
 
     [ClientRpc]
     void RpcCardAdded(Card card)
     {
-        card.transform.position = new Vector2(20f, 20f);
+        card.transform.position = new Vector2(20f, 0f);
     }
 }

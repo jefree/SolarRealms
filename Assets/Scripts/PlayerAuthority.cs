@@ -18,12 +18,13 @@ public class PlayerAuthority : MonoBehaviour
 
     public void OnClick()
     {
-        if (player == player.game.activePlayer)
+        // player can not attack itself
+        if (player == player.game.localPlayer)
             return;
 
         if (player.HasOutpost())
         {
-            player.game.ShowMessage("Primero destruye las bases protectoras");
+            player.game.ShowLocalMessage("Primero destruye las bases protectoras");
             return;
         }
 

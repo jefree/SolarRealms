@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Mirror;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 [Serializable]
 public enum Faction : byte
@@ -23,14 +25,15 @@ public enum CardType
 public class SyncListCard : SyncList<Card> { }
 
 [Serializable]
-public class Card : NetworkBehaviour
+public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler
 {
     [SyncVar] public string cardName;
     [SyncVar] public int cost;
-    [SyncVar] public Location location;
+    [SyncVar(hook = nameof(OnLocationChanged))] public Location location;
     [SyncVar] public Faction faction; // Unaligned, Trade Federation, The blobs, Star Empire, Machine Cult
     [SyncVar] public Player player;
     [SyncVar] public Game game;
+    [SyncVar] public CardType type; // Ship or Base
 
     public Action mainAction;
     public Action allyAction;
@@ -38,10 +41,9 @@ public class Card : NetworkBehaviour
     public Action scrapAction;
     public int defense;
     public bool outpost;
-    public CardType type; // Ship or Base
-
     public GameObject combatUpPrefab;
     EffectUp effectUp;
+    [HideInInspector] public Action currentAction;
 
     void Start()
     {
@@ -52,13 +54,42 @@ public class Card : NetworkBehaviour
     [Client]
     public override void OnStartClient()
     {
+        CardFactory.Build(this, game);
+    }
 
+    void OnLocationChanged(Location old, Location current)
+    {
+        if (old == Location.HAND && current == Location.DISCARD_PILE)
+        {
+            player.discardPile.OnCardAdded(this);
+        }
+        else if (old == Location.DISCARD_PILE && current == Location.DECK)
+        {
+            player.deck.OnCardInserted(new CardInfo(this));
+        }
     }
 
     public void Activate()
     {
-        var firstAction = NextAction();
-        game.ResolveAction(firstAction);
+        ActivateNextAction();
+    }
+
+    void ActivateNextAction()
+    {
+        currentAction = NextAction();
+
+        if (currentAction == null)
+        {
+            game.CardResolved(this);
+            return;
+        }
+
+        currentAction.Activate();
+    }
+
+    public void ActionResolved(Action action)
+    {
+        ActivateNextAction();
     }
 
     public Action NextAction()
@@ -66,19 +97,14 @@ public class Card : NetworkBehaviour
         return ActualActions(mainAction, allyAction, doubleAllyAction).Find(action => action.HasPendingEffects());
     }
 
-    public Action NextManualAction()
-    {
-        return ActualActions(mainAction, scrapAction).Find(action => !action.activated);
-    }
-
     public void Reset()
     {
-        ActualActions(mainAction, scrapAction).ForEach(action => action.Reset());
+        ActualActions(mainAction, allyAction, doubleAllyAction, scrapAction).ForEach(action => action.Reset());
     }
 
     public List<Action> Actions()
     {
-        return ActualActions(mainAction, scrapAction);
+        return ActualActions(mainAction, allyAction, doubleAllyAction, scrapAction);
     }
 
     List<Action> ActualActions(params Action[] actions)
@@ -94,9 +120,9 @@ public class Card : NetworkBehaviour
         return validActions;
     }
 
-    public bool HasPendingActions()
+    public bool HasPendingActions(bool manual = false)
     {
-        return ActualActions(mainAction, allyAction, doubleAllyAction).Any(action => action.HasPendingEffects());
+        return ActualActions(mainAction, allyAction, doubleAllyAction, scrapAction).Any(action => action.HasPendingEffects(manual: manual));
     }
 
     [ClientRpc]
@@ -115,9 +141,26 @@ public class Card : NetworkBehaviour
         gameObject.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>($"Cards/{cardName}");
     }
 
-    [Client]
-    void OnMouseDown()
+    public Action FindAction(string name)
     {
+        return name switch
+        {
+            "main" => mainAction,
+            "scrap" => scrapAction,
+            "ally" => allyAction,
+            "doubleAlly" => doubleAllyAction,
+            _ => throw new ArgumentException($"Invalid action name {name} in card {cardName}")
+        };
+    }
+
+    [Client]
+    public void OnPointerDown(PointerEventData data)
+    {
+        Debug.Log($"Click on: {cardName}");
+
+        // invalidate click on cards outside card list
+        if (game.discardPileList.gameObject.activeSelf && location != Location.DISCARD_PILE)
+            return;
 
         if (location == Location.DISCARD_PILE)
         {
@@ -125,6 +168,7 @@ public class Card : NetworkBehaviour
             return;
         }
 
+        // click other player's hand card
         if (
             game.activePlayer != game.localPlayer ||
             (location == Location.HAND && player != game.localPlayer)
@@ -133,32 +177,34 @@ public class Card : NetworkBehaviour
             return;
         }
 
+        if (
+           game.state == GameState.CHOOSE_CARD &&
+           game.localPlayer.IsOurTurn()
+        )
+        {
+            game.localPlayer.CmdChooseCard(this);
+            return;
+        }
+
+
         // probably attacking a base
         if (
             game.state == GameState.DO_BASIC &&
             location == Location.PLAY_AREA &&
-            game.activePlayer != player &&
+            game.localPlayer != player &&
             type == CardType.BASE
         )
         {
-            game.AttackBase(this);
-        }
-
-        if (
-            game.state == GameState.DO_BASIC &&
-            location == Location.PLAY_AREA &&
-            NextManualAction() != null
-        )
-        {
-            game.ChooseEffect(this);
+            game.localPlayer.CmdAttackBase(this);
             return;
         }
 
         if (
-            game.state == GameState.CHOOSE_CARD
+            game.state == GameState.DO_BASIC &&
+            location == Location.PLAY_AREA
         )
         {
-            game.ChooseCard(this);
+            game.localPlayer.CmdShowEffectList(this);
             return;
         }
 
@@ -167,6 +213,7 @@ public class Card : NetworkBehaviour
             location == Location.HAND
         )
         {
+
             player.CmdPlayCard(this);
             return;
         }
@@ -181,16 +228,15 @@ public class Card : NetworkBehaviour
         }
     }
 
-    void OnMouseEnter()
+    public void OnPointerEnter(PointerEventData data)
     {
-
         if (location == Location.DISCARD_PILE) { return; }
 
         transform.localScale = new Vector2(1.5f, 1.5f);
         gameObject.GetComponent<SpriteRenderer>().sortingOrder = 1;
     }
 
-    void OnMouseExit()
+    public void OnPointerExit(PointerEventData data)
     {
         if (location == Location.DISCARD_PILE) { return; }
 

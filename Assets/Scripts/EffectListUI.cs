@@ -22,6 +22,8 @@ public class EffectListUI : MonoBehaviour
 
     void AddEffects(Action action)
     {
+        var prefix = action.actionName == "scrap" ? "DESHUESAR: " : "";
+
         foreach (var effect in action.manualEffects)
         {
             var panelTransform = transform.Find("Panel");
@@ -30,7 +32,7 @@ public class EffectListUI : MonoBehaviour
             effectGO.GetComponent<EffectButton>().effect = effect;
             effectGO.GetComponent<EffectButton>().action = action;
             effectGO.GetComponent<EffectButton>().ui = this;
-            effectGO.transform.Find("Text").GetComponent<TMPro.TextMeshProUGUI>().text = effect.Text();
+            effectGO.transform.Find("Text").GetComponent<TMPro.TextMeshProUGUI>().text = $"{prefix}{effect.Text()}";
         }
     }
 
@@ -38,7 +40,8 @@ public class EffectListUI : MonoBehaviour
     {
         Close();
 
-        game.ResolveAction(button.action, button.effect);
+        //game.ResolveAction(button.action, button.effect);
+        game.localPlayer.CmdResolveAction(currentCard, button.action.actionName, button.effect.ID(), button.effect.isManual);
     }
 
     public void Close()
