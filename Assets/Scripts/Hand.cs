@@ -61,8 +61,6 @@ public class Hand : NetworkBehaviour
     [Client]
     void OnCardRemoved(Card card)
     {
-        Debug.Log($"-HAND({cards.Count}) {card.cardName} {card.location}");
-
         if (!card.player.isLocalPlayer)
             card.Show();
 
@@ -76,7 +74,7 @@ public class Hand : NetworkBehaviour
         foreach (var card in cards)
         {
             card.transform.localPosition = new Vector3(0, 0, 0);
-            card.transform.Translate(new Vector3(i * Game.CARD_SIZE, 0, 0), Space.World);
+            card.transform.Translate(new Vector3(i * (Game.CARD_WIDTH + Game.CARD_PADDING), 0, 0), Space.World);
 
             i++;
         }

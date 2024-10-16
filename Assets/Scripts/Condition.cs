@@ -21,8 +21,6 @@ namespace Condition
             cards.ForEach(card => Debug.Log($"ALLY {card.cardName}"));
             var result = cards.Contains(card) && cards.Count >= 2;
 
-            Debug.Log($"Ally Condition: {result}");
-
             return result;
         }
     }
@@ -39,8 +37,6 @@ namespace Condition
         {
             var cards = game.activePlayer.playArea.FactionCards(card.faction);
             var result = cards.Contains(card) && cards.Count >= 3;
-
-            Debug.Log($"Double Ally Condition: {result}");
 
             return result;
         }

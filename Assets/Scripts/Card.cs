@@ -44,11 +44,25 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
     public GameObject combatUpPrefab;
     EffectUp effectUp;
     [HideInInspector] public Action currentAction;
+    public SpriteRenderer image;
+    public SpriteRenderer border;
 
     void Start()
     {
         effectUp = Instantiate(combatUpPrefab, transform).GetComponent<EffectUp>();
         GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>($"Cards/{cardName}");
+    }
+
+    void Update()
+    {
+        if (location == Location.PLAY_AREA && HasPendingActions(manual: true, includeScrap: false))
+        {
+            border.color = Color.green;
+        }
+        else if (location == Location.PLAY_AREA && scrapAction != null)
+        {
+            border.color = Color.red;
+        }
     }
 
     [Client]
@@ -89,6 +103,13 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
 
     public void ActionResolved(Action action)
     {
+        if (action.actionName == "scrap")
+        {
+            game.CardResolved(this);
+            game.ScrapCard(this);
+            return;
+        }
+
         ActivateNextAction();
     }
 
@@ -120,9 +141,14 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
         return validActions;
     }
 
-    public bool HasPendingActions(bool manual = false)
+    public bool HasPendingActions(bool manual = false, bool includeScrap = true)
     {
-        return ActualActions(mainAction, allyAction, doubleAllyAction, scrapAction).Any(action => action.HasPendingEffects(manual: manual));
+        var actions = new List<Action> { mainAction, allyAction, doubleAllyAction };
+
+        if (includeScrap)
+            actions.Add(scrapAction);
+
+        return ActualActions(actions.ToArray()).Any(action => action.HasPendingEffects(manual: manual));
     }
 
     [ClientRpc]
@@ -156,8 +182,6 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
     [Client]
     public void OnPointerDown(PointerEventData data)
     {
-        Debug.Log($"Click on: {cardName}");
-
         // invalidate click on cards outside card list
         if (game.discardPileList.gameObject.activeSelf && location != Location.DISCARD_PILE)
             return;
@@ -204,7 +228,7 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
             location == Location.PLAY_AREA
         )
         {
-            game.localPlayer.CmdShowEffectList(this);
+            game.ShowEffectList(this);
             return;
         }
 
@@ -232,15 +256,17 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
     {
         if (location == Location.DISCARD_PILE) { return; }
 
-        transform.localScale = new Vector2(1.5f, 1.5f);
-        gameObject.GetComponent<SpriteRenderer>().sortingOrder = 1;
+        transform.localScale = new Vector2(1.2f, 1.2f);
+        image.sortingOrder = 2;
+        border.sortingOrder = 1;
     }
 
     public void OnPointerExit(PointerEventData data)
     {
         if (location == Location.DISCARD_PILE) { return; }
 
-        transform.localScale = new Vector2(1f, 1f);
-        gameObject.GetComponent<SpriteRenderer>().sortingOrder = 0;
+        transform.localScale = Vector2.one;
+        image.sortingOrder = 0;
+        border.sortingOrder = -1;
     }
 }

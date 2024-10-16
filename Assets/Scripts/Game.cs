@@ -10,15 +10,15 @@ public enum GameState
 {
     DO_BASIC, //play card from hand, activate ship or base, buy card, check discard pile
     RESOLVING_CARD,
-    CHOOSE_CARD,
-    CHOOSE_EFFECT
+    CHOOSE_CARD
 }
 
 public class Game : NetworkBehaviour
 {
     const int INITIAL_SCOUT_AMOUNT = 8;
     const int INITIAL_VIPER_AMOUNT = 2;
-    public const float CARD_SIZE = 2.14f;
+    public const float CARD_WIDTH = 2.14f;
+    public const float CARD_PADDING = 0.07f;
 
 
     [HideInInspector, SyncVar]
@@ -26,6 +26,7 @@ public class Game : NetworkBehaviour
 
     public readonly SyncList<Player> players = new();
     [HideInInspector, SyncVar] public GameState state;
+    [HideInInspector, SyncVar] public Card currentCard;
 
     public GameObject cardPrefab;
     public TMPro.TextMeshProUGUI messageText;
@@ -39,8 +40,6 @@ public class Game : NetworkBehaviour
 
     [HideInInspector]
     int currentPlayerIndex = 0;
-    [HideInInspector]
-    public Card currentCard;
     [HideInInspector]
     Queue<Card> playCardsQueue = new();
 
@@ -150,7 +149,6 @@ public class Game : NetworkBehaviour
 
     public void CardResolved(Card card)
     {
-
         state = GameState.DO_BASIC;
         currentCard = null;
 
@@ -162,9 +160,10 @@ public class Game : NetworkBehaviour
 
     public void ResolveManualEffect(Card card, Action action, Effect.Base effect)
     {
-        if (currentCard != card)
-            throw new ArgumentException("Effect dont belongs to current active card");
+        if (currentCard != null)
+            throw new ArgumentException("There is already a card being played");
 
+        currentCard = card;
         currentCard.currentAction = action;
         action.currentEffect = effect;
         effect.action.ActivateEffect(effect);
@@ -221,15 +220,11 @@ public class Game : NetworkBehaviour
     {
         if (!card.HasPendingActions(manual: true))
         {
-            ShowNetMessage("Carta sin efectos manuales");
+            ShowLocalMessage("Carta sin efectos manuales");
             return;
         }
 
-        state = GameState.CHOOSE_EFFECT;
-        currentCard = card;
-
-        var conn = activePlayer.GetComponent<NetworkIdentity>().connectionToClient;
-        TargetShowEffectList(conn, card);
+        actionListUI.Show(card);
     }
 
     public void AttackPlayer(Player player)
@@ -287,12 +282,6 @@ public class Game : NetworkBehaviour
     void TargetShowMessage(NetworkConnectionToClient conn, string message)
     {
         StartCoroutine(ShowMessageAndClean(message));
-    }
-
-    [TargetRpc]
-    public void TargetShowEffectList(NetworkConnectionToClient conn, Card card)
-    {
-        actionListUI.Show(card);
     }
 
     [TargetRpc]

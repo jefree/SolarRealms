@@ -57,15 +57,11 @@ public class Deck : NetworkBehaviour
 
         card.transform.SetParent(transform);
         card.transform.localPosition = new Vector2(10f + 1.5f * cards.Count, 0f);
-
-        Debug.Log($"+DECK: {card.cardName} {card.location}");
     }
 
     [Client]
     void OnCardRemoved(CardInfo info)
     {
-        //Debug.Log("removed");
-
         /* if (info.card == null)
             return; */
 

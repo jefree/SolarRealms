@@ -92,7 +92,7 @@ public class TradeRow : NetworkBehaviour
     void OnCardInserted(Card card, int position)
     {
         card.transform.SetParent(transform);
-        card.transform.localPosition = new Vector3(position * Game.CARD_SIZE, 0, 0);
+        card.transform.localPosition = new Vector3(position * (Game.CARD_WIDTH + Game.CARD_PADDING), 0, 0);
     }
 
     public void RemoveCard(Card card)

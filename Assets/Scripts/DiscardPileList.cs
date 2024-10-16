@@ -6,6 +6,14 @@ public class DiscardPileList : MonoBehaviour
     Transform panel;
     DiscardPile discardPile;
 
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Close();
+        }
+    }
+
     public void Show(DiscardPile discardPile)
     {
         gameObject.SetActive(true);

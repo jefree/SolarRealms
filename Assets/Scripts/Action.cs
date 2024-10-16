@@ -85,14 +85,12 @@ public class Action
         if (effect != currentEffect)
             throw new ArgumentException("Effect is not the current active");
 
-        Debug.Log($"EFFECT IN ACTION: {actionName}");
-
         if (effect.isManual)
         {
             manualEffects.Remove(effect);
             usedManualEffects.Add(effect);
 
-            game.CardResolved(card);
+            card.ActionResolved(this);
         }
         else
         {

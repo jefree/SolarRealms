@@ -56,8 +56,6 @@ public class DiscardPile : NetworkBehaviour
         topCard.transform.localPosition = Vector2.zero;
         topCard.transform.rotation = Quaternion.Euler(0, 0, 0);
         topCard.transform.localScale = Vector2.one;
-
-        Debug.Log($"+DISCARD({cards.Count}): {card.cardName} {card.location}");
     }
 
     [Server]

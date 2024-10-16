@@ -145,8 +145,6 @@ public class Player : NetworkBehaviour
         if (game.activePlayer != this)
             return;
 
-        Debug.Log("Choosing card");
-
         game.ChooseCard(card);
     }
 
@@ -157,12 +155,6 @@ public class Player : NetworkBehaviour
         var effect = action.FindEffect(effectID, isManual: isManual);
 
         game.ResolveManualEffect(card, action, effect);
-    }
-
-    [Command]
-    public void CmdShowEffectList(Card card)
-    {
-        game.ShowEffectList(card);
     }
 
     [Server]
@@ -176,6 +168,8 @@ public class Player : NetworkBehaviour
 
     public void ScrapCard(Card card)
     {
+        Debug.Log("removing card");
+
         switch (card.location)
         {
             case Location.HAND:
@@ -184,6 +178,10 @@ public class Player : NetworkBehaviour
 
             case Location.DISCARD_PILE:
                 discardPile.RemoveCard(card);
+                break;
+
+            case Location.PLAY_AREA:
+                playArea.RemoveCard(card);
                 break;
 
             default:

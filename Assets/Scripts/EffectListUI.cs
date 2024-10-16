@@ -12,6 +12,14 @@ public class EffectListUI : MonoBehaviour
     public Game game;
     Card currentCard;
 
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Close();
+        }
+    }
+
     public void Show(Card card)
     {
         currentCard = card;
@@ -23,6 +31,7 @@ public class EffectListUI : MonoBehaviour
     void AddEffects(Action action)
     {
         var prefix = action.actionName == "scrap" ? "DESHUESAR: " : "";
+        var color = action.actionName == "scrap" ? Color.red : Color.white;
 
         foreach (var effect in action.manualEffects)
         {
@@ -32,7 +41,11 @@ public class EffectListUI : MonoBehaviour
             effectGO.GetComponent<EffectButton>().effect = effect;
             effectGO.GetComponent<EffectButton>().action = action;
             effectGO.GetComponent<EffectButton>().ui = this;
-            effectGO.transform.Find("Text").GetComponent<TMPro.TextMeshProUGUI>().text = $"{prefix}{effect.Text()}";
+
+            var textGUI = effectGO.transform.Find("Text").GetComponent<TMPro.TextMeshProUGUI>();
+
+            textGUI.color = color;
+            textGUI.text = $"{prefix}{effect.Text()}";
         }
     }
 

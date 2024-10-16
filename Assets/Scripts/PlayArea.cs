@@ -69,7 +69,7 @@ public class PlayArea : NetworkBehaviour
     void OnShipAdded(Card card)
     {
         card.transform.SetParent(shipArea);
-        card.transform.localPosition = new Vector3((ships.Count - 1) * Game.CARD_SIZE, 0, 0);
+        card.transform.localPosition = new Vector3((ships.Count - 1) * (Game.CARD_WIDTH + Game.CARD_PADDING), 0, 0);
 
     }
 
@@ -77,7 +77,7 @@ public class PlayArea : NetworkBehaviour
     void OnBaseAdded(Card card)
     {
         card.transform.SetParent(baseArea);
-        card.transform.localPosition = new Vector3((bases.Count - 1) * Game.CARD_SIZE, 0, 0);
+        card.transform.localPosition = new Vector3((bases.Count - 1) * (Game.CARD_WIDTH + Game.CARD_PADDING), 0, 0);
         card.transform.localRotation = Quaternion.Euler(0, 0, 0);
     }
 
@@ -107,6 +107,20 @@ public class PlayArea : NetworkBehaviour
         foreach (var card in bases)
         {
             player.game.PlayCard(card);
+        }
+    }
+
+    public void RemoveCard(Card card)
+    {
+        Debug.Log($"-PLAYAREA {card.cardName}");
+
+        if (card.type == CardType.SHIP)
+        {
+            RemoveShip(card);
+        }
+        else
+        {
+            RemoveBase(card);
         }
     }
 
