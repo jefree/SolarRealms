@@ -133,6 +133,8 @@ public class Deck : NetworkBehaviour
             initial.Add(CardFactory.GenerateCard("viper", game, cardPrefab, this.gameObject, player: player));
         }
 
+        initial.Add(CardFactory.GenerateCard("enforcer mech", game, cardPrefab, gameObject, player: player));
+        initial.Add(CardFactory.GenerateCard("enforcer mech", game, cardPrefab, gameObject, player: player));
         initial.Add(CardFactory.GenerateCard("blob miner", game, cardPrefab, gameObject, player: player));
 
         Util.Shuffle(initial);

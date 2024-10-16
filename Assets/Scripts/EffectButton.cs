@@ -1,11 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
 using Effect;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
-public class EffectButton : MonoBehaviour
+public class EffectButton : MonoBehaviour, IPointerDownHandler
 {
     public Base effect;
     public Action action;
@@ -13,11 +10,9 @@ public class EffectButton : MonoBehaviour
 
     void Start()
     {
-        var button = gameObject.GetComponent<Button>();
-        button.onClick.AddListener(OnClick);
     }
 
-    void OnClick()
+    public void OnPointerDown(PointerEventData eventData)
     {
         ui.Activate(this);
     }

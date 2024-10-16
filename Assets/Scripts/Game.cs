@@ -166,6 +166,9 @@ public class Game : NetworkBehaviour
         currentCard = card;
         currentCard.currentAction = action;
         action.currentEffect = effect;
+
+        Debug.Log($"Set all for manual effect C({card.cardName}) A({action.actionName}) E({effect.ID()})");
+
         effect.action.ActivateEffect(effect);
     }
 

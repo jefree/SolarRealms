@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Effect
@@ -139,7 +140,7 @@ namespace Effect
 
         public void SetCard(Card card)
         {
-            if (card.location == location)
+            if (location.HasFlag(card.location))
             {
                 this.card = card;
                 Resolve(game);

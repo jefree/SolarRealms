@@ -42,7 +42,7 @@ public class EffectListUI : MonoBehaviour
             effectGO.GetComponent<EffectButton>().action = action;
             effectGO.GetComponent<EffectButton>().ui = this;
 
-            var textGUI = effectGO.transform.Find("Text").GetComponent<TMPro.TextMeshProUGUI>();
+            var textGUI = effectGO.GetComponent<TMPro.TextMeshProUGUI>();
 
             textGUI.color = color;
             textGUI.text = $"{prefix}{effect.Text()}";

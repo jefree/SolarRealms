@@ -55,11 +55,18 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
 
     void Update()
     {
-        if (location == Location.PLAY_AREA && HasPendingActions(manual: true, includeScrap: false))
+
+        if (location != Location.PLAY_AREA)
+        {
+            border.color = Color.clear;
+            return;
+        }
+
+        if (HasPendingActions(manual: true, includeScrap: false))
         {
             border.color = Color.green;
         }
-        else if (location == Location.PLAY_AREA && scrapAction != null)
+        else if (scrapAction != null)
         {
             border.color = Color.red;
         }
@@ -186,7 +193,7 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
         if (game.discardPileList.gameObject.activeSelf && location != Location.DISCARD_PILE)
             return;
 
-        if (location == Location.DISCARD_PILE)
+        if (location == Location.DISCARD_PILE && !game.discardPileList.gameObject.activeSelf)
         {
             game.ShowDiscardCards(player);
             return;
