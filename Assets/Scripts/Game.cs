@@ -24,12 +24,11 @@ public class Game : NetworkBehaviour
     public const float CARD_PADDING = 0.07f;
 
 
-    [HideInInspector, SyncVar]
-    public Player activePlayer;
-
+    [HideInInspector, SyncVar] public Player activePlayer;
     public readonly SyncList<Player> players = new();
     [HideInInspector, SyncVar] public GameState state;
     [HideInInspector, SyncVar] public Card currentCard;
+    [SyncVar] public List<string> turnEffects = new();
 
     public GameObject cardPrefab;
     public TMPro.TextMeshProUGUI messageText;
@@ -135,6 +134,8 @@ public class Game : NetworkBehaviour
             activePlayer.ScrapCard(card);
         }
 
+        RecordEffect("scrap");
+
         Destroy(card.gameObject);
     }
 
@@ -191,6 +192,7 @@ public class Game : NetworkBehaviour
     {
         currentPlayerIndex = (currentPlayerIndex + 1) % players.Count;
         activePlayer = players[currentPlayerIndex];
+        ClearTurnEffects();
 
         ShowNetMessage("Next player turn");
 
@@ -331,5 +333,15 @@ public class Game : NetworkBehaviour
     void ShowMessage(string message)
     {
         messageText.text = message;
+    }
+
+    void RecordEffect(string effect)
+    {
+        turnEffects.Add(effect);
+    }
+
+    void ClearTurnEffects()
+    {
+        turnEffects.Clear();
     }
 }

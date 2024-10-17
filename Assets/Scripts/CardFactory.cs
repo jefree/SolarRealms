@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
-using Effect;
 using Mirror;
-using Unity.VisualScripting;
 using UnityEngine;
+
+
 
 public class CardFactory : MonoBehaviour
 {
+
+    static Dictionary<string, Action<Card, Game>> cards = new();
+
     [Server]
     public static Card GenerateCard(string name, Game game, GameObject cardPrefab, GameObject parent, Player player = null)
     {
@@ -24,45 +27,27 @@ public class CardFactory : MonoBehaviour
         return card;
     }
 
+    static void Init()
+    {
+        cards.Add("viper", Viper);
+        cards.Add("scout", Scout);
+        cards.Add("blob miner", BlobMiner);
+        cards.Add("infested moon", InfestedMoon);
+        cards.Add("integration port", IntegrationPort);
+        cards.Add("hive queen", HiveQueen);
+        cards.Add("enforcer mech", EnforcerMech);
+        cards.Add("outland station", OutlandStation);
+        cards.Add("reclamation station", ReclamationStation);
+    }
+
     public static void Build(Card card, Game game)
     {
-        switch (card.cardName)
-        {
-            case "viper":
-                Viper(card, game);
-                break;
+        if (cards.Count == 0)
+            Init();
 
-            case "scout":
-                Scout(card, game);
-                break;
+        var generator = cards[card.cardName];
 
-            case "blob miner":
-                BlobMiner(card, game);
-                break;
-
-            case "infested moon":
-                InfestedMoon(card, game);
-                break;
-
-            case "integration port":
-                IntegrationPort(card, game);
-                break;
-
-            case "hive queen":
-                HiveQueen(card, game);
-                break;
-
-            case "enforcer mech":
-                EnforcerMech(card, game);
-                break;
-
-            case "outland station":
-                OutlandStation(card, game);
-                break;
-
-            default:
-                throw new ArgumentException("invalid card name");
-        }
+        generator(card, game);
     }
 
     public static void Default(Card card, Game game)
@@ -187,6 +172,20 @@ public class CardFactory : MonoBehaviour
 
         card.scrapAction = new Action(game, "scrap");
         card.scrapAction.AddEffect(new Effect.DrawCard(), isManual: true);
+        card.scrapAction.card = card;
+    }
+
+    static void ReclamationStation(Card card, Game game)
+    {
+        card.type = CardType.BASE;
+        card.cost = 3;
+
+        card.mainAction = new Action(game, "main");
+        card.mainAction.AddEffect(new Effect.ScrapCard(Location.DISCARD_PILE), isManual: true);
+        card.mainAction.card = card;
+
+        card.scrapAction = new Action(game, "scrap");
+        card.scrapAction.AddEffect(new Effect.TurnEffectMultiply("scrap", combat: 3), isManual: true);
         card.scrapAction.card = card;
     }
 }

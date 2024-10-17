@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Mirror;
+using UnityEngine.Timeline;
 
 namespace Effect
 {
@@ -10,9 +12,18 @@ namespace Effect
 
         public Action action;
 
-        public abstract void Activate(Game game);
+        public virtual void Activate(Game game)
+        {
+            Resolve(game);
+        }
 
-        public abstract void Resolve(Game game);
+        public abstract void Apply(Game game);
+
+        public virtual void Resolve(Game game)
+        {
+            Apply(game);
+            action.EffectResolved(this);
+        }
 
         public abstract string ID();
 
@@ -44,22 +55,14 @@ namespace Effect
             this.authority = authority;
         }
 
-        public override void Activate(Game game)
-        {
-            Resolve(game);
-        }
-
-        public override void Resolve(Game game)
+        public override void Apply(Game game)
         {
             Player activePlayer = game.activePlayer;
 
             activePlayer.combat += combat;
             activePlayer.trade += trade;
             activePlayer.authority += authority;
-
-            action.EffectResolved(this);
         }
-
         public override void Animate(Card card)
         {
             if (combat > 0)
@@ -133,10 +136,9 @@ namespace Effect
             resolver.Start();
         }
 
-        public override void Resolve(Game game)
+        public override void Apply(Game game)
         {
             game.ScrapCard(card);
-            action.EffectResolved(this);
         }
 
         public void SetCard(Card card)
@@ -165,15 +167,9 @@ namespace Effect
 
     public class DrawCard : Base
     {
-        public override void Activate(Game game)
-        {
-            Resolve(game);
-        }
-
-        public override void Resolve(Game game)
+        public override void Apply(Game game)
         {
             game.activePlayer.DrawCard();
-            action.EffectResolved(this);
         }
 
         public override string ID()
@@ -184,6 +180,38 @@ namespace Effect
         public override string Text()
         {
             return "Roba un carta";
+        }
+    }
+
+    public class TurnEffectMultiply : Base
+    {
+        string targetTurnEffect;
+        Basic basic;
+
+        public TurnEffectMultiply(string effect, int combat = 0, int trade = 0, int authority = 0)
+        {
+
+            basic = new(combat, trade, authority);
+            targetTurnEffect = effect;
+        }
+
+        public override string ID()
+        {
+            return $"MULTIPLY E({targetTurnEffect}) {basic.ID()}";
+        }
+
+        public override void Apply(Game game)
+        {
+            var multiplier = game.turnEffects.Count(effect => effect == targetTurnEffect) + 1;
+            var effect = new Basic(basic.combat * multiplier, basic.trade * multiplier, basic.authority * multiplier);
+
+            effect.action = action;
+            effect.Apply(game);
+        }
+
+        public override string Text()
+        {
+            return $"Gana {basic.Text()} por carta scrapeada este turno incluida esta";
         }
     }
 }
