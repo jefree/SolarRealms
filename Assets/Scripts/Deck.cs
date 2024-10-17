@@ -94,6 +94,7 @@ public class Deck : NetworkBehaviour
         card.location = Location.DECK;
         var cardInfo = new CardInfo(card);
 
+        card.NetReset();
         cards.Insert(0, cardInfo);
     }
 
@@ -133,9 +134,8 @@ public class Deck : NetworkBehaviour
             initial.Add(CardFactory.GenerateCard("viper", game, cardPrefab, this.gameObject, player: player));
         }
 
-        initial.Add(CardFactory.GenerateCard("enforcer mech", game, cardPrefab, gameObject, player: player));
-        initial.Add(CardFactory.GenerateCard("enforcer mech", game, cardPrefab, gameObject, player: player));
-        initial.Add(CardFactory.GenerateCard("blob miner", game, cardPrefab, gameObject, player: player));
+        initial.Add(CardFactory.GenerateCard("outland station", game, cardPrefab, gameObject, player: player));
+        //initial.Add(CardFactory.GenerateCard("outland station", game, cardPrefab, gameObject, player: player));
 
         Util.Shuffle(initial);
 

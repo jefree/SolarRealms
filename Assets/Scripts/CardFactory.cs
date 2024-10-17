@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using Effect;
 using Mirror;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -54,9 +56,12 @@ public class CardFactory : MonoBehaviour
                 EnforcerMech(card, game);
                 break;
 
-            default:
-                Default(card, game);
+            case "outland station":
+                OutlandStation(card, game);
                 break;
+
+            default:
+                throw new ArgumentException("invalid card name");
         }
     }
 
@@ -168,5 +173,20 @@ public class CardFactory : MonoBehaviour
         card.mainAction.AddEffect(new Effect.Basic(combat: 5));
         card.mainAction.AddEffect(new Effect.ScrapCard(Location.HAND), isManual: true);
         card.mainAction.card = card;
+    }
+
+    static void OutlandStation(Card card, Game game)
+    {
+        card.type = CardType.BASE;
+        card.cost = 3;
+
+        card.mainAction = new OrAction(game, "main");
+        card.mainAction.AddEffect(new Effect.Basic(trade: 1), isManual: true);
+        card.mainAction.AddEffect(new Effect.Basic(authority: 3), isManual: true);
+        card.mainAction.card = card;
+
+        card.scrapAction = new Action(game, "scrap");
+        card.scrapAction.AddEffect(new Effect.DrawCard(), isManual: true);
+        card.scrapAction.card = card;
     }
 }

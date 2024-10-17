@@ -95,7 +95,6 @@ public class Player : NetworkBehaviour
 
         foreach (var card in cards)
         {
-            card.Reset();
             deck.Push(card);
         }
     }
@@ -215,8 +214,6 @@ public class Player : NetworkBehaviour
 
         var discardedShips = playArea.DiscardShips();
         discardedShips.ForEach(card => discardPile.AddCard(card));
-
-        playArea.ResetBases();
 
         DrawNewHand();
 

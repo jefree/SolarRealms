@@ -5,6 +5,9 @@ using Mirror;
 using Unity.VisualScripting;
 using Org.BouncyCastle.Crypto.Engines;
 using System;
+using UnityEngine.Events;
+using Mirror.SimpleWeb;
+using System.Linq;
 
 public enum GameState
 {
@@ -98,12 +101,10 @@ public class Game : NetworkBehaviour
     {
         activePlayer.PlayCard(card);
 
-        var queueWasEmpty = playCardsQueue.Count == 0;
-
         // enqueue cards with pending effects so remaining effects has a chance to activate if valid
         activePlayer.playArea.PendingCards().ForEach(card => playCardsQueue.Enqueue(card));
 
-        if (queueWasEmpty)
+        if (playCardsQueue.Count > 0)
         {
             ResolveCard(playCardsQueue.Dequeue());
         }
@@ -270,21 +271,28 @@ public class Game : NetworkBehaviour
     }
 
     [Server]
-    public void ShowNetMessage(string message)
+    public void ShowNetMessage(string message, bool persist = false)
     {
         var conn = activePlayer.GetComponent<NetworkIdentity>().connectionToClient;
-        TargetShowMessage(conn, message);
+        TargetShowMessage(conn, message, persist);
     }
 
-    public void ShowLocalMessage(string message)
+    public void ShowLocalMessage(string message, bool persist = false)
     {
-        StartCoroutine(ShowMessageAndClean(message));
+        if (persist)
+        {
+            ShowMessage(message);
+        }
+        else
+        {
+            StartCoroutine(ShowMessageAndClean(message));
+        }
     }
 
     [TargetRpc]
-    void TargetShowMessage(NetworkConnectionToClient conn, string message)
+    void TargetShowMessage(NetworkConnectionToClient conn, string message, bool persist)
     {
-        StartCoroutine(ShowMessageAndClean(message));
+        ShowLocalMessage(message, persist);
     }
 
     [TargetRpc]
@@ -318,5 +326,10 @@ public class Game : NetworkBehaviour
         yield return new WaitForSeconds(1.5f);
 
         messageText.text = "Juega o compra cartas";
+    }
+
+    void ShowMessage(string message)
+    {
+        messageText.text = message;
     }
 }

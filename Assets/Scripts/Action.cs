@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
+using Mirror;
 
 public class Action
 {
@@ -11,9 +11,9 @@ public class Action
     Game game;
     public Card card;
     public List<Effect.Base> effects = new();
-    List<Effect.Base> usedEffects = new();
+    protected List<Effect.Base> usedEffects = new();
     public List<Effect.Base> manualEffects = new();
-    List<Effect.Base> usedManualEffects = new();
+    protected List<Effect.Base> usedManualEffects = new();
     List<Condition.ICondition> conditions = new();
 
     public Action(Game game, string name)
@@ -22,7 +22,7 @@ public class Action
         actionName = name;
     }
 
-    public void AddEffect(Effect.Base effect, bool isManual = false)
+    public virtual void AddEffect(Effect.Base effect, bool isManual = false)
     {
         if (!isManual)
         {
@@ -65,7 +65,7 @@ public class Action
         return SatisfyConditions() && remainingEffects > 0;
     }
 
-    void ActivateNextEffect()
+    protected void ActivateNextEffect()
     {
         if (effects.Count == 0)
         {
@@ -80,29 +80,46 @@ public class Action
         currentEffect.Activate(game);
     }
 
-    public void EffectResolved(Effect.Base effect)
+    [Server]
+    public virtual void EffectResolved(Effect.Base effect)
     {
         if (effect != currentEffect)
             throw new ArgumentException("Effect is not the current active");
 
+        NetDisableEffect(effect);
+
         if (effect.isManual)
         {
-            manualEffects.Remove(effect);
-            usedManualEffects.Add(effect);
-
             card.ActionResolved(this);
         }
         else
         {
-            effects.Remove(effect);
-            usedEffects.Add(effect);
-
             ActivateNextEffect();
         }
 
         if (effects.Count == 0 && manualEffects.Count == 0)
         {
             fullyResolved = true;
+        }
+    }
+
+    public void NetDisableEffect(Effect.Base effect)
+    {
+        DisableEffect(effect);
+        card.RpcDisableEffect(actionName, effect.ID(), effect.isManual);
+    }
+
+    public void DisableEffect(Effect.Base effect)
+    {
+        if (effect.isManual)
+        {
+            manualEffects.Remove(effect);
+            usedManualEffects.Add(effect);
+        }
+        else
+        {
+            effects.Remove(effect);
+            usedEffects.Add(effect);
         }
     }
 
@@ -122,12 +139,7 @@ public class Action
         usedManualEffects.Clear();
     }
 
-    public string Text()
-    {
-        return currentEffect.Text();
-    }
-
-    public Effect.Base FindEffect(string id, bool isManual = false)
+    public virtual Effect.Base FindEffect(string id, bool isManual = false)
     {
         var effectList = isManual ? manualEffects : effects;
 

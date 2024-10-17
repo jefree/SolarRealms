@@ -94,18 +94,12 @@ public class PlayArea : NetworkBehaviour
         return removedCards;
     }
 
-    public void ResetBases()
-    {
-        foreach (var card in bases)
-        {
-            card.Reset();
-        }
-    }
-
+    [Server]
     public void ActivateBases()
     {
         foreach (var card in bases)
         {
+            card.NetReset();
             player.game.PlayCard(card);
         }
     }

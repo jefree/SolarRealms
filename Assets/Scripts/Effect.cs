@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Mirror;
 
 namespace Effect
 {
@@ -178,6 +179,11 @@ namespace Effect
         public override string ID()
         {
             return "Draw";
+        }
+
+        public override string Text()
+        {
+            return "Roba un carta";
         }
     }
 }

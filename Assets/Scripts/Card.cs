@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Mirror;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -55,8 +54,7 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
 
     void Update()
     {
-
-        if (location != Location.PLAY_AREA)
+        if (location != Location.PLAY_AREA || !game.localPlayer.IsOurTurn() || !isMine())
         {
             border.color = Color.clear;
             return;
@@ -130,6 +128,21 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
         ActualActions(mainAction, allyAction, doubleAllyAction, scrapAction).ForEach(action => action.Reset());
     }
 
+    public void NetReset()
+    {
+        Reset();
+        RpcReset();
+    }
+
+    [ClientRpc]
+    void RpcReset()
+    {
+        if (isServer)
+            return;
+
+        Reset();
+    }
+
     public List<Action> Actions()
     {
         return ActualActions(mainAction, allyAction, doubleAllyAction, scrapAction);
@@ -164,6 +177,18 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
         effectUp.Enqueue(color, value, type);
     }
 
+    [ClientRpc]
+    public void RpcDisableEffect(string actionName, string effectID, bool isManual)
+    {
+        if (isServer)
+            return;
+
+        var action = FindAction(actionName);
+        var effect = action.FindEffect(effectID, isManual);
+
+        action.DisableEffect(effect);
+    }
+
     public void Hide()
     {
         gameObject.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Cards/back");
@@ -184,6 +209,11 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
             "doubleAlly" => doubleAllyAction,
             _ => throw new ArgumentException($"Invalid action name {name} in card {cardName}")
         };
+    }
+
+    bool isMine()
+    {
+        return player == game.localPlayer;
     }
 
     [Client]
