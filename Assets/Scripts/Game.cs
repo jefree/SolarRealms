@@ -8,6 +8,7 @@ using System;
 using UnityEngine.Events;
 using Mirror.SimpleWeb;
 using System.Linq;
+using Effect;
 
 public enum GameState
 {
@@ -38,12 +39,14 @@ public class Game : NetworkBehaviour
     public TradeRow tradeRow;
     public EffectListUI actionListUI;
     public DiscardPileList discardPileList;
+    public ConfirmDialog confirmDialog;
     public Player localPlayer;
 
     [HideInInspector]
     int currentPlayerIndex = 0;
     [HideInInspector]
     Queue<Card> playCardsQueue = new();
+    List<Card> selectedCards = new();
 
     void Start()
     {
@@ -51,7 +54,7 @@ public class Game : NetworkBehaviour
         combatScoreText = GameObject.Find("CombatText").GetComponent<TMPro.TextMeshProUGUI>();
 
         state = GameState.DO_BASIC;
-        ShowLocalMessage("Esperando otro jugador");
+        ShowLocalMessage("Esperando otro jugador", persist: true);
     }
 
     void Update()
@@ -94,6 +97,8 @@ public class Game : NetworkBehaviour
         {
             player.DrawNewHand();
         }
+
+        ShowLocalMessage("Juega una o mas cartas", persist: true);
     }
 
     public void PlayCard(Card card)
@@ -169,8 +174,6 @@ public class Game : NetworkBehaviour
         currentCard.currentAction = action;
         action.currentEffect = effect;
 
-        Debug.Log($"Set all for manual effect C({card.cardName}) A({action.actionName}) E({effect.ID()})");
-
         effect.action.ActivateEffect(effect);
     }
 
@@ -188,13 +191,14 @@ public class Game : NetworkBehaviour
         ShowNetMessage("Compra o juega una carta");
     }
 
+    [Server]
     public void StartTurn()
     {
         currentPlayerIndex = (currentPlayerIndex + 1) % players.Count;
         activePlayer = players[currentPlayerIndex];
         ClearTurnEffects();
 
-        ShowNetMessage("Next player turn");
+        ShowNetMessage("Tu turno");
 
         state = GameState.DO_BASIC;
 
@@ -208,18 +212,28 @@ public class Game : NetworkBehaviour
             return;
 
         activePlayer.CmdEndTurn();
+        ShowLocalMessage("Turno Oponente", persist: true);
     }
 
+    [Server]
     public void StartChooseCard()
     {
         state = GameState.CHOOSE_CARD;
         ShowNetMessage("Escoge un carta");
     }
 
+    [Server]
     public void ChooseCard(Card card)
     {
         var cardReceiver = (Effect.ICardReceiver)currentCard.currentAction.currentEffect;
-        cardReceiver.SetCard(card);
+        cardReceiver.SetCard(this, card);
+    }
+
+    [Server]
+    public void StartConfirmEffect(Effect.IConfirmNetable effect)
+    {
+        var conn = activePlayer.GetComponent<NetworkIdentity>().connectionToClient;
+        TargetShowConfirmDialog(conn, effect.ToNet());
     }
 
     public void ShowEffectList(Card card)
@@ -298,6 +312,12 @@ public class Game : NetworkBehaviour
     }
 
     [TargetRpc]
+    void TargetShowConfirmDialog(NetworkConnectionToClient conn, NetEffect netEffect)
+    {
+        confirmDialog.Show((IConfirmNetable)netEffect.GetEffect());
+    }
+
+    [TargetRpc]
     public void TargetSetPlayerTwoView(NetworkConnectionToClient _target)
     {
         var one = players[0];
@@ -319,6 +339,8 @@ public class Game : NetworkBehaviour
         var dTwo = two.transform.Find("Deck/Canvas/DeckCountText").GetComponent<RectTransform>();
 
         (dOne.anchoredPosition, dTwo.anchoredPosition) = (dTwo.anchoredPosition, dOne.anchoredPosition);
+
+        ShowLocalMessage("Turno Oponente", persist: true);
     }
 
     IEnumerator ShowMessageAndClean(string message)

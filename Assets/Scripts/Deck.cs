@@ -134,10 +134,10 @@ public class Deck : NetworkBehaviour
             initial.Add(CardFactory.GenerateCard("viper", game, cardPrefab, this.gameObject, player: player));
         }
 
-        initial.Add(CardFactory.GenerateCard("outland station", game, cardPrefab, gameObject, player: player));
-        initial.Add(CardFactory.GenerateCard("outland station", game, cardPrefab, gameObject, player: player));
-        initial.Add(CardFactory.GenerateCard("reclamation station", game, cardPrefab, gameObject, player: player));
-        initial.Add(CardFactory.GenerateCard("reclamation station", game, cardPrefab, gameObject, player: player));
+        initial.Add(CardFactory.GenerateCard("warpgate cruiser", game, cardPrefab, gameObject, player: player));
+        initial.Add(CardFactory.GenerateCard("warpgate cruiser", game, cardPrefab, gameObject, player: player));
+        //initial.Add(CardFactory.GenerateCard("reclamation station", game, cardPrefab, gameObject, player: player));
+        //initial.Add(CardFactory.GenerateCard("reclamation station", game, cardPrefab, gameObject, player: player));
 
         Util.Shuffle(initial);
 

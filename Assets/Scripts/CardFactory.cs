@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using Mirror;
 using UnityEngine;
 
-
-
 public class CardFactory : MonoBehaviour
 {
 
@@ -38,6 +36,7 @@ public class CardFactory : MonoBehaviour
         cards.Add("enforcer mech", EnforcerMech);
         cards.Add("outland station", OutlandStation);
         cards.Add("reclamation station", ReclamationStation);
+        cards.Add("warpgate cruiser", WarpgateCruiser);
     }
 
     public static void Build(Card card, Game game)
@@ -152,6 +151,7 @@ public class CardFactory : MonoBehaviour
     static void EnforcerMech(Card card, Game game)
     {
         card.type = CardType.SHIP;
+        card.faction = Faction.MACHINE_CULT;
         card.cost = 5;
 
         card.mainAction = new Action(game, "main");
@@ -163,6 +163,7 @@ public class CardFactory : MonoBehaviour
     static void OutlandStation(Card card, Game game)
     {
         card.type = CardType.BASE;
+        card.faction = Faction.TRADE_FEDERATION;
         card.cost = 3;
 
         card.mainAction = new OrAction(game, "main");
@@ -178,6 +179,7 @@ public class CardFactory : MonoBehaviour
     static void ReclamationStation(Card card, Game game)
     {
         card.type = CardType.BASE;
+        card.faction = Faction.MACHINE_CULT;
         card.cost = 3;
 
         card.mainAction = new Action(game, "main");
@@ -187,5 +189,20 @@ public class CardFactory : MonoBehaviour
         card.scrapAction = new Action(game, "scrap");
         card.scrapAction.AddEffect(new Effect.TurnEffectMultiply("scrap", combat: 3), isManual: true);
         card.scrapAction.card = card;
+    }
+
+    static void WarpgateCruiser(Card card, Game game)
+    {
+        card.type = CardType.SHIP;
+        card.faction = Faction.STAR_EMPIRE;
+        card.cost = 3;
+
+        card.mainAction = new Action(game, "main");
+        card.mainAction.AddEffect(new Effect.DiscardMultiply(int.MaxValue, new Effect.Basic(combat: 2)), isManual: true);
+        card.mainAction.card = card;
+
+        card.allyAction = new AllyCardAction(game, card, "ally");
+        card.allyAction.AddEffect(new Effect.DrawCard());
+        card.allyAction.card = card;
     }
 }

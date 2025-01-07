@@ -1,8 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using Mirror;
-using UnityEngine.Timeline;
+using UnityEngine;
+
 
 namespace Effect
 {
@@ -22,7 +21,7 @@ namespace Effect
         public virtual void Resolve(Game game)
         {
             Apply(game);
-            action.EffectResolved(this);
+            action.OnEffectResolved(this);
         }
 
         public abstract string ID();
@@ -33,13 +32,54 @@ namespace Effect
         }
 
         public virtual string Text() { return ""; }
+
+        public NetEffect ToNet()
+        {
+            return new NetEffect(this);
+        }
+
+    }
+
+    public struct NetEffect
+    {
+        public Card card;
+        public string actionName;
+        public string id;
+        public bool isManual;
+
+        public NetEffect(Base effect)
+        {
+            card = effect.action.card;
+            actionName = effect.action.actionName;
+            id = effect.ID();
+            isManual = effect.isManual;
+        }
+
+        public Effect.Base GetEffect()
+        {
+            var action = card.FindAction(actionName);
+            return action.FindEffect(id, isManual: isManual);
+        }
     }
 
     public interface ICardReceiver
     {
-
-        void SetCard(Card card);
+        void SetCard(Game game, Card card);
     }
+
+    public interface IConfirmable
+    {
+        void Confirm(Game game);
+        void Cancel();
+        string ConfirmText();
+    }
+
+    public interface INetable
+    {
+        NetEffect ToNet();
+    }
+
+    public interface IConfirmNetable : IConfirmable, INetable { }
 
     public class Basic : Base
     {
@@ -83,7 +123,7 @@ namespace Effect
 
         public override string ID()
         {
-            return $"Basic C({combat}) A({authority}) T({trade})";
+            return $"BASIC C({combat}) A({authority}) T({trade})";
         }
 
         public override string Text()
@@ -115,7 +155,6 @@ namespace Effect
     {
         Game game;
         Card card;
-        EffectResolver.ChooseCard resolver;
         Location location;
 
 
@@ -128,12 +167,7 @@ namespace Effect
         {
             this.game = game;
 
-            if (resolver == null)
-            {
-                resolver = new(game, Location.TRADE_ROW);
-            }
-
-            resolver.Start();
+            game.StartChooseCard();
         }
 
         public override void Apply(Game game)
@@ -141,7 +175,7 @@ namespace Effect
             game.ScrapCard(card);
         }
 
-        public void SetCard(Card card)
+        public void SetCard(Game game, Card card)
         {
             if (location.HasFlag(card.location))
             {
@@ -161,7 +195,7 @@ namespace Effect
 
         public override string ID()
         {
-            return $"Scrap L({location})";
+            return $"SCRAP Location({location})";
         }
     }
 
@@ -174,7 +208,7 @@ namespace Effect
 
         public override string ID()
         {
-            return "Draw";
+            return "DRAW";
         }
 
         public override string Text()
@@ -197,7 +231,7 @@ namespace Effect
 
         public override string ID()
         {
-            return $"MULTIPLY E({targetTurnEffect}) {basic.ID()}";
+            return $"MULTIPLY turnEffect({targetTurnEffect}) {basic.ID()}";
         }
 
         public override void Apply(Game game)
@@ -212,6 +246,85 @@ namespace Effect
         public override string Text()
         {
             return $"Gana {basic.Text()} por carta scrapeada este turno incluida esta";
+        }
+    }
+
+    public class DiscardMultiply : Base, ICardReceiver, IConfirmNetable
+    {
+        int targetCount;
+        Effect.Basic basicEffect;
+        List<Card> selectedCards = new();
+
+        public DiscardMultiply(int count, Effect.Basic effect)
+        {
+            targetCount = count;
+            basicEffect = effect;
+        }
+
+        public override void Activate(Game game)
+        {
+            selectedCards.Clear();
+            game.StartChooseCard();
+
+            // Show confirm dialog for no limited selection effects, so effect can be apply at some point
+            if (targetCount == int.MaxValue)
+            {
+                game.StartConfirmEffect(this);
+            }
+        }
+
+        public override void Apply(Game game)
+        {
+            var multiplier = selectedCards.Count;
+            var effect = new Basic(basicEffect.combat * multiplier, basicEffect.trade * multiplier, basicEffect.authority * multiplier);
+
+            effect.action = action;
+            effect.Apply(game);
+
+            selectedCards.ForEach(card => game.activePlayer.DiscardCard(card));
+        }
+
+        public override string ID()
+        {
+            return $"DISCARD_X targetCount({targetCount}) {basicEffect.ID()}";
+        }
+
+        public override string Text()
+        {
+            return $"Descarta cualquier numero de cartas y gana {basicEffect.Text()} por cada una";
+        }
+
+        public string ConfirmText()
+        {
+            return $"Descartar {selectedCards.Count} Carta(s) ?";
+        }
+
+        public void Confirm(Game game)
+        {
+            Resolve(game);
+        }
+
+        public void Cancel()
+        {
+            action.OnEffectCanceled(this);
+        }
+
+        public void SetCard(Game game, Card card)
+        {
+            if (card.isSelected && selectedCards.Contains(card))
+            {
+                card.isSelected = false;
+                selectedCards.Remove(card);
+                return;
+            }
+
+            selectedCards.Add(card);
+            card.isSelected = true;
+
+            if (selectedCards.Count == targetCount)
+            {
+                Apply(game);
+            }
         }
     }
 }

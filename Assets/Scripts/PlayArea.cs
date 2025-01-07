@@ -106,8 +106,6 @@ public class PlayArea : NetworkBehaviour
 
     public void RemoveCard(Card card)
     {
-        Debug.Log($"-PLAYAREA {card.cardName}");
-
         if (card.type == CardType.SHIP)
         {
             RemoveShip(card);

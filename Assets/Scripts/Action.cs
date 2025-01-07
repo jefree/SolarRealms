@@ -81,7 +81,7 @@ public class Action
     }
 
     [Server]
-    public virtual void EffectResolved(Effect.Base effect)
+    public virtual void OnEffectResolved(Effect.Base effect)
     {
         if (effect != currentEffect)
             throw new ArgumentException("Effect is not the current active");
@@ -100,7 +100,19 @@ public class Action
         if (effects.Count == 0 && manualEffects.Count == 0)
         {
             fullyResolved = true;
+
         }
+    }
+
+    [Server]
+    public void OnEffectCanceled(Effect.Base effect)
+    {
+        if (effect != currentEffect)
+            throw new ArgumentException("Effect is not the current active");
+
+        // since only manual effects can be canceled we resolve this action right away:w
+        card.ActionResolved(this);
+
     }
 
     public void NetDisableEffect(Effect.Base effect)

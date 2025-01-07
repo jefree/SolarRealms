@@ -54,7 +54,7 @@ public class EffectListUI : MonoBehaviour
     {
         Close();
 
-        game.localPlayer.CmdResolveAction(currentCard, button.action.actionName, button.effect.ID(), button.effect.isManual);
+        game.localPlayer.CmdResolveAction(button.effect.ToNet());
     }
 
     public void Close()

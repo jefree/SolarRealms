@@ -21,6 +21,7 @@ public enum CardType
     BASE
 }
 
+
 public class SyncListCard : SyncList<Card> { }
 
 [Serializable]
@@ -33,6 +34,7 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
     [SyncVar] public Player player;
     [SyncVar] public Game game;
     [SyncVar] public CardType type; // Ship or Base
+    [SyncVar] public bool isSelected;
 
     public Action mainAction;
     public Action allyAction;
@@ -54,19 +56,31 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
 
     void Update()
     {
-        if (location != Location.PLAY_AREA || !game.localPlayer.IsOurTurn() || !isMine())
+        border.color = Color.clear;
+
+        if (!game.localPlayer.IsOurTurn() || !isMine())
         {
-            border.color = Color.clear;
             return;
         }
 
-        if (HasPendingActions(manual: true, includeScrap: false))
+        if (location == Location.HAND && isSelected)
         {
-            border.color = Color.green;
+            border.color = Color.yellow;
+            return;
         }
-        else if (scrapAction != null)
+
+        if (location == Location.PLAY_AREA)
         {
-            border.color = Color.red;
+            if (HasPendingActions(manual: true, includeScrap: false))
+            {
+                border.color = Color.green;
+            }
+            else if (scrapAction != null)
+            {
+                border.color = Color.red;
+            }
+
+            return;
         }
     }
 

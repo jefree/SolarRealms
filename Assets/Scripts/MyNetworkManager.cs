@@ -11,12 +11,10 @@ public class MyNetworkManager : NetworkManager
 
         if (NetworkServer.connections.Count == 2)
         {
-            Debug.Log("Enemy arrives");
             newPlayer = GameObject.Find("Enemy");
         }
         else
         {
-            Debug.Log("Player arrives");
             newPlayer = GameObject.Find("Player");
         }
 

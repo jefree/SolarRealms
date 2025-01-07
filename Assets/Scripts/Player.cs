@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Effect;
 using Mirror;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -148,12 +149,24 @@ public class Player : NetworkBehaviour
     }
 
     [Command]
-    public void CmdResolveAction(Card card, string actionName, string effectID, bool isManual)
+    public void CmdResolveAction(NetEffect netEffect)
     {
-        var action = card.FindAction(actionName);
-        var effect = action.FindEffect(effectID, isManual: isManual);
+        var effect = netEffect.GetEffect();
+        game.ResolveManualEffect(effect.action.card, effect.action, effect);
+    }
 
-        game.ResolveManualEffect(card, action, effect);
+    [Command]
+    public void CmdConfirmEffect(NetEffect netEffect)
+    {
+        var effect = (IConfirmable)netEffect.GetEffect();
+        effect.Confirm(game);
+    }
+
+    [Command]
+    public void CmdCancelEffect(NetEffect netEffect)
+    {
+        var effect = (IConfirmable)netEffect.GetEffect();
+        effect.Cancel();
     }
 
     [Server]
@@ -165,10 +178,14 @@ public class Player : NetworkBehaviour
         discardPile.AddCard(card);
     }
 
+    public void DiscardCard(Card card)
+    {
+        hand.RemoveCard(card);
+        discardPile.AddCard(card);
+    }
+
     public void ScrapCard(Card card)
     {
-        Debug.Log("removing card");
-
         switch (card.location)
         {
             case Location.HAND:
@@ -204,12 +221,10 @@ public class Player : NetworkBehaviour
         combat = 0;
         trade = 0;
 
-        //TODO: improve to let hand handle this removing logic
         while (hand.Count() > 0)
         {
             var card = hand.FirstCard();
-            hand.RemoveCard(card);
-            discardPile.AddCard(card);
+            DiscardCard(card);
         }
 
         var discardedShips = playArea.DiscardShips();

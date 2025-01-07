@@ -20,7 +20,8 @@ public class OrAction : Action
 
     [Server]
     //God forgive for what i've done here
-    public override void EffectResolved(Effect.Base effect)
+    //I need to understand why i wrote the message above :sad:
+    public override void OnEffectResolved(Effect.Base effect)
     {
         if (effect != currentEffect)
             throw new ArgumentException("Effect is not the current active");

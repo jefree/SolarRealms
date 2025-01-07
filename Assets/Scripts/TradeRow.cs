@@ -14,7 +14,6 @@ public class TradeRow : NetworkBehaviour
     [HideInInspector] List<Card> tradeDeck = new();
     [HideInInspector] readonly SyncListCard cards = new();
 
-    // Start is called before the first frame update
     public override void OnStartServer()
     {
         game = GameObject.Find("Game").GetComponent<Game>();

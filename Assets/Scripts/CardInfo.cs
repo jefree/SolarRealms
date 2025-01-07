@@ -1,6 +1,5 @@
 using System;
 using Mirror;
-using UnityEngine;
 
 [Serializable]
 public struct CardInfo
