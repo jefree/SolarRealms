@@ -727,6 +727,7 @@ GameObject:
   - component: {fileID: 579768164}
   - component: {fileID: 579768167}
   - component: {fileID: 579768168}
+  - component: {fileID: 579768169}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -813,7 +814,7 @@ MonoBehaviour:
   autoConnectClientBuild: 0
   offlineScene: 
   onlineScene: 
-  transport: {fileID: 579768167}
+  transport: {fileID: 579768169}
   networkAddress: localhost
   maxConnections: 100
   disconnectInactiveConnections: 0
@@ -839,6 +840,24 @@ MonoBehaviour:
   evaluationMethod: 0
   evaluationInterval: 3
   timeInterpolationGui: 0
+--- !u!114 &579768169
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 579768163}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96b149f511061407fb54895c057b7736, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  wrap: {fileID: 579768167}
+  latency: 500
+  jitter: 0.02
+  jitterSpeed: 1
+  unreliableLoss: 2
+  unreliableScramble: 2
 --- !u!1 &713165757
 GameObject:
   m_ObjectHideFlags: 0
@@ -2920,6 +2939,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   game: {fileID: 2003173204}
+  textMesh: {fileID: 1209078780}
 --- !u!1 &2003173203
 GameObject:
   m_ObjectHideFlags: 0

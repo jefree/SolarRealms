@@ -4,24 +4,23 @@ public class ConfirmDialog : MonoBehaviour
 {
     public Game game;
 
-    TMPro.TextMeshProUGUI textMesh;
+    public TMPro.TextMeshProUGUI textMesh;
     Effect.IConfirmNetable effect;
 
     // Start is called before the first frame update
     void Start()
     {
-        textMesh = gameObject.transform.Find("Panel/Text").GetComponent<TMPro.TextMeshProUGUI>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        textMesh.text = effect.ConfirmText();
     }
 
-    public void Show(Effect.IConfirmNetable effect)
+    public void Show(Effect.IConfirmNetable effect, string text)
     {
         this.effect = effect;
+        textMesh.text = text;
 
         gameObject.SetActive(true);
     }
@@ -38,5 +37,10 @@ public class ConfirmDialog : MonoBehaviour
         game.localPlayer.CmdCancelEffect(effect.ToNet());
 
         gameObject.SetActive(false);
+    }
+
+    public void SetText(string text)
+    {
+        textMesh.text = text;
     }
 }

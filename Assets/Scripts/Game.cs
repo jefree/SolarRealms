@@ -230,10 +230,10 @@ public class Game : NetworkBehaviour
     }
 
     [Server]
-    public void StartConfirmEffect(Effect.IConfirmNetable effect)
+    public void StartConfirmEffect(Effect.IConfirmNetable effect, string text)
     {
         var conn = activePlayer.GetComponent<NetworkIdentity>().connectionToClient;
-        TargetShowConfirmDialog(conn, effect.ToNet());
+        TargetShowConfirmDialog(conn, effect.ToNet(), text);
     }
 
     public void ShowEffectList(Card card)
@@ -293,6 +293,13 @@ public class Game : NetworkBehaviour
         TargetShowMessage(conn, message, persist);
     }
 
+    [Server]
+    public void SetNetConfirmText(string text)
+    {
+        var conn = activePlayer.GetComponent<NetworkIdentity>().connectionToClient;
+        TargetSetConfirmText(conn, text);
+    }
+
     public void ShowLocalMessage(string message, bool persist = false)
     {
         if (persist)
@@ -312,9 +319,15 @@ public class Game : NetworkBehaviour
     }
 
     [TargetRpc]
-    void TargetShowConfirmDialog(NetworkConnectionToClient conn, NetEffect netEffect)
+    void TargetShowConfirmDialog(NetworkConnectionToClient conn, NetEffect netEffect, string text)
     {
-        confirmDialog.Show((IConfirmNetable)netEffect.GetEffect());
+        confirmDialog.Show((IConfirmNetable)netEffect.GetEffect(), text);
+    }
+
+    [TargetRpc]
+    void TargetSetConfirmText(NetworkConnectionToClient conn, string text)
+    {
+        confirmDialog.SetText(text);
     }
 
     [TargetRpc]

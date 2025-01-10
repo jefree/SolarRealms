@@ -71,7 +71,6 @@ namespace Effect
     {
         void Confirm(Game game);
         void Cancel();
-        string ConfirmText();
     }
 
     public interface INetable
@@ -269,7 +268,7 @@ namespace Effect
             // Show confirm dialog for no limited selection effects, so effect can be apply at some point
             if (targetCount == int.MaxValue)
             {
-                game.StartConfirmEffect(this);
+                game.StartConfirmEffect(this, ConfirmText());
             }
         }
 
@@ -294,7 +293,7 @@ namespace Effect
             return $"Descarta cualquier numero de cartas y gana {basicEffect.Text()} por cada una";
         }
 
-        public string ConfirmText()
+        string ConfirmText()
         {
             return $"Descartar {selectedCards.Count} Carta(s) ?";
         }
@@ -315,16 +314,14 @@ namespace Effect
             {
                 card.isSelected = false;
                 selectedCards.Remove(card);
-                return;
             }
-
-            selectedCards.Add(card);
-            card.isSelected = true;
-
-            if (selectedCards.Count == targetCount)
+            else
             {
-                Apply(game);
+                selectedCards.Add(card);
+                card.isSelected = true;
             }
+
+            game.SetNetConfirmText(ConfirmText());
         }
     }
 }
