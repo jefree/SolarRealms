@@ -15,19 +15,20 @@ public class ConfirmDialog : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        textMesh.text = effect.ConfirmText();
     }
 
-    public void Show(Effect.IConfirmNetable effect, string text)
+    public void Show(Effect.IConfirmNetable effect)
     {
         this.effect = effect;
-        textMesh.text = text;
+        textMesh.text = effect.ConfirmText();
 
         gameObject.SetActive(true);
     }
 
     public void Confirm()
     {
-        game.localPlayer.CmdConfirmEffect(effect.ToNet());
+        game.localPlayer.CmdConfirmEffect(effect.ToNet(), effect.GetState());
         gameObject.SetActive(false);
     }
 

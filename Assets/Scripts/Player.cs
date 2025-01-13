@@ -119,12 +119,23 @@ public class Player : NetworkBehaviour
         game.AttackBase(card);
     }
 
+    [Server]
     public void PlayCard(Card card)
     {
         if (card.location == Location.HAND)
         {
             hand.RemoveCard(card);
             playArea.AddCard(card);
+        }
+    }
+
+    [Client]
+    public void PlayCardLocal(Card card)
+    {
+        if (card.location == Location.HAND)
+        {
+            hand.OnCardRemoved(card, diff: 1);
+            playArea.AddCardLocal(card);
         }
     }
 
@@ -140,6 +151,15 @@ public class Player : NetworkBehaviour
     }
 
     [Command]
+    public void CmdStartChooseCard()
+    {
+        if (game.activePlayer != this)
+            return;
+
+        game.StartChooseCard();
+    }
+
+    [Command]
     public void CmdChooseCard(Card card)
     {
         if (game.activePlayer != this)
@@ -149,16 +169,32 @@ public class Player : NetworkBehaviour
     }
 
     [Command]
-    public void CmdResolveAction(NetEffect netEffect)
+    public void CmdSetCurrentEffect(NetEffect netEffect)
     {
         var effect = netEffect.GetEffect();
-        game.ResolveManualEffect(effect.action.card, effect.action, effect);
+        game.SetCurrentEffect(effect);
     }
 
     [Command]
-    public void CmdConfirmEffect(NetEffect netEffect)
+    public void CmdResolveEffect(NetEffect netEffect)
     {
-        var effect = (IConfirmable)netEffect.GetEffect();
+        var effect = netEffect.GetEffect();
+
+        if (effect.isManual)
+        {
+            game.ResolveManualEffect(effect);
+        }
+        else
+        {
+            effect.action.ActivateEffect(effect);
+        }
+    }
+
+    [Command]
+    public void CmdConfirmEffect(NetEffect netEffect, EffectState state)
+    {
+        var effect = (IConfirmNetable)netEffect.GetEffect();
+        effect.LoadState(state);
         effect.Confirm(game);
     }
 

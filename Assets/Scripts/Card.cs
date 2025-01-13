@@ -21,7 +21,6 @@ public enum CardType
     BASE
 }
 
-
 public class SyncListCard : SyncList<Card> { }
 
 [Serializable]
@@ -34,8 +33,8 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
     [SyncVar] public Player player;
     [SyncVar] public Game game;
     [SyncVar] public CardType type; // Ship or Base
-    [SyncVar] public bool isSelected;
 
+    public bool isSelected;
     public Action mainAction;
     public Action allyAction;
     public Action doubleAllyAction;
@@ -113,18 +112,19 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
 
         if (currentAction == null)
         {
-            game.CardResolved(this);
+            game.OnCardResolved(this);
             return;
         }
 
         currentAction.Activate();
     }
 
+    [Server]
     public void ActionResolved(Action action)
     {
         if (action.actionName == "scrap")
         {
-            game.CardResolved(this);
+            game.OnCardResolved(this);
             game.ScrapCard(this);
             return;
         }
@@ -257,7 +257,7 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
            game.localPlayer.IsOurTurn()
         )
         {
-            game.localPlayer.CmdChooseCard(this);
+            game.ChooseCard(this);
             return;
         }
 
@@ -288,7 +288,7 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
             location == Location.HAND
         )
         {
-
+            player.PlayCardLocal(this);
             player.CmdPlayCard(this);
             return;
         }

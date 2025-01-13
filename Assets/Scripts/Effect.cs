@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
-
+using Mirror;
 
 namespace Effect
 {
@@ -11,12 +10,18 @@ namespace Effect
 
         public Action action;
 
+        public abstract string ID();
+        public abstract void Apply(Game game);
+
+        public virtual void Dispatch(Game game)
+        {
+            game.localPlayer.CmdResolveEffect(ToNet());
+        }
+
         public virtual void Activate(Game game)
         {
             Resolve(game);
         }
-
-        public abstract void Apply(Game game);
 
         public virtual void Resolve(Game game)
         {
@@ -24,11 +29,9 @@ namespace Effect
             action.OnEffectResolved(this);
         }
 
-        public abstract string ID();
-
         public virtual void Animate(Card card)
         {
-
+            // TODO: looks like this is broken at the moment
         }
 
         public virtual string Text() { return ""; }
@@ -37,7 +40,17 @@ namespace Effect
         {
             return new NetEffect(this);
         }
+    }
 
+    public abstract class Manual : Base
+    {
+        public abstract void ManualActivate(Game game);
+
+        public override void Dispatch(Game game)
+        {
+            game.localPlayer.CmdSetCurrentEffect(ToNet());
+            ManualActivate(game);
+        }
     }
 
     public struct NetEffect
@@ -62,6 +75,11 @@ namespace Effect
         }
     }
 
+    public struct EffectState
+    {
+        public Card[] cards;
+    }
+
     public interface ICardReceiver
     {
         void SetCard(Game game, Card card);
@@ -71,6 +89,8 @@ namespace Effect
     {
         void Confirm(Game game);
         void Cancel();
+
+        string ConfirmText();
     }
 
     public interface INetable
@@ -78,7 +98,11 @@ namespace Effect
         NetEffect ToNet();
     }
 
-    public interface IConfirmNetable : IConfirmable, INetable { }
+    public interface IConfirmNetable : IConfirmable, INetable
+    {
+        public abstract EffectState GetState();
+        public abstract void LoadState(EffectState state);
+    }
 
     public class Basic : Base
     {
@@ -150,51 +174,81 @@ namespace Effect
         }
     }
 
-    public class ScrapCard : Base, ICardReceiver
+    public class ScrapCard : Manual, ICardReceiver, IConfirmNetable
     {
         Game game;
         Card card;
         Location location;
-
 
         public ScrapCard(Location location)
         {
             this.location = location;
         }
 
-        public override void Activate(Game game)
+        public override void ManualActivate(Game game)
         {
             this.game = game;
-
-            game.StartChooseCard();
+            game.localPlayer.CmdStartChooseCard();
+            game.StartConfirmEffect(this);
         }
 
         public override void Apply(Game game)
         {
+            if (card == null) { return; }
+
             game.ScrapCard(card);
         }
 
+        [Client]
         public void SetCard(Game game, Card card)
         {
             if (location.HasFlag(card.location))
             {
                 this.card = card;
-                Resolve(game);
             }
             else
             {
-                game.ShowNetMessage("carta no valida");
+                game.ShowLocalMessage("carta no valida");
             }
         }
 
         public override string Text()
         {
-            return $"deshuesa una carta de {location}";
+            return $"Deshuesa una carta de {location}";
         }
 
         public override string ID()
         {
             return $"SCRAP Location({location})";
+        }
+
+        public EffectState GetState()
+        {
+            var state = new EffectState();
+            state.cards = new Card[] { card };
+
+            return state;
+        }
+
+        public void LoadState(EffectState state)
+        {
+            this.card = state.cards.First();
+        }
+
+        public void Confirm(Game game)
+        {
+            Resolve(game);
+        }
+
+        public void Cancel()
+        {
+            action.OnEffectCanceled(this);
+        }
+
+        public string ConfirmText()
+        {
+            var cardName = card != null ? card.cardName : "Nada";
+            return $"Deshuesar <b>{cardName}</b>?";
         }
     }
 
@@ -248,10 +302,10 @@ namespace Effect
         }
     }
 
-    public class DiscardMultiply : Base, ICardReceiver, IConfirmNetable
+    public class DiscardMultiply : Manual, ICardReceiver, IConfirmNetable
     {
         int targetCount;
-        Effect.Basic basicEffect;
+        Basic basicEffect;
         List<Card> selectedCards = new();
 
         public DiscardMultiply(int count, Effect.Basic effect)
@@ -260,15 +314,15 @@ namespace Effect
             basicEffect = effect;
         }
 
-        public override void Activate(Game game)
+        public override void ManualActivate(Game game)
         {
             selectedCards.Clear();
-            game.StartChooseCard();
+            game.localPlayer.CmdStartChooseCard();
 
             // Show confirm dialog for no limited selection effects, so effect can be apply at some point
             if (targetCount == int.MaxValue)
             {
-                game.StartConfirmEffect(this, ConfirmText());
+                game.StartConfirmEffect(this);
             }
         }
 
@@ -293,9 +347,9 @@ namespace Effect
             return $"Descarta cualquier numero de cartas y gana {basicEffect.Text()} por cada una";
         }
 
-        string ConfirmText()
+        public string ConfirmText()
         {
-            return $"Descartar {selectedCards.Count} Carta(s) ?";
+            return $"Descartar <b>{selectedCards.Count}</b> Carta(s) ?";
         }
 
         public void Confirm(Game game)
@@ -308,6 +362,7 @@ namespace Effect
             action.OnEffectCanceled(this);
         }
 
+        [Client]
         public void SetCard(Game game, Card card)
         {
             if (card.isSelected && selectedCards.Contains(card))
@@ -320,8 +375,19 @@ namespace Effect
                 selectedCards.Add(card);
                 card.isSelected = true;
             }
+        }
 
-            game.SetNetConfirmText(ConfirmText());
+        public EffectState GetState()
+        {
+            var state = new EffectState();
+            state.cards = selectedCards.ToArray();
+
+            return state;
+        }
+
+        public void LoadState(EffectState state)
+        {
+            selectedCards = state.cards.ToList();
         }
     }
 }

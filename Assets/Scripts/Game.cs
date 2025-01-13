@@ -2,12 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
-using Unity.VisualScripting;
-using Org.BouncyCastle.Crypto.Engines;
 using System;
-using UnityEngine.Events;
-using Mirror.SimpleWeb;
-using System.Linq;
+
 using Effect;
 
 public enum GameState
@@ -28,7 +24,7 @@ public class Game : NetworkBehaviour
     [HideInInspector, SyncVar] public Player activePlayer;
     public readonly SyncList<Player> players = new();
     [HideInInspector, SyncVar] public GameState state;
-    [HideInInspector, SyncVar] public Card currentCard;
+    [HideInInspector] public Card currentCard;
     [SyncVar] public List<string> turnEffects = new();
 
     public GameObject cardPrefab;
@@ -101,6 +97,7 @@ public class Game : NetworkBehaviour
         ShowLocalMessage("Juega una o mas cartas", persist: true);
     }
 
+    [Server]
     public void PlayCard(Card card)
     {
         activePlayer.PlayCard(card);
@@ -128,6 +125,7 @@ public class Game : NetworkBehaviour
         }
     }
 
+    [Server]
     public void ScrapCard(Card card)
     {
         if (card.location == Location.TRADE_ROW)
@@ -154,7 +152,8 @@ public class Game : NetworkBehaviour
         currentCard.Activate();
     }
 
-    public void CardResolved(Card card)
+    [Server]
+    public void OnCardResolved(Card card)
     {
         state = GameState.DO_BASIC;
         currentCard = null;
@@ -165,15 +164,37 @@ public class Game : NetworkBehaviour
         }
     }
 
-    public void ResolveManualEffect(Card card, Action action, Effect.Base effect)
+    [Server]
+    public void SetCurrentEffect(Base effect)
     {
         if (currentCard != null)
             throw new ArgumentException("There is already a card being played");
 
-        currentCard = card;
-        currentCard.currentAction = action;
-        action.currentEffect = effect;
+        currentCard = effect.action.card;
+        currentCard.currentAction = effect.action;
+        effect.action.currentEffect = effect;
 
+        RpcSetCurrentEffect(effect.ToNet());
+    }
+
+    [ClientRpc]
+    void RpcSetCurrentEffect(NetEffect netEffect)
+    {
+        if (isServer) { return; }
+
+        var effect = netEffect.GetEffect();
+
+        currentCard = effect.action.card;
+        currentCard.currentAction = effect.action;
+        effect.action.currentEffect = effect;
+
+        Debug.Log("current effect updated");
+    }
+
+    [Server]
+    public void ResolveManualEffect(Base effect)
+    {
+        SetCurrentEffect(effect);
         effect.action.ActivateEffect(effect);
     }
 
@@ -222,18 +243,16 @@ public class Game : NetworkBehaviour
         ShowNetMessage("Escoge un carta");
     }
 
-    [Server]
     public void ChooseCard(Card card)
     {
-        var cardReceiver = (Effect.ICardReceiver)currentCard.currentAction.currentEffect;
+        var cardReceiver = (ICardReceiver)currentCard.currentAction.currentEffect;
         cardReceiver.SetCard(this, card);
     }
 
-    [Server]
-    public void StartConfirmEffect(Effect.IConfirmNetable effect, string text)
+    [Client]
+    public void StartConfirmEffect(Effect.IConfirmNetable effect)
     {
-        var conn = activePlayer.GetComponent<NetworkIdentity>().connectionToClient;
-        TargetShowConfirmDialog(conn, effect.ToNet(), text);
+        confirmDialog.Show(effect);
     }
 
     public void ShowEffectList(Card card)
@@ -293,13 +312,6 @@ public class Game : NetworkBehaviour
         TargetShowMessage(conn, message, persist);
     }
 
-    [Server]
-    public void SetNetConfirmText(string text)
-    {
-        var conn = activePlayer.GetComponent<NetworkIdentity>().connectionToClient;
-        TargetSetConfirmText(conn, text);
-    }
-
     public void ShowLocalMessage(string message, bool persist = false)
     {
         if (persist)
@@ -316,12 +328,6 @@ public class Game : NetworkBehaviour
     void TargetShowMessage(NetworkConnectionToClient conn, string message, bool persist)
     {
         ShowLocalMessage(message, persist);
-    }
-
-    [TargetRpc]
-    void TargetShowConfirmDialog(NetworkConnectionToClient conn, NetEffect netEffect, string text)
-    {
-        confirmDialog.Show((IConfirmNetable)netEffect.GetEffect(), text);
     }
 
     [TargetRpc]

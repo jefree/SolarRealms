@@ -29,7 +29,10 @@ public class EffectListUI : MonoBehaviour
         prefix = prefix == "" && action is OrAction ? "Or " : "";
         var color = action.actionName == "scrap" ? Color.red : Color.white;
 
-        foreach (var effect in action.manualEffects)
+        // var effects = action.actionName == "scrap" ? action.effects : action.manualEffects;
+        var effects = action.manualEffects;
+
+        foreach (var effect in effects)
         {
             AddEffect(effect, action, color, prefix);
         }
@@ -53,8 +56,9 @@ public class EffectListUI : MonoBehaviour
     public void Activate(EffectButton button)
     {
         Close();
+        button.effect.Dispatch(game);
 
-        game.localPlayer.CmdResolveAction(button.effect.ToNet());
+        // game.localPlayer.CmdResolveAction(button.effect.ToNet());
     }
 
     public void Close()

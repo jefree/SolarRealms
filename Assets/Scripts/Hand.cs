@@ -59,22 +59,21 @@ public class Hand : NetworkBehaviour
     }
 
     [Client]
-    void OnCardRemoved(Card card)
+    public void OnCardRemoved(Card card, int diff = 0)
     {
         if (!card.player.isLocalPlayer)
             card.Show();
 
-        RepositionCards();
+        RepositionCards(diff);
     }
 
-    void RepositionCards()
+    void RepositionCards(int diff = 0)
     {
-
         var i = 0;
         foreach (var card in cards)
         {
             card.transform.localPosition = new Vector3(0, 0, 0);
-            card.transform.Translate(new Vector3(i * (Game.CARD_WIDTH + Game.CARD_PADDING), 0, 0), Space.World);
+            card.transform.Translate(new Vector3((i - diff) * (Game.CARD_WIDTH + Game.CARD_PADDING), 0, 0), Space.World);
 
             i++;
         }
