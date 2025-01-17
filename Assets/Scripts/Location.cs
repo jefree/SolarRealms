@@ -1,4 +1,4 @@
-public enum Location
+public enum CardLocation
 {
     UNDEFINED = 1,
     TRADE_DECK = 2,

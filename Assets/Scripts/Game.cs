@@ -4,8 +4,6 @@ using UnityEngine;
 using Mirror;
 using System;
 
-using Effect;
-
 public enum GameState
 {
     DO_BASIC, //play card from hand, activate ship or base, buy card, check discard pile
@@ -128,7 +126,7 @@ public class Game : NetworkBehaviour
     [Server]
     public void ScrapCard(Card card)
     {
-        if (card.location == Location.TRADE_ROW)
+        if (card.location == CardLocation.TRADE_ROW)
         {
             tradeRow.ScrapCard(card);
         }
@@ -142,6 +140,12 @@ public class Game : NetworkBehaviour
         Destroy(card.gameObject);
     }
 
+    [Server]
+    public void AcquireCard(Card card, Deck.Location location)
+    {
+        tradeRow.RemoveCard(card);
+        activePlayer.AcquireCard(card, location);
+    }
 
     // ResolveCard -> card.Activate -> ResolveAction -> action.Activate -> effect.Activate -> EffectResolved
     void ResolveCard(Card card)
@@ -165,7 +169,7 @@ public class Game : NetworkBehaviour
     }
 
     [Server]
-    public void SetCurrentEffect(Base effect)
+    public void SetCurrentEffect(Effect.Base effect)
     {
         if (currentCard != null)
             throw new ArgumentException("There is already a card being played");
@@ -173,26 +177,20 @@ public class Game : NetworkBehaviour
         currentCard = effect.action.card;
         currentCard.currentAction = effect.action;
         effect.action.currentEffect = effect;
-
-        RpcSetCurrentEffect(effect.ToNet());
     }
 
-    [ClientRpc]
-    void RpcSetCurrentEffect(NetEffect netEffect)
+    [Client]
+    void SetLocalCurrentEffect(Effect.Base effect)
     {
         if (isServer) { return; }
-
-        var effect = netEffect.GetEffect();
 
         currentCard = effect.action.card;
         currentCard.currentAction = effect.action;
         effect.action.currentEffect = effect;
-
-        Debug.Log("current effect updated");
     }
 
     [Server]
-    public void ResolveManualEffect(Base effect)
+    public void ResolveManualEffect(Effect.Base effect)
     {
         SetCurrentEffect(effect);
         effect.action.ActivateEffect(effect);
@@ -245,14 +243,17 @@ public class Game : NetworkBehaviour
 
     public void ChooseCard(Card card)
     {
-        var cardReceiver = (ICardReceiver)currentCard.currentAction.currentEffect;
+        var cardReceiver = (Effect.ICardReceiver)currentCard.currentAction.currentEffect;
         cardReceiver.SetCard(this, card);
     }
 
     [Client]
-    public void StartConfirmEffect(Effect.IConfirmNetable effect)
+    public void StartConfirmEffect(Effect.IConfirmNetable effect, bool showCancel = true)
     {
-        confirmDialog.Show(effect);
+        var baseEffect = (Effect.Base)effect;
+
+        SetLocalCurrentEffect(baseEffect);
+        confirmDialog.Show(effect, showCancel);
     }
 
     public void ShowEffectList(Card card)
@@ -264,6 +265,13 @@ public class Game : NetworkBehaviour
         }
 
         actionListUI.Show(card);
+    }
+
+    [Server]
+    public void CloseNetConfirm()
+    {
+        var conn = activePlayer.GetComponent<NetworkIdentity>().connectionToClient;
+        TargetCloseConfirm(conn);
     }
 
     public void AttackPlayer(Player player)
@@ -331,9 +339,17 @@ public class Game : NetworkBehaviour
     }
 
     [TargetRpc]
-    void TargetSetConfirmText(NetworkConnectionToClient conn, string text)
+    public void TargetStartConfirm(NetworkConnectionToClient conn, Effect.NetEffect netEffect)
     {
-        confirmDialog.SetText(text);
+        var effect = (Effect.Manual)netEffect.GetEffect();
+        SetLocalCurrentEffect(effect);
+        effect.ManualActivate(this);
+    }
+
+    [TargetRpc]
+    public void TargetCloseConfirm(NetworkConnectionToClient conn)
+    {
+        confirmDialog.Close();
     }
 
     [TargetRpc]

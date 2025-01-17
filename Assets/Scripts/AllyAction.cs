@@ -2,7 +2,7 @@ using Condition;
 
 public class AllyCardAction : Action
 {
-    public AllyCardAction(Game game, Card card, string name) : base(game, name)
+    public AllyCardAction(Card card, string name) : base(card, name)
     {
         AddCondition(new AllyCardCondition(card));
     }
@@ -10,7 +10,7 @@ public class AllyCardAction : Action
 
 public class DoubleAllyCardAction : Action
 {
-    public DoubleAllyCardAction(Game game, Card card, string name) : base(game, name)
+    public DoubleAllyCardAction(Card card, string name) : base(card, name)
     {
         AddCondition(new DoubleAllyCardCondition(card));
     }

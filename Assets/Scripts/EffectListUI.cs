@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class EffectListUI : MonoBehaviour
 {
@@ -27,12 +28,9 @@ public class EffectListUI : MonoBehaviour
         // improve this, maybe each kind of action can draw in the list with its own style
         var prefix = action.actionName == "scrap" ? "DESHUESAR: " : "";
         prefix = prefix == "" && action is OrAction ? "Or " : "";
-        var color = action.actionName == "scrap" ? Color.red : Color.white;
+        var color = action.actionName == "scrap" ? Color.red : Color.green;
 
-        // var effects = action.actionName == "scrap" ? action.effects : action.manualEffects;
-        var effects = action.manualEffects;
-
-        foreach (var effect in effects)
+        foreach (var effect in action.manualEffects)
         {
             AddEffect(effect, action, color, prefix);
         }
@@ -41,16 +39,17 @@ public class EffectListUI : MonoBehaviour
     void AddEffect(Effect.Base effect, Action action, Color color, string prefix = "")
     {
         var panelTransform = transform.Find("Panel");
-        var effectGO = Instantiate(itemPrefab, panelTransform);
+        var effectButton = Instantiate(itemPrefab, panelTransform).GetComponent<EffectButton>();
 
-        effectGO.GetComponent<EffectButton>().effect = effect;
-        effectGO.GetComponent<EffectButton>().action = action;
-        effectGO.GetComponent<EffectButton>().ui = this;
+        effectButton.effect = effect;
+        effectButton.action = action;
+        effectButton.ui = this;
 
-        var textGUI = effectGO.GetComponent<TMPro.TextMeshProUGUI>();
+        effectButton.textMesh.text = $"{prefix}{effect.Text()}";
 
-        textGUI.color = color;
-        textGUI.text = $"{prefix}{effect.Text()}";
+        var newColors = effectButton.button.colors;
+        newColors.normalColor = color;
+        effectButton.button.colors = newColors;
     }
 
     public void Activate(EffectButton button)

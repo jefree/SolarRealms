@@ -3,8 +3,9 @@ using UnityEngine;
 public class ConfirmDialog : MonoBehaviour
 {
     public Game game;
-
     public TMPro.TextMeshProUGUI textMesh;
+    public GameObject cancelButtonGO;
+
     Effect.IConfirmNetable effect;
 
     // Start is called before the first frame update
@@ -18,25 +19,30 @@ public class ConfirmDialog : MonoBehaviour
         textMesh.text = effect.ConfirmText();
     }
 
-    public void Show(Effect.IConfirmNetable effect)
+    public void Show(Effect.IConfirmNetable effect, bool showCancel = true)
     {
         this.effect = effect;
         textMesh.text = effect.ConfirmText();
 
+        cancelButtonGO.SetActive(showCancel);
         gameObject.SetActive(true);
     }
 
     public void Confirm()
     {
         game.localPlayer.CmdConfirmEffect(effect.ToNet(), effect.GetState());
-        gameObject.SetActive(false);
     }
 
     public void Cancel()
     {
-        var ef = (Effect.Base)effect;
         game.localPlayer.CmdCancelEffect(effect.ToNet());
 
+        Close();
+    }
+
+    public void Close()
+    {
+        effect.CleanUp();
         gameObject.SetActive(false);
     }
 

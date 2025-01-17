@@ -5,11 +5,20 @@ using Mirror;
 using System.Linq;
 using Unity.Collections.LowLevel.Unsafe;
 using Org.BouncyCastle.Asn1.Cmp;
+using Unity.VisualScripting;
+using System;
 
 public class Deck : NetworkBehaviour
 {
     const int INITIAL_SCOUT_AMOUNT = 8;
     const int INITIAL_VIPER_AMOUNT = 2;
+
+    public enum Location
+    {
+        TOP,
+        BOTTOM,
+        SHUFFLE
+    }
 
     public Game game;
     public Player player;
@@ -22,7 +31,7 @@ public class Deck : NetworkBehaviour
 
     public override void OnStartClient()
     {
-        cards.Callback += OnUpdateCards;
+        cards.OnChange += OnUpdateCards;
 
         foreach (var card in cards)
         {
@@ -30,16 +39,16 @@ public class Deck : NetworkBehaviour
         }
     }
 
-    void OnUpdateCards(SyncListCardInfo.Operation op, int index, CardInfo oldCard, CardInfo newCard)
+    void OnUpdateCards(SyncListCardInfo.Operation op, int index, CardInfo card)
     {
         switch (op)
         {
             case SyncListCardInfo.Operation.OP_INSERT:
-                OnCardInserted(newCard);
+                OnCardInserted(card);
                 break;
 
             case SyncListCardInfo.Operation.OP_REMOVEAT:
-                OnCardRemoved(oldCard);
+                OnCardRemoved(card);
                 break;
 
         }
@@ -91,7 +100,7 @@ public class Deck : NetworkBehaviour
     [Server]
     public void Push(Card card)
     {
-        card.location = Location.DECK;
+        card.location = CardLocation.DECK;
         var cardInfo = new CardInfo(card);
 
         card.NetReset();
@@ -105,6 +114,27 @@ public class Deck : NetworkBehaviour
         cards.RemoveAt(0);
 
         return info.card;
+    }
+
+    [Server]
+    public void Add(Card card, Location location)
+    {
+        switch (location)
+        {
+            case Deck.Location.TOP:
+                Push(card);
+                break;
+
+            case Deck.Location.BOTTOM:
+                throw new NotImplementedException();
+
+
+            case Deck.Location.SHUFFLE:
+                throw new NotImplementedException();
+
+            default:
+                throw new ArgumentException($"Invalid Deck.Location value {location}");
+        }
     }
 
     [Client]
@@ -134,9 +164,9 @@ public class Deck : NetworkBehaviour
             initial.Add(CardFactory.GenerateCard("viper", game, cardPrefab, this.gameObject, player: player));
         }
 
-        initial.Add(CardFactory.GenerateCard("blob miner", game, cardPrefab, gameObject, player: player));
-        initial.Add(CardFactory.GenerateCard("blob miner", game, cardPrefab, gameObject, player: player));
-        //initial.Add(CardFactory.GenerateCard("reclamation station", game, cardPrefab, gameObject, player: player));
+        initial.Add(CardFactory.GenerateCard("frontier hawk", game, cardPrefab, gameObject, player: player));
+        initial.Add(CardFactory.GenerateCard("frontier hawk", game, cardPrefab, gameObject, player: player));
+        //initial.Add(CardFactory.GenerateCard("outland station", game, cardPrefab, gameObject, player: player));
         //initial.Add(CardFactory.GenerateCard("reclamation station", game, cardPrefab, gameObject, player: player));
 
         Util.Shuffle(initial);

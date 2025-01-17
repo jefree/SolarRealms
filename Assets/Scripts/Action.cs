@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Mirror;
+using UnityEngine;
 
 public class Action
 {
@@ -16,9 +17,11 @@ public class Action
     protected List<Effect.Base> usedManualEffects = new();
     List<Condition.ICondition> conditions = new();
 
-    public Action(Game game, string name)
+    public Action(Card card, string name)
     {
-        this.game = game;
+        this.card = card;
+        this.game = card.game;
+
         actionName = name;
     }
 
@@ -65,6 +68,7 @@ public class Action
         return SatisfyConditions() && remainingEffects > 0;
     }
 
+    [Server]
     protected void ActivateNextEffect()
     {
         if (effects.Count == 0)
@@ -110,7 +114,7 @@ public class Action
         if (effect != currentEffect)
             throw new ArgumentException("Effect is not the current active");
 
-        // since only manual effects can be canceled we resolve this action right away:w
+        // since only manual effects can be canceled we resolve this action right away
         card.ActionResolved(this);
 
     }

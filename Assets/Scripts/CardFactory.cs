@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using Mirror;
+using Org.BouncyCastle.Crypto.Macs;
 using UnityEngine;
 
 public class CardFactory : MonoBehaviour
 {
 
-    static Dictionary<string, Action<Card, Game>> cards = new();
+    static Dictionary<string, Action<Card>> cards = new();
 
     [Server]
     public static Card GenerateCard(string name, Game game, GameObject cardPrefab, GameObject parent, Player player = null)
@@ -18,7 +19,7 @@ public class CardFactory : MonoBehaviour
         card.game = game;
         card.player = player;
 
-        Build(card, game);
+        Build(card);
 
         NetworkServer.Spawn(cardGameObject);
 
@@ -27,76 +28,62 @@ public class CardFactory : MonoBehaviour
 
     static void Init()
     {
-        cards.Add("viper", Viper);
-        cards.Add("scout", Scout);
         cards.Add("blob miner", BlobMiner);
+        cards.Add("enforcer mech", EnforcerMech);
+        cards.Add("frontier hawk", FrontierHawk);
+        cards.Add("gateship", Gateship);
+        cards.Add("hive queen", HiveQueen);
         cards.Add("infested moon", InfestedMoon);
         cards.Add("integration port", IntegrationPort);
-        cards.Add("hive queen", HiveQueen);
-        cards.Add("enforcer mech", EnforcerMech);
+        cards.Add("neural nexus", NeuralNexus);
         cards.Add("outland station", OutlandStation);
         cards.Add("reclamation station", ReclamationStation);
+        cards.Add("scout", Scout);
+        cards.Add("viper", Viper);
         cards.Add("warpgate cruiser", WarpgateCruiser);
     }
 
-    public static void Build(Card card, Game game)
+    public static void Build(Card card)
     {
         if (cards.Count == 0)
             Init();
 
+
+        card.Init();
         var generator = cards[card.cardName];
 
-        generator(card, game);
+        generator(card);
     }
 
-    public static void Default(Card card, Game game)
-    {
-        card.cost = 1;
-        card.type = CardType.SHIP;
-        card.faction = Faction.UNALIGNED;
-
-        card.mainAction = new Action(game, "main");
-        card.mainAction.AddEffect(new Effect.Basic());
-        card.mainAction.card = card;
-    }
-
-    public static void Viper(Card card, Game game)
+    public static void Viper(Card card)
     {
         card.type = CardType.SHIP;
         card.faction = Faction.UNALIGNED;
 
-        card.mainAction = new Action(game, "main");
-        card.mainAction.AddEffect(new Effect.Basic(combat: 1));
-        card.mainAction.card = card;
+        card.AddEffect(new Effect.Basic(combat: 1), "main");
     }
 
-    public static void Scout(Card card, Game game)
+    public static void Scout(Card card)
     {
         card.type = CardType.SHIP;
         card.faction = Faction.UNALIGNED;
 
-        card.mainAction = new Action(game, "main");
-        card.mainAction.AddEffect(new Effect.Basic(trade: 1));
-        card.mainAction.card = card;
+        card.AddEffect(new Effect.Basic(trade: 1), "main");
     }
 
-    public static void BlobMiner(Card card, Game game)
+    public static void BlobMiner(Card card)
     {
         card.type = CardType.SHIP;
         card.faction = Faction.THE_BLOBS;
         card.cost = 2;
 
-        card.mainAction = new Action(game, "main");
-        card.mainAction.AddEffect(new Effect.Basic(trade: 3));
-        card.mainAction.AddEffect(new Effect.ScrapCard(Location.TRADE_ROW), isManual: true);
-        card.mainAction.card = card;
+        card.AddEffect(new Effect.Basic(trade: 3), "main");
+        card.AddEffect(new Effect.ScrapCard(CardLocation.TRADE_ROW), "main", isManual: true);
 
-        card.scrapAction = new Action(game, "scrap");
-        card.scrapAction.AddEffect(new Effect.Basic(combat: 2), isManual: true);
-        card.scrapAction.card = card;
+        card.AddEffect(new Effect.Basic(combat: 2), "scrap", isManual: true);
     }
 
-    static void InfestedMoon(Card card, Game game)
+    static void InfestedMoon(Card card)
     {
         card.type = CardType.BASE;
         card.faction = Faction.THE_BLOBS;
@@ -104,105 +91,106 @@ public class CardFactory : MonoBehaviour
         card.defense = 5;
         card.outpost = false;
 
-        card.mainAction = new Action(game, "main");
-        card.mainAction.AddEffect(new Effect.Basic(combat: 4));
-        card.mainAction.card = card;
-
-        card.allyAction = new AllyCardAction(game, card, "ally");
-        card.allyAction.AddEffect(new Effect.DrawCard());
-        card.allyAction.card = card;
-
-        card.doubleAllyAction = new DoubleAllyCardAction(game, card, "doubleAlly");
-        card.doubleAllyAction.AddEffect(new Effect.DrawCard());
-        card.doubleAllyAction.card = card;
+        card.AddEffect(new Effect.Basic(combat: 4), "main");
+        card.AddEffect(new Effect.DrawCard(), "ally");
+        card.AddEffect(new Effect.DrawCard(), "doubleAlly");
     }
 
-    static void IntegrationPort(Card card, Game game)
+    static void IntegrationPort(Card card)
     {
         card.type = CardType.BASE;
         card.faction = Faction.MACHINE_CULT;
         card.cost = 3;
         card.defense = 5;
         card.outpost = true;
-        card.mainAction = new Action(game, "main");
-        card.mainAction.AddEffect(new Effect.Basic(trade: 1));
-        card.mainAction.card = card;
+
+        card.AddEffect(new Effect.Basic(trade: 1), "main");
     }
-    static void HiveQueen(Card card, Game game)
+    static void HiveQueen(Card card)
     {
         card.type = CardType.SHIP;
         card.faction = Faction.THE_BLOBS;
         card.cost = 7;
 
-        card.mainAction = new Action(game, "main");
-        card.mainAction.AddEffect(new Effect.Basic(combat: 7));
-        card.mainAction.AddEffect(new Effect.DrawCard());
-        card.mainAction.card = card;
+        card.AddEffect(new Effect.Basic(combat: 7), "main");
+        card.AddEffect(new Effect.DrawCard(), "main");
 
-        card.allyAction = new AllyCardAction(game, card, "ally");
-        card.allyAction.AddEffect(new Effect.Basic(combat: 3));
-        card.allyAction.card = card;
-
-        card.doubleAllyAction = new DoubleAllyCardAction(game, card, "doubleAlly");
-        card.doubleAllyAction.AddEffect(new Effect.Basic(combat: 3));
-        card.doubleAllyAction.card = card;
+        card.AddEffect(new Effect.Basic(combat: 3), "ally");
+        card.AddEffect(new Effect.Basic(combat: 3), "doubleAlly");
     }
 
-    static void EnforcerMech(Card card, Game game)
+    static void EnforcerMech(Card card)
     {
         card.type = CardType.SHIP;
         card.faction = Faction.MACHINE_CULT;
         card.cost = 5;
 
-        card.mainAction = new Action(game, "main");
-        card.mainAction.AddEffect(new Effect.Basic(combat: 5));
-        card.mainAction.AddEffect(new Effect.ScrapCard(Location.HAND), isManual: true);
-        card.mainAction.card = card;
+        card.AddEffect(new Effect.Basic(combat: 5), "main");
+        card.AddEffect(new Effect.ScrapCard(CardLocation.HAND), "main", isManual: true);
     }
 
-    static void OutlandStation(Card card, Game game)
+    static void OutlandStation(Card card)
     {
         card.type = CardType.BASE;
         card.faction = Faction.TRADE_FEDERATION;
         card.cost = 3;
 
-        card.mainAction = new OrAction(game, "main");
-        card.mainAction.AddEffect(new Effect.Basic(trade: 1), isManual: true);
-        card.mainAction.AddEffect(new Effect.Basic(authority: 3), isManual: true);
-        card.mainAction.card = card;
+        card.mainAction = new OrAction(card, "main");
+        card.AddEffect(new Effect.Basic(trade: 1), "main", isManual: true);
+        card.AddEffect(new Effect.Basic(authority: 3), "main", isManual: true);
 
-        card.scrapAction = new Action(game, "scrap");
-        card.scrapAction.AddEffect(new Effect.DrawCard(), isManual: true);
-        card.scrapAction.card = card;
+        card.AddEffect(new Effect.DrawCard(), "scrap", isManual: true);
     }
 
-    static void ReclamationStation(Card card, Game game)
+    static void ReclamationStation(Card card)
     {
         card.type = CardType.BASE;
         card.faction = Faction.MACHINE_CULT;
         card.cost = 3;
 
-        card.mainAction = new Action(game, "main");
-        card.mainAction.AddEffect(new Effect.ScrapCard(Location.DISCARD_PILE), isManual: true);
-        card.mainAction.card = card;
-
-        card.scrapAction = new Action(game, "scrap");
-        card.scrapAction.AddEffect(new Effect.TurnEffectMultiply("scrap", combat: 3), isManual: true);
-        card.scrapAction.card = card;
+        card.AddEffect(new Effect.ScrapCard(CardLocation.DISCARD_PILE), "main", isManual: true);
+        card.AddEffect(new Effect.TurnEffectMultiply("scrap", combat: 3), "scrap", isManual: true);
     }
 
-    static void WarpgateCruiser(Card card, Game game)
+    static void WarpgateCruiser(Card card)
     {
         card.type = CardType.SHIP;
         card.faction = Faction.STAR_EMPIRE;
         card.cost = 3;
 
-        card.mainAction = new Action(game, "main");
-        card.mainAction.AddEffect(new Effect.DiscardMultiply(int.MaxValue, new Effect.Basic(combat: 2)), isManual: true);
-        card.mainAction.card = card;
+        card.AddEffect(new Effect.DiscardMultiply(int.MaxValue, new Effect.Basic(combat: 2)), "main", isManual: true);
+        card.AddEffect(new Effect.DrawCard(), "ally");
+    }
 
-        card.allyAction = new AllyCardAction(game, card, "ally");
-        card.allyAction.AddEffect(new Effect.DrawCard());
-        card.allyAction.card = card;
+    static void Gateship(Card card)
+    {
+        card.type = CardType.SHIP;
+        card.faction = Faction.TRADE_FEDERATION;
+        card.cost = 6;
+
+        card.AddEffect(new Effect.AcquireCard(type: CardType.SHIP_BASE, maxCost: 6), "main", isManual: true);
+        card.AddEffect(new Effect.Basic(authority: 5), "ally");
+    }
+
+    static void NeuralNexus(Card card)
+    {
+        card.type = CardType.BASE;
+        card.faction = Faction.MACHINE_CULT;
+        card.cost = 7;
+        card.outpost = true;
+
+        card.AddEffect(new Effect.ScrapCostMultiply(new Effect.Basic(combat: 1)), "main", isManual: true);
+        card.AddEffect(new Effect.DrawCard(), "ally");
+    }
+
+    static void FrontierHawk(Card card)
+    {
+        card.type = CardType.SHIP;
+        card.faction = Faction.STAR_EMPIRE;
+        card.cost = 1;
+
+        card.AddEffect(new Effect.Basic(combat: 3), "main");
+        card.AddEffect(new Effect.DrawCard(3), "main");
+        card.AddEffect(new Effect.ForceDiscard(3), "main");
     }
 }

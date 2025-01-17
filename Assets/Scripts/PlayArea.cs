@@ -29,8 +29,6 @@ public class PlayArea : NetworkBehaviour
 
     void OnUpdateShips(SyncListCard.Operation op, int index, Card card)
     {
-        if (card.player.isLocalPlayer) return;
-
         switch (op)
         {
             case SyncListCard.Operation.OP_ADD:
@@ -41,8 +39,6 @@ public class PlayArea : NetworkBehaviour
 
     void OnUpdateBases(SyncListCard.Operation op, int index, Card card)
     {
-        if (card.player.isLocalPlayer) return;
-
         switch (op)
         {
             case SyncListCard.Operation.OP_ADD:
@@ -54,7 +50,7 @@ public class PlayArea : NetworkBehaviour
     [Server]
     public void AddCard(Card card)
     {
-        card.location = Location.PLAY_AREA;
+        card.location = CardLocation.PLAY_AREA;
 
         switch (card.type)
         {
@@ -88,20 +84,16 @@ public class PlayArea : NetworkBehaviour
     [Client]
     void OnShipAdded(Card card)
     {
-        var diff = card.player.isLocalPlayer ? 0 : 1;
-
         card.transform.SetParent(shipArea);
-        card.transform.localPosition = new Vector3((ships.Count - diff) * (Game.CARD_WIDTH + Game.CARD_PADDING), 0, 0);
+        card.transform.localPosition = new Vector3((ships.Count - 1) * (Game.CARD_WIDTH + Game.CARD_PADDING), 0, 0);
 
     }
 
     [Client]
     void OnBaseAdded(Card card)
     {
-        var diff = card.player.isLocalPlayer ? 0 : 1;
-
         card.transform.SetParent(baseArea);
-        card.transform.localPosition = new Vector3((bases.Count - diff) * (Game.CARD_WIDTH + Game.CARD_PADDING), 0, 0);
+        card.transform.localPosition = new Vector3((bases.Count - 1) * (Game.CARD_WIDTH + Game.CARD_PADDING), 0, 0);
         card.transform.localRotation = Quaternion.Euler(0, 0, 0);
     }
 
@@ -143,13 +135,13 @@ public class PlayArea : NetworkBehaviour
     void RemoveShip(Card card)
     {
         card.transform.SetParent(null);
-        card.location = Location.UNDEFINED;
+        card.location = CardLocation.UNDEFINED;
 
         ships.Remove(card);
     }
     void RemoveBase(Card card)
     {
-        card.location = Location.UNDEFINED;
+        card.location = CardLocation.UNDEFINED;
         bases.Remove(card);
     }
 

@@ -1,6 +1,6 @@
 public class ScrapAction : Action
 {
-    public ScrapAction(Game game, string name) : base(game, name)
+    public ScrapAction(Card card, string name) : base(card, name)
     {
 
     }

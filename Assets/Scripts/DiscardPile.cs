@@ -12,7 +12,7 @@ public class DiscardPile : NetworkBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        cards.Callback += OnUpdateCards;
+        cards.OnChange += OnUpdateCards;
     }
 
     // Update is called once per frame
@@ -22,15 +22,15 @@ public class DiscardPile : NetworkBehaviour
     }
 
     [Client]
-    void OnUpdateCards(SyncListCard.Operation op, int index, Card oldCard, Card newCard)
+    void OnUpdateCards(SyncListCard.Operation op, int index, Card card)
     {
         switch (op)
         {
             case SyncList<Card>.Operation.OP_ADD:
-                OnCardAdded(newCard);
+                OnCardAdded(card);
                 break;
             case SyncList<Card>.Operation.OP_REMOVEAT:
-                OnCardRemoved(oldCard);
+                OnCardRemoved(card);
                 break;
         }
 
@@ -39,7 +39,7 @@ public class DiscardPile : NetworkBehaviour
     [Server]
     public void AddCard(Card card)
     {
-        card.location = Location.DISCARD_PILE;
+        card.location = CardLocation.DISCARD_PILE;
         cards.Add(card);
     }
 
@@ -61,7 +61,7 @@ public class DiscardPile : NetworkBehaviour
     [Server]
     public void RemoveCard(Card card)
     {
-        card.location = Location.UNDEFINED;
+        card.location = CardLocation.UNDEFINED;
         cards.Remove(card);
     }
 

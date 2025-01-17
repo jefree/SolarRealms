@@ -12,13 +12,13 @@ public enum EffectColor
 
 public class EffectUp : MonoBehaviour
 {
-    TMPro.TextMeshPro textMeshPro;
+    TextMeshPro textMeshPro;
     Queue<(EffectColor, float, CardType)> queue = new();
     float time = 0;
 
     void Start()
     {
-        textMeshPro = GetComponent<TMPro.TextMeshPro>();
+        textMeshPro = GetComponent<TextMeshPro>();
     }
 
     void Update()

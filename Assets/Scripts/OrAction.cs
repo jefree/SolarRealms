@@ -3,7 +3,7 @@ using Mirror;
 
 public class OrAction : Action
 {
-    public OrAction(Game game, string name) : base(game, name)
+    public OrAction(Card card, string name) : base(card, name)
     {
 
     }

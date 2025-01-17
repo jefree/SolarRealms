@@ -122,20 +122,10 @@ public class Player : NetworkBehaviour
     [Server]
     public void PlayCard(Card card)
     {
-        if (card.location == Location.HAND)
+        if (card.location == CardLocation.HAND)
         {
             hand.RemoveCard(card);
             playArea.AddCard(card);
-        }
-    }
-
-    [Client]
-    public void PlayCardLocal(Card card)
-    {
-        if (card.location == Location.HAND)
-        {
-            hand.OnCardRemoved(card, diff: 1);
-            playArea.AddCardLocal(card);
         }
     }
 
@@ -214,31 +204,40 @@ public class Player : NetworkBehaviour
         discardPile.AddCard(card);
     }
 
+    [Server]
     public void DiscardCard(Card card)
     {
         hand.RemoveCard(card);
         discardPile.AddCard(card);
     }
 
+    [Server]
     public void ScrapCard(Card card)
     {
         switch (card.location)
         {
-            case Location.HAND:
+            case CardLocation.HAND:
                 hand.RemoveCard(card);
                 break;
 
-            case Location.DISCARD_PILE:
+            case CardLocation.DISCARD_PILE:
                 discardPile.RemoveCard(card);
                 break;
 
-            case Location.PLAY_AREA:
+            case CardLocation.PLAY_AREA:
                 playArea.RemoveCard(card);
                 break;
 
             default:
                 throw new ArgumentException("Scrapped card does not belong to player");
         }
+    }
+
+    [Server]
+    public void AcquireCard(Card card, Deck.Location location)
+    {
+        card.player = this;
+        deck.Add(card, location);
     }
 
     public void StartTurn()

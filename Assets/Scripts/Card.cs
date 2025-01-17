@@ -18,7 +18,9 @@ public enum Faction : byte
 public enum CardType
 {
     SHIP,
-    BASE
+    BASE,
+
+    SHIP_BASE = SHIP | BASE
 }
 
 public class SyncListCard : SyncList<Card> { }
@@ -28,7 +30,7 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
 {
     [SyncVar] public string cardName;
     [SyncVar] public int cost;
-    [SyncVar(hook = nameof(OnLocationChanged))] public Location location;
+    [SyncVar(hook = nameof(OnLocationChanged))] public CardLocation location;
     [SyncVar] public Faction faction; // Unaligned, Trade Federation, The blobs, Star Empire, Machine Cult
     [SyncVar] public Player player;
     [SyncVar] public Game game;
@@ -47,6 +49,14 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
     public SpriteRenderer image;
     public SpriteRenderer border;
 
+    public void Init()
+    {
+        mainAction = new Action(this, "main");
+        allyAction = new AllyCardAction(this, "ally");
+        doubleAllyAction = new DoubleAllyCardAction(this, "doubleAlly");
+        scrapAction = new ScrapAction(this, "scrap");
+    }
+
     void Start()
     {
         effectUp = Instantiate(combatUpPrefab, transform).GetComponent<EffectUp>();
@@ -57,24 +67,24 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
     {
         border.color = Color.clear;
 
-        if (!game.localPlayer.IsOurTurn() || !isMine())
+        if (!game.localPlayer.IsOurTurn())
         {
             return;
         }
 
-        if (location == Location.HAND && isSelected)
+        if (isSelected)
         {
             border.color = Color.yellow;
             return;
         }
 
-        if (location == Location.PLAY_AREA)
+        if (location == CardLocation.PLAY_AREA)
         {
             if (HasPendingActions(manual: true, includeScrap: false))
             {
                 border.color = Color.green;
             }
-            else if (scrapAction != null)
+            else if (scrapAction.HasPendingEffects(manual: true))
             {
                 border.color = Color.red;
             }
@@ -86,16 +96,16 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
     [Client]
     public override void OnStartClient()
     {
-        CardFactory.Build(this, game);
+        CardFactory.Build(this);
     }
 
-    void OnLocationChanged(Location old, Location current)
+    void OnLocationChanged(CardLocation old, CardLocation current)
     {
-        if (old == Location.HAND && current == Location.DISCARD_PILE)
+        if (old == CardLocation.HAND && current == CardLocation.DISCARD_PILE)
         {
             player.discardPile.OnCardAdded(this);
         }
-        else if (old == Location.DISCARD_PILE && current == Location.DECK)
+        else if (old == CardLocation.DISCARD_PILE && current == CardLocation.DECK)
         {
             player.deck.OnCardInserted(new CardInfo(this));
         }
@@ -230,14 +240,20 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
         return player == game.localPlayer;
     }
 
+    public void AddEffect(Effect.Base effect, string actionName, bool isManual = false)
+    {
+        var action = FindAction(actionName);
+        action.AddEffect(effect, isManual);
+    }
+
     [Client]
     public void OnPointerDown(PointerEventData data)
     {
         // invalidate click on cards outside card list
-        if (game.discardPileList.gameObject.activeSelf && location != Location.DISCARD_PILE)
+        if (game.discardPileList.gameObject.activeSelf && location != CardLocation.DISCARD_PILE)
             return;
 
-        if (location == Location.DISCARD_PILE && !game.discardPileList.gameObject.activeSelf)
+        if (location == CardLocation.DISCARD_PILE && !game.discardPileList.gameObject.activeSelf)
         {
             game.ShowDiscardCards(player);
             return;
@@ -246,7 +262,7 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
         // click other player's hand card
         if (
             game.activePlayer != game.localPlayer ||
-            (location == Location.HAND && player != game.localPlayer)
+            (location == CardLocation.HAND && player != game.localPlayer)
         )
         {
             return;
@@ -265,7 +281,7 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
         // probably attacking a base
         if (
             game.state == GameState.DO_BASIC &&
-            location == Location.PLAY_AREA &&
+            location == CardLocation.PLAY_AREA &&
             game.localPlayer != player &&
             type == CardType.BASE
         )
@@ -276,7 +292,7 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
 
         if (
             game.state == GameState.DO_BASIC &&
-            location == Location.PLAY_AREA
+            location == CardLocation.PLAY_AREA
         )
         {
             game.ShowEffectList(this);
@@ -285,17 +301,16 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
 
         if (
             game.state == GameState.DO_BASIC &&
-            location == Location.HAND
+            location == CardLocation.HAND
         )
         {
-            player.PlayCardLocal(this);
             player.CmdPlayCard(this);
             return;
         }
 
         if (
             game.state == GameState.DO_BASIC &&
-            location == Location.TRADE_ROW
+            location == CardLocation.TRADE_ROW
         )
         {
             game.localPlayer.CmdBuyCard(this);
@@ -305,7 +320,7 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
 
     public void OnPointerEnter(PointerEventData data)
     {
-        if (location == Location.DISCARD_PILE) { return; }
+        if (location == CardLocation.DISCARD_PILE) { return; }
 
         transform.localScale = new Vector2(1.2f, 1.2f);
         image.sortingOrder = 2;
@@ -314,7 +329,7 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
 
     public void OnPointerExit(PointerEventData data)
     {
-        if (location == Location.DISCARD_PILE) { return; }
+        if (location == CardLocation.DISCARD_PILE) { return; }
 
         transform.localScale = Vector2.one;
         image.sortingOrder = 0;

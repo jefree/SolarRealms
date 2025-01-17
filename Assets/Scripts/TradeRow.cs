@@ -21,7 +21,7 @@ public class TradeRow : NetworkBehaviour
 
     public override void OnStartClient()
     {
-        cards.Callback += OnUpdateCards;
+        cards.OnChange += OnUpdateCards;
 
         int i = 0;
         foreach (var card in cards)
@@ -37,16 +37,16 @@ public class TradeRow : NetworkBehaviour
 
     }
 
-    void OnUpdateCards(SyncListCard.Operation op, int index, Card oldCard, Card newCard)
+    void OnUpdateCards(SyncListCard.Operation op, int index, Card card)
     {
         switch (op)
         {
             case SyncListCard.Operation.OP_INSERT:
-                OnCardInserted(newCard, index);
+                OnCardInserted(card, index);
                 break;
 
             case SyncListCard.Operation.OP_REMOVEAT:
-                OnCardRemoved(oldCard, index);
+                OnCardRemoved(card, index);
                 break;
         }
     }
@@ -54,22 +54,21 @@ public class TradeRow : NetworkBehaviour
     [Server]
     public void CreateTradeDeck()
     {
-        AddToTradeDeck(CardFactory.GenerateCard("hive queen", game, cardPrefab, gameObject));
-        AddToTradeDeck(CardFactory.GenerateCard("infested moon", game, cardPrefab, gameObject));
-        AddToTradeDeck(CardFactory.GenerateCard("enforcer mech", game, cardPrefab, gameObject));
-        AddToTradeDeck(CardFactory.GenerateCard("blob miner", game, cardPrefab, gameObject));
-        AddToTradeDeck(CardFactory.GenerateCard("integration port", game, cardPrefab, gameObject));
-        AddToTradeDeck(CardFactory.GenerateCard("integration port", game, cardPrefab, gameObject));
-        AddToTradeDeck(CardFactory.GenerateCard("hive queen", game, cardPrefab, gameObject));
-        AddToTradeDeck(CardFactory.GenerateCard("infested moon", game, cardPrefab, gameObject));
-        AddToTradeDeck(CardFactory.GenerateCard("enforcer mech", game, cardPrefab, gameObject));
-        AddToTradeDeck(CardFactory.GenerateCard("blob miner", game, cardPrefab, gameObject));
-        AddToTradeDeck(CardFactory.GenerateCard("blob miner", game, cardPrefab, gameObject));
-        AddToTradeDeck(CardFactory.GenerateCard("blob miner", game, cardPrefab, gameObject));
-        AddToTradeDeck(CardFactory.GenerateCard("blob miner", game, cardPrefab, gameObject));
+        AddToTradeDeck("blob miner", 3);
+        AddToTradeDeck("enforcer mech");
+        AddToTradeDeck("frontier hawk", 3);
+        AddToTradeDeck("gateship");
+        AddToTradeDeck("hive queen");
+        AddToTradeDeck("infested moon");
+        AddToTradeDeck("integration port", 2);
+        AddToTradeDeck("neural nexus");
+        AddToTradeDeck("outland station", 3);
+        AddToTradeDeck("reclamation station");
+        AddToTradeDeck("warpgate cruiser");
 
         Util.Shuffle(tradeDeck);
     }
+
 
     [Server]
     public void Init()
@@ -84,7 +83,7 @@ public class TradeRow : NetworkBehaviour
     [Server]
     void AddCard(Card card, int position)
     {
-        card.location = Location.TRADE_ROW;
+        card.location = CardLocation.TRADE_ROW;
         cards.Insert(position, card);
     }
 
@@ -96,7 +95,7 @@ public class TradeRow : NetworkBehaviour
 
     public void RemoveCard(Card card)
     {
-        card.location = Location.UNDEFINED;
+        card.location = CardLocation.UNDEFINED;
 
         var freePosition = cards.IndexOf(card);
         cards.Remove(card);
@@ -121,11 +120,16 @@ public class TradeRow : NetworkBehaviour
     }
 
     [Server]
-    void AddToTradeDeck(Card card)
+    void AddToTradeDeck(string cardName, int amount = 1)
     {
-        card.location = Location.TRADE_DECK;
-        tradeDeck.Insert(0, card);
-        RpcCardAdded(card);
+        for (int i = 0; i < amount; i++)
+        {
+            var card = CardFactory.GenerateCard(cardName, game, cardPrefab, gameObject);
+
+            card.location = CardLocation.TRADE_DECK;
+            tradeDeck.Insert(0, card);
+            RpcCardAdded(card);
+        }
     }
 
     [ClientRpc]

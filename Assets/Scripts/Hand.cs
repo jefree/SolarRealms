@@ -9,7 +9,7 @@ public class Hand : NetworkBehaviour
     public override void OnStartClient()
     {
 
-        cards.Callback += OnUpdateCards;
+        cards.OnChange += OnUpdateCards;
 
         foreach (var card in cards)
         {
@@ -18,15 +18,15 @@ public class Hand : NetworkBehaviour
 
     }
 
-    void OnUpdateCards(SyncListCard.Operation op, int index, Card oldCard, Card newCard)
+    void OnUpdateCards(SyncListCard.Operation op, int index, Card card)
     {
         switch (op)
         {
             case SyncListCard.Operation.OP_ADD:
-                OnCardAdded(newCard);
+                OnCardAdded(card);
                 break;
             case SyncListCard.Operation.OP_REMOVEAT:
-                OnCardRemoved(oldCard);
+                OnCardRemoved(card);
                 break;
         }
     }
@@ -34,7 +34,7 @@ public class Hand : NetworkBehaviour
     [Server]
     public void AddCard(Card card)
     {
-        card.location = Location.HAND;
+        card.location = CardLocation.HAND;
         cards.Add(card);
     }
 
@@ -54,7 +54,7 @@ public class Hand : NetworkBehaviour
     [Server]
     public void RemoveCard(Card card)
     {
-        card.location = Location.UNDEFINED;
+        card.location = CardLocation.UNDEFINED;
         cards.Remove(card);
     }
 
