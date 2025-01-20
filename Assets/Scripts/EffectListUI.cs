@@ -5,18 +5,18 @@ public class EffectListUI : MonoBehaviour
 {
     public GameObject itemPrefab;
     public Game game;
+    public UIManager ui;
     Card currentCard;
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            Close();
-        }
+
     }
 
     public void Show(Card card)
     {
+        ui.ShowNew(GetComponent<UIDisplay>());
+
         currentCard = card;
         currentCard.Actions().ForEach(action => AddEffects(action));
 
@@ -25,9 +25,15 @@ public class EffectListUI : MonoBehaviour
 
     void AddEffects(Action action)
     {
+
+        if (!action.SatisfyConditions())
+        {
+            return;
+        }
+
         // improve this, maybe each kind of action can draw in the list with its own style
         var prefix = action.actionName == "scrap" ? "DESHUESAR: " : "";
-        prefix = prefix == "" && action is OrAction ? "Or " : "";
+        prefix = prefix == "" ? $"{action.PrefixText()} " : "";
         var color = action.actionName == "scrap" ? Color.red : Color.green;
 
         foreach (var effect in action.manualEffects)

@@ -170,6 +170,16 @@ public class PlayArea : NetworkBehaviour
         return factionCards;
     }
 
+    public List<Card> TypeCards(CardType type)
+    {
+        List<Card> typeCards = new();
+
+        typeCards.AddRange(ships.FindAll(card => card.type == type));
+        typeCards.AddRange(bases.FindAll(card => card.type == type));
+
+        return typeCards;
+    }
+
     public List<Card> PendingCards()
     {
         List<Card> pendingCards = new();
@@ -179,5 +189,4 @@ public class PlayArea : NetworkBehaviour
 
         return pendingCards;
     }
-
 }

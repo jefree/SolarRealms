@@ -4,7 +4,12 @@ public class AllyCardAction : Action
 {
     public AllyCardAction(Card card, string name) : base(card, name)
     {
-        AddCondition(new AllyCardCondition(card));
+        AddCondition(new AllyCard(card));
+    }
+
+    public override string PrefixText()
+    {
+        return "Ally:";
     }
 }
 
@@ -12,6 +17,11 @@ public class DoubleAllyCardAction : Action
 {
     public DoubleAllyCardAction(Card card, string name) : base(card, name)
     {
-        AddCondition(new DoubleAllyCardCondition(card));
+        AddCondition(new DoubleAllyCard(card));
+    }
+
+    public override string PrefixText()
+    {
+        return "D-Ally:";
     }
 }

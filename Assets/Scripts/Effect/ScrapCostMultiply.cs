@@ -1,23 +1,27 @@
 using System.Linq;
 using Mirror;
+using UnityEngine;
 
 namespace Effect
 {
     public class ScrapCostMultiply : Manual, ICardReceiver, IConfirmNetable
     {
-        Basic basicEffect;
+        Basic effect;
+        CardLocation location;
         Card card;
+        bool force;
 
-        public ScrapCostMultiply(Basic effect)
+        public ScrapCostMultiply(Basic effect, CardLocation location, bool force = false)
         {
-            basicEffect = effect;
+            this.effect = effect;
+            this.location = location;
+            this.force = force;
         }
 
         public override void ManualActivate(Game game)
         {
             game.localPlayer.CmdStartChooseCard();
-            game.StartConfirmEffect(this);
-
+            game.StartConfirmEffect(this, !force);
         }
 
         public override bool Apply(Game game)
@@ -25,10 +29,11 @@ namespace Effect
             if (card != null)
             {
                 var multiplier = card.cost;
-                var effect = new Basic(basicEffect.combat * multiplier, basicEffect.trade * multiplier, basicEffect.authority * multiplier);
+                Debug.Log(card.cost);
+                var multEffect = new Basic(effect.combat * multiplier, effect.trade * multiplier, effect.authority * multiplier);
 
-                effect.action = action;
-                effect.Apply(game);
+                multEffect.action = action;
+                multEffect.Apply(game);
                 game.ScrapCard(card);
             }
 
@@ -37,12 +42,12 @@ namespace Effect
 
         public override string ID()
         {
-            return $"SCRAP_X_COST {basicEffect.ID()}";
+            return $"SCRAP_X_COST {effect.ID()}";
         }
 
         public override string Text()
         {
-            return $"Deshuesa una carta y gana {basicEffect.Text()} por su costo";
+            return $"Deshuesa una carta y gana {effect.Text()} por su costo";
         }
 
         public string ConfirmText()
@@ -56,9 +61,9 @@ namespace Effect
         [Client]
         public void SetCard(Game game, Card card)
         {
-            if (card.location != CardLocation.HAND && card.location != CardLocation.DISCARD_PILE)
+            if (!location.HasFlag(card.location))
             {
-                game.ShowLocalMessage("Carta invalida");
+                game.ShowLocalMessage("Ubicacion de carta no valida");
                 return;
             }
 

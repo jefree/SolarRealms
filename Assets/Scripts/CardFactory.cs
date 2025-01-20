@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Effect;
 using Mirror;
 using Org.BouncyCastle.Crypto.Macs;
 using UnityEngine;
@@ -35,9 +36,13 @@ public class CardFactory : MonoBehaviour
         cards.Add("hive queen", HiveQueen);
         cards.Add("infested moon", InfestedMoon);
         cards.Add("integration port", IntegrationPort);
+        cards.Add("nanobot swarm", NanobotSwarm);
         cards.Add("neural nexus", NeuralNexus);
+        cards.Add("orbital shuttle", OrbitalShuttle);
         cards.Add("outland station", OutlandStation);
+        cards.Add("pulverizer", Pulverizer);
         cards.Add("reclamation station", ReclamationStation);
+        cards.Add("repair mech", RepairMech);
         cards.Add("scout", Scout);
         cards.Add("viper", Viper);
         cards.Add("warpgate cruiser", WarpgateCruiser);
@@ -127,6 +132,8 @@ public class CardFactory : MonoBehaviour
 
         card.AddEffect(new Effect.Basic(combat: 5), "main");
         card.AddEffect(new Effect.ScrapCard(CardLocation.HAND), "main", isManual: true);
+
+        card.AddEffect(new DrawCard(), "scrap");
     }
 
     static void OutlandStation(Card card)
@@ -146,7 +153,7 @@ public class CardFactory : MonoBehaviour
     {
         card.type = CardType.BASE;
         card.faction = Faction.MACHINE_CULT;
-        card.cost = 3;
+        card.cost = 6;
 
         card.AddEffect(new Effect.ScrapCard(CardLocation.DISCARD_PILE), "main", isManual: true);
         card.AddEffect(new Effect.TurnEffectMultiply("scrap", combat: 3), "scrap", isManual: true);
@@ -177,9 +184,15 @@ public class CardFactory : MonoBehaviour
         card.type = CardType.BASE;
         card.faction = Faction.MACHINE_CULT;
         card.cost = 7;
-        card.outpost = true;
 
-        card.AddEffect(new Effect.ScrapCostMultiply(new Effect.Basic(combat: 1)), "main", isManual: true);
+        card.outpost = true;
+        card.defense = 6;
+
+        card.AddEffect(new Effect.ScrapCostMultiply(
+            new Effect.Basic(combat: 1),
+            CardLocation.HAND_OR_DISCARD
+        ), "main", isManual: true);
+
         card.AddEffect(new Effect.DrawCard(), "ally");
     }
 
@@ -192,5 +205,53 @@ public class CardFactory : MonoBehaviour
         card.AddEffect(new Effect.Basic(combat: 3), "main");
         card.AddEffect(new Effect.DrawCard(3), "main");
         card.AddEffect(new Effect.ForceDiscard(3), "main");
+    }
+
+    static void RepairMech(Card card)
+    {
+        card.type = CardType.SHIP;
+        card.faction = Faction.MACHINE_CULT;
+        card.cost = 4;
+
+        card.mainAction = new OrAction(card, "main");
+        card.AddEffect(new Basic(trade: 3), "main", isManual: true);
+        card.AddEffect(new RecoverCard(CardLocation.DISCARD_PILE, CardType.BASE), "main", isManual: true);
+
+        card.AddEffect(new ScrapCard(CardLocation.HAND_OR_DISCARD), "ally", isManual: true);
+    }
+
+    static void OrbitalShuttle(Card card)
+    {
+        card.type = CardType.SHIP;
+        card.faction = Faction.TRADE_FEDERATION;
+        card.cost = 2;
+
+        card.AddEffect(new Basic(trade: 3), "main");
+        card.AddEffect(new Conditional(
+            new Condition.TypeCard(CardType.BASE, 2),
+            new Basic(authority: 4),
+            new DrawCard()
+        ), "main");
+    }
+
+    static void NanobotSwarm(Card card)
+    {
+        card.type = CardType.SHIP;
+        card.faction = Faction.MACHINE_CULT;
+        card.cost = 8;
+
+        card.AddEffect(new Basic(combat: 5), "main");
+        card.AddEffect(new DrawCard(2), "main");
+        card.AddEffect(new ScrapCard(CardLocation.HAND_OR_DISCARD, 2), "main", isManual: true);
+    }
+
+    static void Pulverizer(Card card)
+    {
+        card.type = CardType.SHIP;
+        card.faction = Faction.THE_BLOBS;
+        card.cost = 5;
+
+        card.AddEffect(new ScrapCostMultiply(new Basic(combat: 1), CardLocation.TRADE_ROW, force: true), "main");
+        card.AddEffect(new DrawCard(), "ally");
     }
 }

@@ -1,4 +1,5 @@
 using System.Linq;
+using Effect.Helper;
 using Mirror;
 
 namespace Effect
@@ -6,12 +7,16 @@ namespace Effect
     public class ScrapCard : Manual, ICardReceiver, IConfirmNetable
     {
         Game game;
-        Card card;
+        CardSelector cards;
         CardLocation location;
+        int count;
 
-        public ScrapCard(CardLocation location)
+        public ScrapCard(CardLocation location, int count = 1)
         {
             this.location = location;
+            this.count = count;
+
+            cards = new CardSelector(count, location);
         }
 
         public override void ManualActivate(Game game)
@@ -23,10 +28,7 @@ namespace Effect
 
         public override bool Apply(Game game)
         {
-            if (card != null)
-            {
-                game.ScrapCard(card);
-            }
+            cards.ForEach(card => game.ScrapCard(card));
 
             return true;
         }
@@ -34,18 +36,10 @@ namespace Effect
         [Client]
         public void SetCard(Game game, Card card)
         {
-            if (card.location.HasFlag(location))
-            {
 
-                if (this.card != null)
-                {
-                    this.card.isSelected = false;
-                }
+            var result = cards.ProcessCard(card);
 
-                this.card = card;
-                this.card.isSelected = true;
-            }
-            else
+            if (result == Result.InvalidLocation)
             {
                 game.ShowLocalMessage("carta no valida");
             }
@@ -53,7 +47,7 @@ namespace Effect
 
         public override string Text()
         {
-            return $"Deshuesa una carta de {location}";
+            return $"Deshuesa {count} carta(s) de {location}";
         }
 
         public override string ID()
@@ -63,29 +57,24 @@ namespace Effect
 
         public EffectState GetState()
         {
-            var state = new EffectState();
-            state.cards = new Card[] { card };
+            var state = new EffectState(cards: cards.ToArray());
 
             return state;
         }
 
         public void LoadState(EffectState state)
         {
-            this.card = state.cards.First();
+            cards.SetCards(state.cards);
         }
 
         public string ConfirmText()
         {
-            var cardName = card != null ? card.cardName : "Nada";
-            return $"Deshuesar <b>{cardName}</b>?";
+            return $"Deshuesar {cards.Count} carta(s)?";
         }
 
         public override void CleanUp()
         {
-            if (this.card != null)
-            {
-                this.card.isSelected = false;
-            }
+            cards.CleanUp();
         }
     }
 }

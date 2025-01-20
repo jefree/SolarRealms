@@ -34,6 +34,7 @@ public class Game : NetworkBehaviour
     public EffectListUI actionListUI;
     public DiscardPileList discardPileList;
     public ConfirmDialog confirmDialog;
+    public CardView cardView;
     public Player localPlayer;
 
     [HideInInspector]
@@ -256,6 +257,7 @@ public class Game : NetworkBehaviour
         confirmDialog.Show(effect, showCancel);
     }
 
+    [Client]
     public void ShowEffectList(Card card)
     {
         if (!card.HasPendingActions(manual: true))
@@ -265,6 +267,12 @@ public class Game : NetworkBehaviour
         }
 
         actionListUI.Show(card);
+    }
+
+    [Client]
+    public void ShowCard(Card card)
+    {
+        cardView.Show(card);
     }
 
     [Server]
@@ -291,7 +299,6 @@ public class Game : NetworkBehaviour
 
     public void AttackBase(Card card)
     {
-
         if (!card.outpost && card.player.HasOutpost())
         {
             ShowNetMessage("Primero destruye las bases protectoras");

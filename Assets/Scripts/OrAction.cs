@@ -31,7 +31,7 @@ public class OrAction : Action
             NetDisableEffect(manualEffects[0]);
         }
 
-        card.ActionResolved(this);
+        card.OnActionResolved(this);
         fullyResolved = true;
     }
 
@@ -48,5 +48,10 @@ public class OrAction : Action
         }
 
         return effect;
+    }
+
+    public override string PrefixText()
+    {
+        return "Or:";
     }
 }

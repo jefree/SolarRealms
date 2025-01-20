@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class EffectButton : MonoBehaviour, IPointerDownHandler
 {
-    public Base effect;
+    public Effect.Base effect;
     public Action action;
     public EffectListUI ui;
     public Button button;

@@ -1,17 +1,19 @@
 using System.Collections.Generic;
 using System.Linq;
+using Effect.Helper;
 using UnityEngine;
 
 namespace Effect
 {
     public class ForceDiscard : Manual, IConfirmNetable, ICardReceiver
     {
-        List<Card> cards = new();
+        CardSelector cards;
         int targetCount;
 
         public ForceDiscard(int count)
         {
             targetCount = count;
+            cards = new(count, CardLocation.HAND);
         }
 
         public override void ManualActivate(Game game)
@@ -31,39 +33,16 @@ namespace Effect
 
             cards.ForEach(card => game.activePlayer.DiscardCard(card));
 
-
             return true;
         }
 
         public void SetCard(Game game, Card card)
         {
-            Debug.Log($"set card {card.cardName}");
+            var result = cards.ProcessCard(card);
 
-            if (card.location != CardLocation.HAND)
+            if (result == Result.InvalidLocation)
             {
                 game.ShowLocalMessage("Selecciona cartas de tu mano");
-            }
-
-            // here we have an opportunity to abstract this logic of adding/removing
-            // and mark as selected the cards.
-            if (cards.Contains(card))
-            {
-                card.isSelected = false;
-                cards.Remove(card);
-                return;
-            }
-
-            card.isSelected = true;
-
-            if (cards.Count < targetCount)
-            {
-                cards.Add(card);
-            }
-            else
-            {
-                cards[0].isSelected = false;
-                cards.RemoveAt(0);
-                cards.Add(card);
             }
         }
 
@@ -90,7 +69,7 @@ namespace Effect
 
         public void LoadState(EffectState state)
         {
-            cards = state.cards.ToList();
+            cards.SetCards(state.cards);
         }
 
         public override string ID()

@@ -63,8 +63,11 @@ public class TradeRow : NetworkBehaviour
         AddToTradeDeck("integration port", 2);
         AddToTradeDeck("neural nexus");
         AddToTradeDeck("outland station", 3);
+        AddToTradeDeck("orbital shuttle", 3);
+        AddToTradeDeck("pulverizer", 1);
         AddToTradeDeck("reclamation station");
         AddToTradeDeck("warpgate cruiser");
+        AddToTradeDeck("repair mech", 2);
 
         Util.Shuffle(tradeDeck);
     }

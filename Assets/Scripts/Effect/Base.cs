@@ -1,4 +1,5 @@
 using Mirror;
+using UnityEngine;
 
 namespace Effect
 {
@@ -25,10 +26,8 @@ namespace Effect
 
         public virtual void Resolve(Game game)
         {
-            if (Apply(game))
-            {
-                action.OnEffectResolved(this);
-            }
+            Apply(game);
+            action.OnEffectResolved(this);
         }
 
         public virtual void Animate(Card card)

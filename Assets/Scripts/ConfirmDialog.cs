@@ -3,6 +3,7 @@ using UnityEngine;
 public class ConfirmDialog : MonoBehaviour
 {
     public Game game;
+    public UIManager ui;
     public TMPro.TextMeshProUGUI textMesh;
     public GameObject cancelButtonGO;
 
@@ -21,6 +22,8 @@ public class ConfirmDialog : MonoBehaviour
 
     public void Show(Effect.IConfirmNetable effect, bool showCancel = true)
     {
+        ui.ShowNew(GetComponent<UIDisplay>());
+
         this.effect = effect;
         textMesh.text = effect.ConfirmText();
 

@@ -52,6 +52,11 @@ public class Action
 
     public void ActivateEffect(Effect.Base effect)
     {
+        if (!SatisfyConditions())
+        {
+            throw new ArgumentException("Action do not satisfy conditions");
+        }
+
         if (!effects.Contains(effect) && !manualEffects.Contains(effect))
         {
             throw new ArgumentException("Effect does not belong to this card");
@@ -63,9 +68,9 @@ public class Action
 
     public bool HasPendingEffects(bool manual = false)
     {
-        var remainingEffects = manual ? manualEffects.Count : effects.Count;
+        var remainingEffects = manual ? manualEffects : effects;
 
-        return SatisfyConditions() && remainingEffects > 0;
+        return SatisfyConditions() && remainingEffects.Count > 0;
     }
 
     [Server]
@@ -75,12 +80,12 @@ public class Action
         {
             currentEffect = null;
 
-            card.ActionResolved(this);
+            card.OnActionResolved(this);
 
             return;
         }
 
-        currentEffect = effects[0];
+        currentEffect = effects.First();
         currentEffect.Activate(game);
     }
 
@@ -94,7 +99,7 @@ public class Action
 
         if (effect.isManual)
         {
-            card.ActionResolved(this);
+            card.OnActionResolved(this);
         }
         else
         {
@@ -115,7 +120,7 @@ public class Action
             throw new ArgumentException("Effect is not the current active");
 
         // since only manual effects can be canceled we resolve this action right away
-        card.ActionResolved(this);
+        card.OnActionResolved(this);
 
     }
 
@@ -167,5 +172,10 @@ public class Action
         }
 
         return effect;
+    }
+
+    public virtual string PrefixText()
+    {
+        return "";
     }
 }

@@ -5,6 +5,7 @@ using Mirror;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+
 [Serializable]
 public enum Faction : byte
 {
@@ -130,9 +131,10 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
     }
 
     [Server]
-    public void ActionResolved(Action action)
+    public void OnActionResolved(Action action, bool skip = false)
     {
-        if (action.actionName == "scrap")
+        // this betten be moved to the scrap action logic
+        if (!skip && action.actionName == "scrap")
         {
             game.OnCardResolved(this);
             game.ScrapCard(this);
@@ -249,6 +251,12 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
     [Client]
     public void OnPointerDown(PointerEventData data)
     {
+        if (data.button == PointerEventData.InputButton.Right)
+        {
+            game.ShowCard(this);
+            return;
+        }
+
         // invalidate click on cards outside card list
         if (game.discardPileList.gameObject.activeSelf && location != CardLocation.DISCARD_PILE)
             return;

@@ -164,10 +164,10 @@ public class Deck : NetworkBehaviour
             initial.Add(CardFactory.GenerateCard("viper", game, cardPrefab, this.gameObject, player: player));
         }
 
-        initial.Add(CardFactory.GenerateCard("frontier hawk", game, cardPrefab, gameObject, player: player));
-        initial.Add(CardFactory.GenerateCard("frontier hawk", game, cardPrefab, gameObject, player: player));
-        //initial.Add(CardFactory.GenerateCard("outland station", game, cardPrefab, gameObject, player: player));
-        //initial.Add(CardFactory.GenerateCard("reclamation station", game, cardPrefab, gameObject, player: player));
+        initial.Add(CardFactory.GenerateCard("neural nexus", game, cardPrefab, gameObject, player: player));
+        initial.Add(CardFactory.GenerateCard("neural nexus", game, cardPrefab, gameObject, player: player));
+        //initial.Add(CardFactory.GenerateCard("neural nexus", game, cardPrefab, gameObject, player: player));
+        //initial.Add(CardFactory.GenerateCard("neural nexus", game, cardPrefab, gameObject, player: player));
 
         Util.Shuffle(initial);
 

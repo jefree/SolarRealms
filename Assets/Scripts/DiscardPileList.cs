@@ -4,6 +4,7 @@ public class DiscardPileList : MonoBehaviour
 {
     public Transform panel;
     public Canvas canvas;
+    public UIManager ui;
     DiscardPile discardPile;
 
     void Start()
@@ -13,15 +14,12 @@ public class DiscardPileList : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            Close();
-        }
+
     }
 
     public void Show(DiscardPile discardPile)
     {
-
+        ui.ShowNew(GetComponent<UIDisplay>());
         gameObject.SetActive(true);
 
         this.discardPile = discardPile;
