@@ -4,10 +4,10 @@ namespace Effect
 {
     public class TurnEffectMultiply : Base
     {
-        string targetTurnEffect;
+        TurnEffect targetTurnEffect;
         Basic basic;
 
-        public TurnEffectMultiply(string effect, int combat = 0, int trade = 0, int authority = 0)
+        public TurnEffectMultiply(TurnEffect effect, int combat = 0, int trade = 0, int authority = 0)
         {
 
             basic = new(combat, trade, authority);

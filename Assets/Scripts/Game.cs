@@ -11,6 +11,11 @@ public enum GameState
     CHOOSE_CARD
 }
 
+public enum TurnEffect
+{
+    Scrap
+}
+
 public class Game : NetworkBehaviour
 {
     const int INITIAL_SCOUT_AMOUNT = 8;
@@ -23,7 +28,7 @@ public class Game : NetworkBehaviour
     public readonly SyncList<Player> players = new();
     [HideInInspector, SyncVar] public GameState state;
     [HideInInspector] public Card currentCard;
-    [SyncVar] public List<string> turnEffects = new();
+    [SyncVar] public List<TurnEffect> turnEffects = new();
 
     public GameObject cardPrefab;
     public TMPro.TextMeshProUGUI messageText;
@@ -136,7 +141,7 @@ public class Game : NetworkBehaviour
             activePlayer.ScrapCard(card);
         }
 
-        RecordEffect("scrap");
+        RecordEffect(TurnEffect.Scrap);
 
         Destroy(card.gameObject);
     }
@@ -323,7 +328,7 @@ public class Game : NetworkBehaviour
     [Server]
     public void ShowNetMessage(string message, bool persist = false)
     {
-        var conn = activePlayer.GetComponent<NetworkIdentity>().connectionToClient;
+        var conn = activePlayer.netIdentity.connectionToClient;
         TargetShowMessage(conn, message, persist);
     }
 
@@ -399,7 +404,7 @@ public class Game : NetworkBehaviour
         messageText.text = message;
     }
 
-    void RecordEffect(string effect)
+    void RecordEffect(TurnEffect effect)
     {
         turnEffects.Add(effect);
     }

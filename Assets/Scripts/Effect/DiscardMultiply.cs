@@ -6,13 +6,11 @@ namespace Effect
 {
     public class DiscardMultiply : Manual, ICardReceiver, IConfirmNetable
     {
-        int targetCount;
         Basic basicEffect;
         List<Card> selectedCards = new();
 
-        public DiscardMultiply(int count, Effect.Basic effect)
+        public DiscardMultiply(Effect.Basic effect)
         {
-            targetCount = count;
             basicEffect = effect;
         }
 
@@ -20,12 +18,7 @@ namespace Effect
         {
             selectedCards.Clear();
             game.localPlayer.CmdStartChooseCard();
-
-            // Show confirm dialog for no limited selection effects, so effect can be apply at some point
-            if (targetCount == int.MaxValue)
-            {
-                game.StartConfirmEffect(this);
-            }
+            game.StartConfirmEffect(this);
         }
 
         public override bool Apply(Game game)
@@ -43,7 +36,7 @@ namespace Effect
 
         public override string ID()
         {
-            return $"DISCARD_X targetCount({targetCount}) {basicEffect.ID()}";
+            return $"DISCARD_X {basicEffect.ID()}";
         }
 
         public override string Text()

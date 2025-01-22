@@ -1,0 +1,104 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-9189840013873460799
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f872b72e586ec5d49bdfc1f59d9a26ad, type: 3}
+  m_Name: main/scrap card
+  m_EditorClassIdentifier: 
+  action: {fileID: 592359259846053105}
+  isManual: 1
+  location: 4
+  count: 1
+--- !u!114 &-5242050517291712350
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ddce843cddeffb4aa8cf9db5df44d9f, type: 3}
+  m_Name: main/basic
+  m_EditorClassIdentifier: 
+  action: {fileID: 592359259846053105}
+  isManual: 0
+  combat: 5
+  trade: 0
+  authority: 0
+--- !u!114 &-441174222632330462
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c68cd7bcf53f7534b93e643ac0fb52ed, type: 3}
+  m_Name: scrap
+  m_EditorClassIdentifier: 
+  card: {fileID: 11400000}
+  type: 0
+  effects:
+  - {fileID: 804932141987811836}
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5597b84a4bb19140902abe79c90231e, type: 3}
+  m_Name: enforcer mech
+  m_EditorClassIdentifier: 
+  sprite: {fileID: 21300000, guid: 0e190fe6b2cc8e74391f45338421d258, type: 3}
+  type: 0
+  faction: 4
+  cost: 5
+  defense: 0
+  outpost: 0
+  actions:
+  - {fileID: 592359259846053105}
+  - {fileID: -441174222632330462}
+--- !u!114 &592359259846053105
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c68cd7bcf53f7534b93e643ac0fb52ed, type: 3}
+  m_Name: main
+  m_EditorClassIdentifier: 
+  card: {fileID: 11400000}
+  type: 0
+  effects:
+  - {fileID: -5242050517291712350}
+  - {fileID: -9189840013873460799}
+--- !u!114 &804932141987811836
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ecffe452507cf84c9228f692e4665af, type: 3}
+  m_Name: scrap/draw card
+  m_EditorClassIdentifier: 
+  action: {fileID: -441174222632330462}
+  isManual: 1
+  count: 1

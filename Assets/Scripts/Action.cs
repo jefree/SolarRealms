@@ -17,6 +17,14 @@ public class Action
     protected List<Effect.Base> usedManualEffects = new();
     List<Condition.ICondition> conditions = new();
 
+    public enum Type
+    {
+        Main,
+        AllyAction,
+        DoubleAllyAction,
+        OrAction
+    }
+
     public Action(Card card, string name)
     {
         this.card = card;

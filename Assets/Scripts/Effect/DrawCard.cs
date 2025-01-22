@@ -6,7 +6,7 @@ namespace Effect
     {
         int targetCount = 1;
 
-        public DrawCard(int count = 1)
+        public DrawCard(int count)
         {
             targetCount = count;
         }

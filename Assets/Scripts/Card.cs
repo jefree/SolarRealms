@@ -61,7 +61,7 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
     void Start()
     {
         effectUp = Instantiate(combatUpPrefab, transform).GetComponent<EffectUp>();
-        GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>($"Cards/{cardName}");
+        //GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>($"Cards/{cardName}");
     }
 
     void Update()
@@ -85,7 +85,7 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
             {
                 border.color = Color.green;
             }
-            else if (scrapAction.HasPendingEffects(manual: true))
+            else if (scrapAction != null && scrapAction.HasPendingEffects(manual: true))
             {
                 border.color = Color.red;
             }
@@ -97,7 +97,7 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
     [Client]
     public override void OnStartClient()
     {
-        CardFactory.Build(this);
+        CardFactory.Populate(cardName, this);
     }
 
     void OnLocationChanged(CardLocation old, CardLocation current)

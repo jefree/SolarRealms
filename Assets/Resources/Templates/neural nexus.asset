@@ -1,0 +1,89 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-7963158347095171754
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c68cd7bcf53f7534b93e643ac0fb52ed, type: 3}
+  m_Name: main
+  m_EditorClassIdentifier: 
+  card: {fileID: 11400000}
+  type: 0
+  effects:
+  - {fileID: 7705127080937291836}
+--- !u!114 &-1225291774083767076
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c68cd7bcf53f7534b93e643ac0fb52ed, type: 3}
+  m_Name: ally
+  m_EditorClassIdentifier: 
+  card: {fileID: 11400000}
+  type: 1
+  effects:
+  - {fileID: 67859278012809137}
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5597b84a4bb19140902abe79c90231e, type: 3}
+  m_Name: neural nexus
+  m_EditorClassIdentifier: 
+  sprite: {fileID: 21300000, guid: 883bf7c7413f3e74ba38c13beeb9cdaa, type: 3}
+  type: 1
+  faction: 4
+  cost: 7
+  defense: 6
+  outpost: 1
+  actions:
+  - {fileID: -7963158347095171754}
+  - {fileID: -1225291774083767076}
+--- !u!114 &67859278012809137
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ecffe452507cf84c9228f692e4665af, type: 3}
+  m_Name: ally/draw card
+  m_EditorClassIdentifier: 
+  action: {fileID: -1225291774083767076}
+  isManual: 0
+  count: 1
+--- !u!114 &7705127080937291836
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 683a3967402e38545a06373955e905d7, type: 3}
+  m_Name: main/acquire card
+  m_EditorClassIdentifier: 
+  action: {fileID: -7963158347095171754}
+  isManual: 1
+  location: 68
+  force: 0
+  combat: 1
+  trade: 0
+  authority: 0

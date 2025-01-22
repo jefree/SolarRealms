@@ -29,7 +29,6 @@ namespace Effect
             if (card != null)
             {
                 var multiplier = card.cost;
-                Debug.Log(card.cost);
                 var multEffect = new Basic(effect.combat * multiplier, effect.trade * multiplier, effect.authority * multiplier);
 
                 multEffect.action = action;

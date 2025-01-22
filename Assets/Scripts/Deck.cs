@@ -156,16 +156,17 @@ public class Deck : NetworkBehaviour
 
         for (int i = 0; i < INITIAL_SCOUT_AMOUNT; i++)
         {
-            initial.Add(CardFactory.GenerateCard("scout", game, cardPrefab, this.gameObject, player: player));
+            initial.Add(CardFactory.FromSO("scout", game, cardPrefab, this.gameObject, player: player));
         }
 
         for (int i = 0; i < INITIAL_VIPER_AMOUNT; i++)
         {
-            initial.Add(CardFactory.GenerateCard("viper", game, cardPrefab, this.gameObject, player: player));
+            initial.Add(CardFactory.FromSO("viper", game, cardPrefab, this.gameObject, player: player));
         }
 
-        initial.Add(CardFactory.GenerateCard("neural nexus", game, cardPrefab, gameObject, player: player));
-        initial.Add(CardFactory.GenerateCard("neural nexus", game, cardPrefab, gameObject, player: player));
+        initial.Add(CardFactory.FromSO("frontier hawk", game, cardPrefab, gameObject, player: player));
+        initial.Add(CardFactory.FromSO("frontier hawk", game, cardPrefab, gameObject, player: player));
+        initial.Add(CardFactory.FromSO("frontier hawk", game, cardPrefab, gameObject, player: player));
         //initial.Add(CardFactory.GenerateCard("neural nexus", game, cardPrefab, gameObject, player: player));
         //initial.Add(CardFactory.GenerateCard("neural nexus", game, cardPrefab, gameObject, player: player));
 

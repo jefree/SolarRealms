@@ -1,0 +1,89 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-8686732517708948941
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f872b72e586ec5d49bdfc1f59d9a26ad, type: 3}
+  m_Name: main/scrap card
+  m_EditorClassIdentifier: 
+  action: {fileID: 4716733812474685851}
+  isManual: 1
+  location: 4
+  count: 1
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5597b84a4bb19140902abe79c90231e, type: 3}
+  m_Name: reclamation station
+  m_EditorClassIdentifier: 
+  sprite: {fileID: 21300000, guid: 61ce3a88c2584d045b58022554c5ed0e, type: 3}
+  type: 1
+  faction: 4
+  cost: 6
+  defense: 6
+  outpost: 1
+  actions:
+  - {fileID: 4716733812474685851}
+  - {fileID: 3715777914628320767}
+--- !u!114 &414862959431273935
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edd388d6dadd7aa4f9785b9ddf133dbd, type: 3}
+  m_Name: scrap/turn effect m
+  m_EditorClassIdentifier: 
+  action: {fileID: 3715777914628320767}
+  isManual: 1
+  turnEffect: 0
+  combat: 3
+  trade: 0
+  authority: 0
+--- !u!114 &3715777914628320767
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c68cd7bcf53f7534b93e643ac0fb52ed, type: 3}
+  m_Name: scrap
+  m_EditorClassIdentifier: 
+  card: {fileID: 11400000}
+  type: 0
+  effects:
+  - {fileID: 414862959431273935}
+--- !u!114 &4716733812474685851
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c68cd7bcf53f7534b93e643ac0fb52ed, type: 3}
+  m_Name: main
+  m_EditorClassIdentifier: 
+  card: {fileID: 11400000}
+  type: 0
+  effects:
+  - {fileID: -8686732517708948941}

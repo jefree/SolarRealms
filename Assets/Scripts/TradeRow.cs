@@ -54,12 +54,14 @@ public class TradeRow : NetworkBehaviour
     [Server]
     public void CreateTradeDeck()
     {
+
         AddToTradeDeck("blob miner", 3);
+        AddToTradeDeck("infested moon", 2);
+        /*
         AddToTradeDeck("enforcer mech");
         AddToTradeDeck("frontier hawk", 3);
         AddToTradeDeck("gateship");
         AddToTradeDeck("hive queen");
-        AddToTradeDeck("infested moon");
         AddToTradeDeck("integration port", 2);
         AddToTradeDeck("neural nexus");
         AddToTradeDeck("outland station", 3);
@@ -68,6 +70,8 @@ public class TradeRow : NetworkBehaviour
         AddToTradeDeck("reclamation station");
         AddToTradeDeck("warpgate cruiser");
         AddToTradeDeck("repair mech", 2);
+        */
+
 
         Util.Shuffle(tradeDeck);
     }
@@ -127,11 +131,13 @@ public class TradeRow : NetworkBehaviour
     {
         for (int i = 0; i < amount; i++)
         {
-            var card = CardFactory.GenerateCard(cardName, game, cardPrefab, gameObject);
+            var card = CardFactory.FromSO(cardName, game, cardPrefab, gameObject);
+            //var card = CardFactory.GenerateCard(cardName, game, cardPrefab, gameObject);
 
             card.location = CardLocation.TRADE_DECK;
             tradeDeck.Insert(0, card);
             RpcCardAdded(card);
+
         }
     }
 

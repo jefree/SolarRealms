@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5597b84a4bb19140902abe79c90231e, type: 3}
+  m_Name: integration port
+  m_EditorClassIdentifier: 
+  sprite: {fileID: 21300000, guid: ae9e69a8d44891144ade3b16b4c74be6, type: 3}
+  type: 1
+  faction: 4
+  cost: 3
+  defense: 5
+  outpost: 1
+  actions:
+  - {fileID: 2856680923710325283}
+--- !u!114 &2856680923710325283
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c68cd7bcf53f7534b93e643ac0fb52ed, type: 3}
+  m_Name: main
+  m_EditorClassIdentifier: 
+  card: {fileID: 11400000}
+  type: 0
+  effects:
+  - {fileID: 6639485281882455288}
+--- !u!114 &6639485281882455288
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ddce843cddeffb4aa8cf9db5df44d9f, type: 3}
+  m_Name: main/basic
+  m_EditorClassIdentifier: 
+  action: {fileID: 2856680923710325283}
+  isManual: 0
+  combat: 0
+  trade: 1
+  authority: 0

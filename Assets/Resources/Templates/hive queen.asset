@@ -1,0 +1,139 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-8657649688299729602
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ddce843cddeffb4aa8cf9db5df44d9f, type: 3}
+  m_Name: ally/basic
+  m_EditorClassIdentifier: 
+  action: {fileID: -2929860069642107593}
+  isManual: 0
+  combat: 3
+  trade: 0
+  authority: 0
+--- !u!114 &-7144681383449797644
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ddce843cddeffb4aa8cf9db5df44d9f, type: 3}
+  m_Name: main/basic
+  m_EditorClassIdentifier: 
+  action: {fileID: -3318903889426209475}
+  isManual: 0
+  combat: 7
+  trade: 0
+  authority: 0
+--- !u!114 &-6737076287628965290
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ddce843cddeffb4aa8cf9db5df44d9f, type: 3}
+  m_Name: doubleAlly/basic
+  m_EditorClassIdentifier: 
+  action: {fileID: -6514364030569032325}
+  isManual: 0
+  combat: 3
+  trade: 0
+  authority: 0
+--- !u!114 &-6514364030569032325
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c68cd7bcf53f7534b93e643ac0fb52ed, type: 3}
+  m_Name: doubleAlly
+  m_EditorClassIdentifier: 
+  card: {fileID: 11400000}
+  type: 2
+  effects:
+  - {fileID: -6737076287628965290}
+--- !u!114 &-3318903889426209475
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c68cd7bcf53f7534b93e643ac0fb52ed, type: 3}
+  m_Name: main
+  m_EditorClassIdentifier: 
+  card: {fileID: 11400000}
+  type: 0
+  effects:
+  - {fileID: -7144681383449797644}
+  - {fileID: -169690262648172971}
+--- !u!114 &-2929860069642107593
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c68cd7bcf53f7534b93e643ac0fb52ed, type: 3}
+  m_Name: ally
+  m_EditorClassIdentifier: 
+  card: {fileID: 11400000}
+  type: 1
+  effects:
+  - {fileID: -8657649688299729602}
+--- !u!114 &-169690262648172971
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ecffe452507cf84c9228f692e4665af, type: 3}
+  m_Name: main/draw card
+  m_EditorClassIdentifier: 
+  action: {fileID: -3318903889426209475}
+  isManual: 0
+  count: 1
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5597b84a4bb19140902abe79c90231e, type: 3}
+  m_Name: hive queen
+  m_EditorClassIdentifier: 
+  sprite: {fileID: 21300000, guid: 2d5295afe90b0fc43874b1d064887f17, type: 3}
+  type: 0
+  faction: 2
+  cost: 7
+  defense: 0
+  outpost: 0
+  actions:
+  - {fileID: -3318903889426209475}
+  - {fileID: -2929860069642107593}
+  - {fileID: -6514364030569032325}

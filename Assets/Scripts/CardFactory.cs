@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Effect;
 using Mirror;
-using Org.BouncyCastle.Crypto.Macs;
+using Template;
 using UnityEngine;
 
 public class CardFactory : MonoBehaviour
@@ -21,6 +21,23 @@ public class CardFactory : MonoBehaviour
         card.player = player;
 
         Build(card);
+
+        NetworkServer.Spawn(cardGameObject);
+
+        return card;
+    }
+
+    public static Card FromSO(string name, Game game, GameObject cardPrefab, GameObject parent, Player player = null)
+    {
+        GameObject cardGameObject = Instantiate(cardPrefab);
+        Card card = cardGameObject.GetComponent<Card>();
+
+        card.name = name;
+
+        Populate(name, card);
+
+        card.game = game;
+        card.player = player;
 
         NetworkServer.Spawn(cardGameObject);
 
@@ -60,6 +77,13 @@ public class CardFactory : MonoBehaviour
         generator(card);
     }
 
+    public static void Populate(string name, Card card)
+    {
+        var template = Resources.Load<CardSO>($"Templates/{name}");
+
+        template.Populate(card);
+    }
+
     public static void Viper(Card card)
     {
         card.type = CardType.SHIP;
@@ -97,8 +121,8 @@ public class CardFactory : MonoBehaviour
         card.outpost = false;
 
         card.AddEffect(new Effect.Basic(combat: 4), "main");
-        card.AddEffect(new Effect.DrawCard(), "ally");
-        card.AddEffect(new Effect.DrawCard(), "doubleAlly");
+        card.AddEffect(new Effect.DrawCard(1), "ally");
+        card.AddEffect(new Effect.DrawCard(1), "doubleAlly");
     }
 
     static void IntegrationPort(Card card)
@@ -118,11 +142,12 @@ public class CardFactory : MonoBehaviour
         card.cost = 7;
 
         card.AddEffect(new Effect.Basic(combat: 7), "main");
-        card.AddEffect(new Effect.DrawCard(), "main");
+        card.AddEffect(new Effect.DrawCard(1), "main");
 
         card.AddEffect(new Effect.Basic(combat: 3), "ally");
         card.AddEffect(new Effect.Basic(combat: 3), "doubleAlly");
     }
+
 
     static void EnforcerMech(Card card)
     {
@@ -133,7 +158,7 @@ public class CardFactory : MonoBehaviour
         card.AddEffect(new Effect.Basic(combat: 5), "main");
         card.AddEffect(new Effect.ScrapCard(CardLocation.HAND), "main", isManual: true);
 
-        card.AddEffect(new DrawCard(), "scrap");
+        card.AddEffect(new DrawCard(1), "scrap");
     }
 
     static void OutlandStation(Card card)
@@ -146,7 +171,7 @@ public class CardFactory : MonoBehaviour
         card.AddEffect(new Effect.Basic(trade: 1), "main", isManual: true);
         card.AddEffect(new Effect.Basic(authority: 3), "main", isManual: true);
 
-        card.AddEffect(new Effect.DrawCard(), "scrap", isManual: true);
+        card.AddEffect(new Effect.DrawCard(1), "scrap", isManual: true);
     }
 
     static void ReclamationStation(Card card)
@@ -156,7 +181,7 @@ public class CardFactory : MonoBehaviour
         card.cost = 6;
 
         card.AddEffect(new Effect.ScrapCard(CardLocation.DISCARD_PILE), "main", isManual: true);
-        card.AddEffect(new Effect.TurnEffectMultiply("scrap", combat: 3), "scrap", isManual: true);
+        card.AddEffect(new Effect.TurnEffectMultiply(TurnEffect.Scrap, combat: 3), "scrap", isManual: true);
     }
 
     static void WarpgateCruiser(Card card)
@@ -165,8 +190,8 @@ public class CardFactory : MonoBehaviour
         card.faction = Faction.STAR_EMPIRE;
         card.cost = 3;
 
-        card.AddEffect(new Effect.DiscardMultiply(int.MaxValue, new Effect.Basic(combat: 2)), "main", isManual: true);
-        card.AddEffect(new Effect.DrawCard(), "ally");
+        card.AddEffect(new Effect.DiscardMultiply(new Effect.Basic(combat: 2)), "main", isManual: true);
+        card.AddEffect(new Effect.DrawCard(1), "ally");
     }
 
     static void Gateship(Card card)
@@ -193,7 +218,7 @@ public class CardFactory : MonoBehaviour
             CardLocation.HAND_OR_DISCARD
         ), "main", isManual: true);
 
-        card.AddEffect(new Effect.DrawCard(), "ally");
+        card.AddEffect(new Effect.DrawCard(1), "ally");
     }
 
     static void FrontierHawk(Card card)
@@ -203,10 +228,11 @@ public class CardFactory : MonoBehaviour
         card.cost = 1;
 
         card.AddEffect(new Effect.Basic(combat: 3), "main");
-        card.AddEffect(new Effect.DrawCard(3), "main");
-        card.AddEffect(new Effect.ForceDiscard(3), "main");
+        card.AddEffect(new Effect.DrawCard(1), "main");
+        card.AddEffect(new Effect.ForceDiscard(1), "main");
     }
 
+    // ==================================================
     static void RepairMech(Card card)
     {
         card.type = CardType.SHIP;
@@ -230,7 +256,7 @@ public class CardFactory : MonoBehaviour
         card.AddEffect(new Conditional(
             new Condition.TypeCard(CardType.BASE, 2),
             new Basic(authority: 4),
-            new DrawCard()
+            new DrawCard(1)
         ), "main");
     }
 
@@ -252,6 +278,6 @@ public class CardFactory : MonoBehaviour
         card.cost = 5;
 
         card.AddEffect(new ScrapCostMultiply(new Basic(combat: 1), CardLocation.TRADE_ROW, force: true), "main");
-        card.AddEffect(new DrawCard(), "ally");
+        card.AddEffect(new DrawCard(1), "ally");
     }
 }
