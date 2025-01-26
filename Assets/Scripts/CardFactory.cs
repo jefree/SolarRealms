@@ -14,9 +14,6 @@ public class CardFactory : MonoBehaviour
         GameObject cardGameObject = Instantiate(cardPrefab);
         Card card = cardGameObject.GetComponent<Card>();
 
-        card.name = name;
-        card.gameObject.name = name;
-
         Populate(name, card);
 
         card.game = game;
@@ -29,7 +26,7 @@ public class CardFactory : MonoBehaviour
     public static void Populate(string name, Card card)
     {
         var template = Resources.Load<CardSO>($"Templates/{name}");
-
+        card.name = name;
         template.Populate(card);
     }
 

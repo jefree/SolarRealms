@@ -96,6 +96,8 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
     [Client]
     public override void OnStartClient()
     {
+        if (isServer) { return; }
+
         CardFactory.Populate(cardName, this);
     }
 

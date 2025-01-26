@@ -116,7 +116,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  cardName: Empty Card
+  cardName: 
   cost: 0
   location: 0
   faction: 0
