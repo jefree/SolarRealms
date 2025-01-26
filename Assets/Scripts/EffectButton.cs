@@ -1,9 +1,7 @@
-using Effect;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class EffectButton : MonoBehaviour, IPointerDownHandler
+public class EffectButton : MonoBehaviour
 {
     public Effect.Base effect;
     public Action action;
@@ -13,9 +11,10 @@ public class EffectButton : MonoBehaviour, IPointerDownHandler
 
     void Start()
     {
+        button.onClick.AddListener(Activate);
     }
 
-    public void OnPointerDown(PointerEventData eventData)
+    public void Activate()
     {
         ui.Activate(this);
     }

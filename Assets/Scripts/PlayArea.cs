@@ -66,22 +66,6 @@ public class PlayArea : NetworkBehaviour
     }
 
     [Client]
-    public void AddCardLocal(Card card)
-    {
-        switch (card.type)
-        {
-            case CardType.SHIP:
-                OnShipAdded(card);
-                break;
-            case CardType.BASE:
-                OnBaseAdded(card);
-                break;
-            default:
-                throw new InvalidOperationException($"card type not support {card.type}");
-        }
-    }
-
-    [Client]
     void OnShipAdded(Card card)
     {
         card.transform.SetParent(shipArea);

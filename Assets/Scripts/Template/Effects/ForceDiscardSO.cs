@@ -4,10 +4,9 @@ namespace Template
     {
         public int count = 1;
 
-        public override void Populate(Action action)
+        public override Effect.Base CreateEffect(Action action)
         {
-            var effect = new Effect.ForceDiscard(count);
-            action.AddEffect(effect, isManual);
+            return new Effect.ForceDiscard(count);
         }
     }
 }

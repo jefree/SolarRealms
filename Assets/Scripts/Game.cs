@@ -41,12 +41,14 @@ public class Game : NetworkBehaviour
     public ConfirmDialog confirmDialog;
     public CardView cardView;
     public Player localPlayer;
+    List<Card> scrapHeap = new();
 
     [HideInInspector]
     int currentPlayerIndex = 0;
     [HideInInspector]
-    Queue<Card> playCardsQueue = new();
-    List<Card> selectedCards = new();
+    //Queue<Card> playCardsQueue = new();
+
+    StateHandler stateHandler;
 
     void Start()
     {
@@ -54,6 +56,7 @@ public class Game : NetworkBehaviour
         combatScoreText = GameObject.Find("CombatText").GetComponent<TMPro.TextMeshProUGUI>();
 
         state = GameState.DO_BASIC;
+        stateHandler = new(this);
         ShowLocalMessage("Esperando otro jugador", persist: true);
     }
 
@@ -61,6 +64,8 @@ public class Game : NetworkBehaviour
     {
         if (activePlayer == null)
             return;
+
+        stateHandler.Update();
 
         tradeScoreText.text = $"{activePlayer.trade}";
         combatScoreText.text = $"{activePlayer.combat}";
@@ -72,11 +77,16 @@ public class Game : NetworkBehaviour
         players.Add(player);
         player.deck.Init(player);
 
+        //Temporary logic to allow 1 player game
+        // activePlayer = player;
+        // player.playerName = "Player";
+        // tradeRow.CreateTradeDeck();
+        // Invoke("StartGame", 2.0f);
+
         if (players.Count == 2)
         {
             player.playerName = "Enemy";
             tradeRow.CreateTradeDeck();
-
             Invoke("StartGame", 2.0f);
         }
         else
@@ -89,6 +99,7 @@ public class Game : NetworkBehaviour
     [Server]
     void StartGame()
     {
+        //TODO: enable this for 2 players game
         TargetSetPlayerTwoView(players[1].GetComponent<NetworkIdentity>().connectionToClient);
 
         tradeRow.Init();
@@ -107,12 +118,13 @@ public class Game : NetworkBehaviour
         activePlayer.PlayCard(card);
 
         // enqueue cards with pending effects so remaining effects has a chance to activate if valid
-        activePlayer.playArea.PendingCards().ForEach(card => playCardsQueue.Enqueue(card));
+        // activePlayer.playArea.PendingCards().ForEach(card => playCardsQueue.Enqueue(card));
+        activePlayer.playArea.PendingCards().ForEach(card => stateHandler.ProcessCard(card));
 
-        if (playCardsQueue.Count > 0)
-        {
-            ResolveCard(playCardsQueue.Dequeue());
-        }
+        // if (playCardsQueue.Count > 0)
+        // {
+        //     ResolveCard(playCardsQueue.Dequeue());
+        // }
     }
 
     public void BuyCard(Card card)
@@ -143,7 +155,9 @@ public class Game : NetworkBehaviour
 
         RecordEffect(TurnEffect.Scrap);
 
-        Destroy(card.gameObject);
+        scrapHeap.Add(card);
+        card.location = CardLocation.SCRAP_HEAP;
+        card.gameObject.SetActive(false);
     }
 
     [Server]
@@ -151,6 +165,13 @@ public class Game : NetworkBehaviour
     {
         tradeRow.RemoveCard(card);
         activePlayer.AcquireCard(card, location);
+    }
+
+    [Server]
+    public void FreeCard(Card card)
+    {
+        tradeRow.RemoveCard(card);
+        activePlayer.FreeCard(card);
     }
 
     // ResolveCard -> card.Activate -> ResolveAction -> action.Activate -> effect.Activate -> EffectResolved
@@ -168,10 +189,10 @@ public class Game : NetworkBehaviour
         state = GameState.DO_BASIC;
         currentCard = null;
 
-        if (playCardsQueue.Count > 0)
-        {
-            ResolveCard(playCardsQueue.Dequeue());
-        }
+        // if (playCardsQueue.Count > 0)
+        // {
+        //     ResolveCard(playCardsQueue.Dequeue());
+        // }
     }
 
     [Server]
@@ -202,19 +223,25 @@ public class Game : NetworkBehaviour
         effect.action.ActivateEffect(effect);
     }
 
-    public void StartPlayNewCard()
+    [Server]
+    public void ResolveIsolatedEffect(Effect.Base effect)
     {
-        if (playCardsQueue.Count > 0)
-        {
-            ResolveCard(playCardsQueue.Dequeue());
-            return;
-        }
-
-        state = GameState.DO_BASIC;
-
-
-        ShowNetMessage("Compra o juega una carta");
+        effect.Apply(this);
     }
+
+    // public void StartPlayNewCard()
+    // {
+    //     if (playCardsQueue.Count > 0)
+    //     {
+    //         ResolveCard(playCardsQueue.Dequeue());
+    //         return;
+    //     }
+
+    //     state = GameState.DO_BASIC;
+
+
+    //     ShowNetMessage("Compra o juega una carta");
+    // }
 
     [Server]
     public void StartTurn()
@@ -277,7 +304,14 @@ public class Game : NetworkBehaviour
     [Client]
     public void ShowCard(Card card)
     {
-        cardView.Show(card);
+        if (card != null)
+        {
+            cardView.Show(card);
+        }
+        else
+        {
+            cardView.Close();
+        }
     }
 
     [Server]

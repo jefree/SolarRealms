@@ -100,8 +100,8 @@ public class Action
     [Server]
     public virtual void OnEffectResolved(Effect.Base effect)
     {
-        if (effect != currentEffect)
-            throw new ArgumentException("Effect is not the current active");
+        //if (effect != currentEffect)
+        //    throw new ArgumentException("Effect is not the current active");
 
         NetDisableEffect(effect);
 
@@ -109,15 +109,14 @@ public class Action
         {
             card.OnActionResolved(this);
         }
-        else
-        {
-            ActivateNextEffect();
-        }
+        //else
+        //{
+        //    ActivateNextEffect();
+        //}
 
         if (effects.Count == 0 && manualEffects.Count == 0)
         {
             fullyResolved = true;
-
         }
     }
 
@@ -132,6 +131,7 @@ public class Action
 
     }
 
+    [Server]
     public void NetDisableEffect(Effect.Base effect)
     {
         DisableEffect(effect);

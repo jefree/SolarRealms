@@ -12,7 +12,7 @@ namespace Effect
 
         CardSelector cards;
 
-        public RecoverCard(CardLocation location, CardType type, int count = 1)
+        public RecoverCard(CardLocation location, CardType type, int count)
         {
             this.location = location;
             this.type = type;

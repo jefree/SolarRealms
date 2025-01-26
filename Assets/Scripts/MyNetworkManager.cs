@@ -20,13 +20,6 @@ public class MyNetworkManager : NetworkManager
 
         NetworkServer.AddPlayerForConnection(conn, newPlayer);
 
-        var player = newPlayer.GetComponent<Player>();
-        var hand = player.hand.netIdentity;
-        var playArea = player.playArea.netIdentity;
-
-        hand.AssignClientAuthority(conn);
-        playArea.AssignClientAuthority(conn);
-
         game.AddPlayer(newPlayer.GetComponent<Player>());
     }
 }

@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c68cd7bcf53f7534b93e643ac0fb52ed, type: 3}
   m_Name: ally
   m_EditorClassIdentifier: 
-  card: {fileID: 11400000}
-  type: 1
   effects:
   - {fileID: 8745271298188229193}
+  card: {fileID: 11400000}
+  type: 1
 --- !u!114 &-5519073155513006580
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -28,11 +28,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c68cd7bcf53f7534b93e643ac0fb52ed, type: 3}
   m_Name: main
   m_EditorClassIdentifier: 
-  card: {fileID: 11400000}
-  type: 0
   effects:
   - {fileID: -1562162022369626807}
   - {fileID: 6151001948962208060}
+  card: {fileID: 11400000}
+  type: 0
 --- !u!114 &-1562162022369626807
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c54949667de8ce489a6af595a1be6cc, type: 3}
   m_Name: main/discard m
   m_EditorClassIdentifier: 
-  action: {fileID: -5519073155513006580}
+  container: {fileID: -5519073155513006580}
   isManual: 1
   combat: 2
   trade: 0
@@ -83,7 +83,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ecffe452507cf84c9228f692e4665af, type: 3}
   m_Name: main/draw card
   m_EditorClassIdentifier: 
-  action: {fileID: -5519073155513006580}
+  container: {fileID: -5519073155513006580}
   isManual: 0
   count: 1
 --- !u!114 &8745271298188229193
@@ -98,6 +98,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ecffe452507cf84c9228f692e4665af, type: 3}
   m_Name: ally/draw card
   m_EditorClassIdentifier: 
-  action: {fileID: -9133369451100909385}
+  container: {fileID: -9133369451100909385}
   isManual: 0
   count: 1

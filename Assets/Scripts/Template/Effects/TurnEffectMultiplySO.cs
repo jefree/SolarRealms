@@ -7,10 +7,9 @@ namespace Template
         public int trade;
         public int authority;
 
-        public override void Populate(Action action)
+        public override Effect.Base CreateEffect(Action action)
         {
-            var effect = new Effect.TurnEffectMultiply(turnEffect, combat, trade, authority);
-            action.AddEffect(effect, isManual);
+            return new Effect.TurnEffectMultiply(turnEffect, combat, trade, authority);
         }
     }
 }

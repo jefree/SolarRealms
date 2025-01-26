@@ -164,9 +164,9 @@ public class Deck : NetworkBehaviour
             initial.Add(CardFactory.FromSO("viper", game, cardPrefab, this.gameObject, player: player));
         }
 
-        initial.Add(CardFactory.FromSO("frontier hawk", game, cardPrefab, gameObject, player: player));
-        initial.Add(CardFactory.FromSO("frontier hawk", game, cardPrefab, gameObject, player: player));
-        initial.Add(CardFactory.FromSO("frontier hawk", game, cardPrefab, gameObject, player: player));
+        initial.Add(CardFactory.FromSO("conversion yard", game, cardPrefab, gameObject, player: player));
+        initial.Add(CardFactory.FromSO("conversion yard", game, cardPrefab, gameObject, player: player));
+        //initial.Add(CardFactory.FromSO("mobile market", game, cardPrefab, gameObject, player: player));
         //initial.Add(CardFactory.GenerateCard("neural nexus", game, cardPrefab, gameObject, player: player));
         //initial.Add(CardFactory.GenerateCard("neural nexus", game, cardPrefab, gameObject, player: player));
 

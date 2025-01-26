@@ -27,7 +27,7 @@ namespace Effect
         public virtual void Resolve(Game game)
         {
             Apply(game);
-            action.OnEffectResolved(this);
+            //action.OnEffectResolved(this);
         }
 
         public virtual void Animate(Card card)

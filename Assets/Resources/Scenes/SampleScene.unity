@@ -382,7 +382,7 @@ RectTransform:
   m_GameObject: {fileID: 300445684}
   m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.8, y: 1.8, z: 1}
+  m_LocalScale: {x: 1.5, y: 1.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1873354493}
@@ -3291,7 +3291,7 @@ MonoBehaviour:
   activePlayer: {fileID: 0}
   state: 0
   currentCard: {fileID: 0}
-  turnEffects: []
+  turnEffects: 
   cardPrefab: {fileID: 1546928846508714842, guid: 5f1fac4f9e213804dbe64091b16639d7, type: 3}
   messageText: {fileID: 714181683}
   tradeScoreText: {fileID: 0}

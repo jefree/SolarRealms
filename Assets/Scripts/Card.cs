@@ -20,7 +20,6 @@ public enum CardType
 {
     SHIP,
     BASE,
-
     SHIP_BASE = SHIP | BASE
 }
 
@@ -131,17 +130,17 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
     }
 
     [Server]
-    public void OnActionResolved(Action action, bool skip = false)
+    public void OnActionResolved(Action action)
     {
-        // this betten be moved to the scrap action logic
-        if (!skip && action.actionName == "scrap")
+        // this better be moved to the scrap action logic
+        if (action.actionName == "scrap")
         {
             game.OnCardResolved(this);
             game.ScrapCard(this);
             return;
         }
 
-        ActivateNextAction();
+        //ActivateNextAction();
     }
 
     public Action NextAction()
@@ -172,6 +171,11 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
     public List<Action> Actions()
     {
         return ActualActions(mainAction, allyAction, doubleAllyAction, scrapAction);
+    }
+
+    public List<Action> PendingActions()
+    {
+        return ActualActions(mainAction, allyAction, doubleAllyAction).Where(action => action.HasPendingEffects()).ToList();
     }
 
     List<Action> ActualActions(params Action[] actions)
@@ -251,12 +255,6 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
     [Client]
     public void OnPointerDown(PointerEventData data)
     {
-        if (data.button == PointerEventData.InputButton.Right)
-        {
-            game.ShowCard(this);
-            return;
-        }
-
         // invalidate click on cards outside card list
         if (game.discardPileList.gameObject.activeSelf && location != CardLocation.DISCARD_PILE)
             return;
@@ -330,17 +328,13 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
     {
         if (location == CardLocation.DISCARD_PILE) { return; }
 
-        transform.localScale = new Vector2(1.2f, 1.2f);
-        image.sortingOrder = 2;
-        border.sortingOrder = 1;
+        game.ShowCard(this);
     }
 
     public void OnPointerExit(PointerEventData data)
     {
         if (location == CardLocation.DISCARD_PILE) { return; }
 
-        transform.localScale = Vector2.one;
-        image.sortingOrder = 0;
-        border.sortingOrder = -1;
+        game.ShowCard(null);
     }
 }

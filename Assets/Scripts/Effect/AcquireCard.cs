@@ -4,9 +4,9 @@ namespace Effect
 {
     public class AcquireCard : Manual, ICardReceiver, IConfirmNetable
     {
-        Card card;
-        CardType type;
-        int maxCost;
+        protected Card card;
+        protected CardType type;
+        protected int maxCost;
 
         public AcquireCard(CardType type, int maxCost)
         {
@@ -62,7 +62,7 @@ namespace Effect
 
             if (card.cost > maxCost)
             {
-                game.ShowLocalMessage("Carta con un mayor al permitido");
+                game.ShowLocalMessage("Carta con un costo mayor al permitido");
                 return;
             }
 

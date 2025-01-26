@@ -11,7 +11,7 @@ namespace Effect
         CardLocation location;
         int count;
 
-        public ScrapCard(CardLocation location, int count = 1)
+        public ScrapCard(CardLocation location, int count)
         {
             this.location = location;
             this.count = count;

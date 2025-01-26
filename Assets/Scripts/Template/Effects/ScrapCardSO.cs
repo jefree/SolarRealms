@@ -5,10 +5,9 @@ namespace Template
         public CardLocation location;
         public int count = 1;
 
-        public override void Populate(Action action)
+        public override Effect.Base CreateEffect(Action action)
         {
-            var effect = new Effect.ScrapCard(location, count);
-            action.AddEffect(effect, isManual);
+            return new Effect.ScrapCard(location, count);
         }
     }
 }

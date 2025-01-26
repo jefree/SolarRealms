@@ -6,10 +6,9 @@ namespace Template
         public int trade;
         public int authority;
 
-        public override void Populate(Action action)
+        public override Effect.Base CreateEffect(Action action)
         {
-            var effect = new Effect.Basic(combat: combat, trade: trade, authority: authority);
-            action.AddEffect(effect, isManual);
+            return new Effect.Basic(combat: combat, trade: trade, authority: authority);
         }
     }
 }

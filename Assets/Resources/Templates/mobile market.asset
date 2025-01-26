@@ -1,0 +1,138 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-6844353701412334290
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ecffe452507cf84c9228f692e4665af, type: 3}
+  m_Name: scrap/composite/draw card
+  m_EditorClassIdentifier: 
+  container: {fileID: 757597664355604680}
+  isManual: 0
+  count: 1
+--- !u!114 &-3878092201962041459
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ddce843cddeffb4aa8cf9db5df44d9f, type: 3}
+  m_Name: main/basic
+  m_EditorClassIdentifier: 
+  container: {fileID: 4193286075920807976}
+  isManual: 0
+  combat: 0
+  trade: 2
+  authority: 0
+--- !u!114 &-3519261652819746862
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ddce843cddeffb4aa8cf9db5df44d9f, type: 3}
+  m_Name: scrap/composite/basic
+  m_EditorClassIdentifier: 
+  container: {fileID: 757597664355604680}
+  isManual: 0
+  combat: 0
+  trade: 0
+  authority: 2
+--- !u!114 &-259841433414437469
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 13b4720abe0038f4c960b06eb014553e, type: 3}
+  m_Name: scrap/composite/unscrap card
+  m_EditorClassIdentifier: 
+  container: {fileID: 757597664355604680}
+  isManual: 0
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5597b84a4bb19140902abe79c90231e, type: 3}
+  m_Name: mobile market
+  m_EditorClassIdentifier: 
+  sprite: {fileID: 21300000, guid: 829d7edf1b6d7434c8051e9a57063a68, type: 3}
+  type: 1
+  faction: 1
+  cost: 4
+  defense: 4
+  outpost: 1
+  actions:
+  - {fileID: 4193286075920807976}
+  - {fileID: 880988638553944585}
+--- !u!114 &757597664355604680
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f4e5fe4f15cd8644b8252c035d74544, type: 3}
+  m_Name: scrap/composite
+  m_EditorClassIdentifier: 
+  effects:
+  - {fileID: -3519261652819746862}
+  - {fileID: -6844353701412334290}
+  - {fileID: -259841433414437469}
+  container: {fileID: 880988638553944585}
+  isManual: 1
+  text: Gana 2 de Autoridad y roba 1 carta. Al final del turno mueve Mobile Market
+    de tu deshuese a tu pila de descarte.
+--- !u!114 &880988638553944585
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c68cd7bcf53f7534b93e643ac0fb52ed, type: 3}
+  m_Name: scrap
+  m_EditorClassIdentifier: 
+  effects:
+  - {fileID: 757597664355604680}
+  card: {fileID: 11400000}
+  type: 0
+--- !u!114 &4193286075920807976
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c68cd7bcf53f7534b93e643ac0fb52ed, type: 3}
+  m_Name: main
+  m_EditorClassIdentifier: 
+  effects:
+  - {fileID: -3878092201962041459}
+  card: {fileID: 11400000}
+  type: 0

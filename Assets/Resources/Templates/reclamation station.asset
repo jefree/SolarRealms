@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f872b72e586ec5d49bdfc1f59d9a26ad, type: 3}
   m_Name: main/scrap card
   m_EditorClassIdentifier: 
-  action: {fileID: 4716733812474685851}
+  container: {fileID: 4716733812474685851}
   isManual: 1
   location: 4
   count: 1
@@ -49,7 +49,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: edd388d6dadd7aa4f9785b9ddf133dbd, type: 3}
   m_Name: scrap/turn effect m
   m_EditorClassIdentifier: 
-  action: {fileID: 3715777914628320767}
+  container: {fileID: 3715777914628320767}
   isManual: 1
   turnEffect: 0
   combat: 3
@@ -67,10 +67,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c68cd7bcf53f7534b93e643ac0fb52ed, type: 3}
   m_Name: scrap
   m_EditorClassIdentifier: 
-  card: {fileID: 11400000}
-  type: 0
   effects:
   - {fileID: 414862959431273935}
+  card: {fileID: 11400000}
+  type: 0
 --- !u!114 &4716733812474685851
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -83,7 +83,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c68cd7bcf53f7534b93e643ac0fb52ed, type: 3}
   m_Name: main
   m_EditorClassIdentifier: 
-  card: {fileID: 11400000}
-  type: 0
   effects:
   - {fileID: -8686732517708948941}
+  card: {fileID: 11400000}
+  type: 0

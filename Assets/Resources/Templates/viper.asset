@@ -14,7 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sprite: {fileID: 21300000, guid: 9f356110cdac50f428bf9760f803f56e, type: 3}
   type: 0
+  faction: 0
   cost: 0
+  defense: 0
+  outpost: 0
   actions:
   - {fileID: 5144373505836024185}
 --- !u!114 &4040378034951992208
@@ -29,7 +32,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ddce843cddeffb4aa8cf9db5df44d9f, type: 3}
   m_Name: main/basic
   m_EditorClassIdentifier: Assembly-CSharp:Template:BasicSO
-  action: {fileID: 5144373505836024185}
+  container: {fileID: 5144373505836024185}
   isManual: 0
   combat: 1
   trade: 0
@@ -46,7 +49,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c68cd7bcf53f7534b93e643ac0fb52ed, type: 3}
   m_Name: main
   m_EditorClassIdentifier: 
-  card: {fileID: 11400000}
-  type: 0
   effects:
   - {fileID: 4040378034951992208}
+  card: {fileID: 11400000}
+  type: 0

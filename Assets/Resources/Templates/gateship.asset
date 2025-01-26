@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e819eca39ee6da4c9450a2f8fae47ee, type: 3}
   m_Name: main/acquire card
   m_EditorClassIdentifier: 
-  action: {fileID: 1719761290402482131}
+  container: {fileID: 1719761290402482131}
   isManual: 1
   type: 1
   maxCost: 6
@@ -28,7 +28,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ddce843cddeffb4aa8cf9db5df44d9f, type: 3}
   m_Name: ally/basic
   m_EditorClassIdentifier: 
-  action: {fileID: 6762263742467739235}
+  container: {fileID: 6762263742467739235}
   isManual: 0
   combat: 0
   trade: 0
@@ -66,10 +66,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c68cd7bcf53f7534b93e643ac0fb52ed, type: 3}
   m_Name: main
   m_EditorClassIdentifier: 
-  card: {fileID: 11400000}
-  type: 0
   effects:
   - {fileID: -5101869647281468550}
+  card: {fileID: 11400000}
+  type: 0
 --- !u!114 &6762263742467739235
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -82,7 +82,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c68cd7bcf53f7534b93e643ac0fb52ed, type: 3}
   m_Name: ally
   m_EditorClassIdentifier: 
-  card: {fileID: 11400000}
-  type: 1
   effects:
   - {fileID: -3185350885048935259}
+  card: {fileID: 11400000}
+  type: 1

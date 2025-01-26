@@ -32,10 +32,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c68cd7bcf53f7534b93e643ac0fb52ed, type: 3}
   m_Name: main
   m_EditorClassIdentifier: 
-  card: {fileID: 11400000}
-  type: 0
   effects:
   - {fileID: 6639485281882455288}
+  card: {fileID: 11400000}
+  type: 0
 --- !u!114 &6639485281882455288
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -48,7 +48,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ddce843cddeffb4aa8cf9db5df44d9f, type: 3}
   m_Name: main/basic
   m_EditorClassIdentifier: 
-  action: {fileID: 2856680923710325283}
+  container: {fileID: 2856680923710325283}
   isManual: 0
   combat: 0
   trade: 1

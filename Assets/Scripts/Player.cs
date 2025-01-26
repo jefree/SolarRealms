@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Effect;
 using Mirror;
@@ -23,6 +24,11 @@ public class Player : NetworkBehaviour
     [HideInInspector] public PlayArea playArea;
     [HideInInspector] public Player enemy;
     [HideInInspector] public TMPro.TextMeshProUGUI authorityScoreText;
+
+
+    List<Effect.Base> turnStartEffects = new();
+    List<Effect.Base> turnEndEffects = new();
+
 
     // Start is called before the first frame update
     void Start()
@@ -134,6 +140,16 @@ public class Player : NetworkBehaviour
         return trade >= card.cost;
     }
 
+    public void AddTurnStartEffect(Effect.Base effect)
+    {
+        turnStartEffects.Add(effect);
+    }
+
+    public void AddTurnEndEffect(Effect.Base effect)
+    {
+        turnEndEffects.Add(effect);
+    }
+
     [Command]
     public void CmdBuyCard(Card card)
     {
@@ -198,8 +214,16 @@ public class Player : NetworkBehaviour
     [Server]
     public void BuyCard(Card card)
     {
+
         trade -= card.cost;
 
+        card.player = this;
+        discardPile.AddCard(card);
+    }
+
+    [Server]
+    public void FreeCard(Card card)
+    {
         card.player = this;
         discardPile.AddCard(card);
     }
@@ -242,6 +266,7 @@ public class Player : NetworkBehaviour
 
     public void StartTurn()
     {
+        turnEndEffects.ForEach(effect => game.ResolveIsolatedEffect(effect));
         playArea.ActivateBases();
     }
 
@@ -261,6 +286,8 @@ public class Player : NetworkBehaviour
             var card = hand.FirstCard();
             DiscardCard(card);
         }
+
+        turnEndEffects.ForEach(effect => game.ResolveIsolatedEffect(effect));
 
         var discardedShips = playArea.DiscardShips();
         discardedShips.ForEach(card => discardPile.AddCard(card));

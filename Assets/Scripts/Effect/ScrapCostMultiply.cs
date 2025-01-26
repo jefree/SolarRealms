@@ -6,15 +6,24 @@ namespace Effect
 {
     public class ScrapCostMultiply : Manual, ICardReceiver, IConfirmNetable
     {
+
+        public enum MultiplierType
+        {
+            Cost,
+            Fixed
+        }
+
         Basic effect;
         CardLocation location;
         Card card;
+        MultiplierType type;
         bool force;
 
-        public ScrapCostMultiply(Basic effect, CardLocation location, bool force = false)
+        public ScrapCostMultiply(Basic effect, CardLocation location, MultiplierType type, bool force = false)
         {
             this.effect = effect;
             this.location = location;
+            this.type = type;
             this.force = force;
         }
 
@@ -28,7 +37,7 @@ namespace Effect
         {
             if (card != null)
             {
-                var multiplier = card.cost;
+                var multiplier = type == MultiplierType.Cost ? card.cost : 1;
                 var multEffect = new Basic(effect.combat * multiplier, effect.trade * multiplier, effect.authority * multiplier);
 
                 multEffect.action = action;
@@ -46,7 +55,8 @@ namespace Effect
 
         public override string Text()
         {
-            return $"Deshuesa una carta y gana {effect.Text()} por su costo";
+            var suffix = type == MultiplierType.Cost ? " por su costo" : "";
+            return $"Deshuesa una carta y gana {effect.Text()}{suffix}.";
         }
 
         public string ConfirmText()

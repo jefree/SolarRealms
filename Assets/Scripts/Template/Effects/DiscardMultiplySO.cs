@@ -8,12 +8,10 @@ namespace Template
         public int trade;
         public int authority;
 
-        public override void Populate(Action action)
+        public override Effect.Base CreateEffect(Action action)
         {
             var basic = new Effect.Basic(combat, trade, authority);
-            var effect = new Effect.DiscardMultiply(basic);
-
-            action.AddEffect(effect, isManual);
+            return new Effect.DiscardMultiply(basic);
         }
     }
 }

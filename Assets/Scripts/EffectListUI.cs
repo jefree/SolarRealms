@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class EffectListUI : MonoBehaviour
@@ -52,10 +53,7 @@ public class EffectListUI : MonoBehaviour
         effectButton.ui = this;
 
         effectButton.textMesh.text = $"{prefix}{effect.Text()}";
-
-        var newColors = effectButton.button.colors;
-        newColors.normalColor = color;
-        effectButton.button.colors = newColors;
+        effectButton.textMesh.color = color;
     }
 
     public void Activate(EffectButton button)
@@ -76,4 +74,6 @@ public class EffectListUI : MonoBehaviour
             Destroy(item.gameObject);
         }
     }
+
+
 }

@@ -54,24 +54,24 @@ public class TradeRow : NetworkBehaviour
     [Server]
     public void CreateTradeDeck()
     {
-
         AddToTradeDeck("blob miner", 3);
-        AddToTradeDeck("infested moon", 2);
-        /*
-        AddToTradeDeck("enforcer mech");
+        AddToTradeDeck("burrower", 2);
+        AddToTradeDeck("conversion yard", 1);
+        AddToTradeDeck("enforcer mech", 1);
         AddToTradeDeck("frontier hawk", 3);
-        AddToTradeDeck("gateship");
-        AddToTradeDeck("hive queen");
+        AddToTradeDeck("gateship", 1);
+        AddToTradeDeck("hive queen", 1);
+        AddToTradeDeck("infested moon", 2);
         AddToTradeDeck("integration port", 2);
-        AddToTradeDeck("neural nexus");
-        AddToTradeDeck("outland station", 3);
+        AddToTradeDeck("mobile market", 2);
+        AddToTradeDeck("nanobot swarm", 1);
+        AddToTradeDeck("neural nexus", 1);
         AddToTradeDeck("orbital shuttle", 3);
+        AddToTradeDeck("outland station", 3);
         AddToTradeDeck("pulverizer", 1);
-        AddToTradeDeck("reclamation station");
-        AddToTradeDeck("warpgate cruiser");
+        AddToTradeDeck("reclamation station", 1);
         AddToTradeDeck("repair mech", 2);
-        */
-
+        AddToTradeDeck("warpgate cruiser", 1);
 
         Util.Shuffle(tradeDeck);
     }
@@ -127,7 +127,7 @@ public class TradeRow : NetworkBehaviour
     }
 
     [Server]
-    void AddToTradeDeck(string cardName, int amount = 1)
+    void AddToTradeDeck(string cardName, int amount)
     {
         for (int i = 0; i < amount; i++)
         {
@@ -137,7 +137,6 @@ public class TradeRow : NetworkBehaviour
             card.location = CardLocation.TRADE_DECK;
             tradeDeck.Insert(0, card);
             RpcCardAdded(card);
-
         }
     }
 

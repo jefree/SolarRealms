@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ecffe452507cf84c9228f692e4665af, type: 3}
   m_Name: scrap/draw card
   m_EditorClassIdentifier: 
-  action: {fileID: -3241927552596061532}
+  container: {fileID: -3241927552596061532}
   isManual: 1
   count: 1
 --- !u!114 &-3241927552596061532
@@ -27,10 +27,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c68cd7bcf53f7534b93e643ac0fb52ed, type: 3}
   m_Name: scrap
   m_EditorClassIdentifier: 
-  card: {fileID: 11400000}
-  type: 0
   effects:
   - {fileID: -4754554768508534077}
+  card: {fileID: 11400000}
+  type: 0
 --- !u!114 &-3043703491082619589
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -43,11 +43,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c68cd7bcf53f7534b93e643ac0fb52ed, type: 3}
   m_Name: main
   m_EditorClassIdentifier: 
-  card: {fileID: 11400000}
-  type: 3
   effects:
   - {fileID: 5812727100405280092}
   - {fileID: 8284720490503930798}
+  card: {fileID: 11400000}
+  type: 3
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -81,7 +81,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ddce843cddeffb4aa8cf9db5df44d9f, type: 3}
   m_Name: main/basic
   m_EditorClassIdentifier: 
-  action: {fileID: -3043703491082619589}
+  container: {fileID: -3043703491082619589}
   isManual: 1
   combat: 0
   trade: 1
@@ -98,7 +98,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ddce843cddeffb4aa8cf9db5df44d9f, type: 3}
   m_Name: main/basic
   m_EditorClassIdentifier: 
-  action: {fileID: -3043703491082619589}
+  container: {fileID: -3043703491082619589}
   isManual: 1
   combat: 0
   trade: 0

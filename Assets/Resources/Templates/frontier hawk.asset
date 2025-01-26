@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ddce843cddeffb4aa8cf9db5df44d9f, type: 3}
   m_Name: main/basic
   m_EditorClassIdentifier: 
-  action: {fileID: 4231783401892929291}
+  container: {fileID: 4231783401892929291}
   isManual: 0
   combat: 3
   trade: 0
@@ -49,7 +49,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ecffe452507cf84c9228f692e4665af, type: 3}
   m_Name: main/draw card
   m_EditorClassIdentifier: 
-  action: {fileID: 4231783401892929291}
+  container: {fileID: 4231783401892929291}
   isManual: 0
   count: 1
 --- !u!114 &4231783401892929291
@@ -64,12 +64,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c68cd7bcf53f7534b93e643ac0fb52ed, type: 3}
   m_Name: main
   m_EditorClassIdentifier: 
-  card: {fileID: 11400000}
-  type: 0
   effects:
   - {fileID: -8638116014239011260}
   - {fileID: 1075803965256775298}
   - {fileID: 5351580460067942624}
+  card: {fileID: 11400000}
+  type: 0
 --- !u!114 &5351580460067942624
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -82,6 +82,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b03cd78a5af0e5145b609c339c3e8d93, type: 3}
   m_Name: main/force discard
   m_EditorClassIdentifier: 
-  action: {fileID: 4231783401892929291}
+  container: {fileID: 4231783401892929291}
   isManual: 0
   count: 1

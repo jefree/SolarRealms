@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Effect;
 using Mirror;
 using Template;
 using UnityEngine;
@@ -10,29 +9,13 @@ public class CardFactory : MonoBehaviour
 
     static Dictionary<string, Action<Card>> cards = new();
 
-    [Server]
-    public static Card GenerateCard(string name, Game game, GameObject cardPrefab, GameObject parent, Player player = null)
-    {
-        GameObject cardGameObject = Instantiate(cardPrefab);
-        Card card = cardGameObject.GetComponent<Card>();
-
-        card.cardName = name;
-        card.game = game;
-        card.player = player;
-
-        Build(card);
-
-        NetworkServer.Spawn(cardGameObject);
-
-        return card;
-    }
-
     public static Card FromSO(string name, Game game, GameObject cardPrefab, GameObject parent, Player player = null)
     {
         GameObject cardGameObject = Instantiate(cardPrefab);
         Card card = cardGameObject.GetComponent<Card>();
 
         card.name = name;
+        card.gameObject.name = name;
 
         Populate(name, card);
 
@@ -43,7 +26,14 @@ public class CardFactory : MonoBehaviour
 
         return card;
     }
+    public static void Populate(string name, Card card)
+    {
+        var template = Resources.Load<CardSO>($"Templates/{name}");
 
+        template.Populate(card);
+    }
+
+    /*
     static void Init()
     {
         cards.Add("blob miner", BlobMiner);
@@ -65,6 +55,23 @@ public class CardFactory : MonoBehaviour
         cards.Add("warpgate cruiser", WarpgateCruiser);
     }
 
+    [Server]
+    public static Card GenerateCard(string name, Game game, GameObject cardPrefab, GameObject parent, Player player = null)
+    {
+        GameObject cardGameObject = Instantiate(cardPrefab);
+        Card card = cardGameObject.GetComponent<Card>();
+
+        card.cardName = name;
+        card.game = game;
+        card.player = player;
+
+        Build(card);
+
+        NetworkServer.Spawn(cardGameObject);
+
+        return card;
+    }
+
     public static void Build(Card card)
     {
         if (cards.Count == 0)
@@ -75,13 +82,6 @@ public class CardFactory : MonoBehaviour
         var generator = cards[card.cardName];
 
         generator(card);
-    }
-
-    public static void Populate(string name, Card card)
-    {
-        var template = Resources.Load<CardSO>($"Templates/{name}");
-
-        template.Populate(card);
     }
 
     public static void Viper(Card card)
@@ -107,7 +107,7 @@ public class CardFactory : MonoBehaviour
         card.cost = 2;
 
         card.AddEffect(new Effect.Basic(trade: 3), "main");
-        card.AddEffect(new Effect.ScrapCard(CardLocation.TRADE_ROW), "main", isManual: true);
+        card.AddEffect(new Effect.ScrapCard(CardLocation.TRADE_ROW, 1), "main", isManual: true);
 
         card.AddEffect(new Effect.Basic(combat: 2), "scrap", isManual: true);
     }
@@ -156,7 +156,7 @@ public class CardFactory : MonoBehaviour
         card.cost = 5;
 
         card.AddEffect(new Effect.Basic(combat: 5), "main");
-        card.AddEffect(new Effect.ScrapCard(CardLocation.HAND), "main", isManual: true);
+        card.AddEffect(new Effect.ScrapCard(CardLocation.HAND, 1), "main", isManual: true);
 
         card.AddEffect(new DrawCard(1), "scrap");
     }
@@ -180,7 +180,7 @@ public class CardFactory : MonoBehaviour
         card.faction = Faction.MACHINE_CULT;
         card.cost = 6;
 
-        card.AddEffect(new Effect.ScrapCard(CardLocation.DISCARD_PILE), "main", isManual: true);
+        card.AddEffect(new Effect.ScrapCard(CardLocation.DISCARD_PILE, 1), "main", isManual: true);
         card.AddEffect(new Effect.TurnEffectMultiply(TurnEffect.Scrap, combat: 3), "scrap", isManual: true);
     }
 
@@ -232,7 +232,6 @@ public class CardFactory : MonoBehaviour
         card.AddEffect(new Effect.ForceDiscard(1), "main");
     }
 
-    // ==================================================
     static void RepairMech(Card card)
     {
         card.type = CardType.SHIP;
@@ -241,9 +240,9 @@ public class CardFactory : MonoBehaviour
 
         card.mainAction = new OrAction(card, "main");
         card.AddEffect(new Basic(trade: 3), "main", isManual: true);
-        card.AddEffect(new RecoverCard(CardLocation.DISCARD_PILE, CardType.BASE), "main", isManual: true);
+        card.AddEffect(new RecoverCard(CardLocation.DISCARD_PILE, CardType.BASE, 1), "main", isManual: true);
 
-        card.AddEffect(new ScrapCard(CardLocation.HAND_OR_DISCARD), "ally", isManual: true);
+        card.AddEffect(new ScrapCard(CardLocation.HAND_OR_DISCARD, 1), "ally", isManual: true);
     }
 
     static void OrbitalShuttle(Card card)
@@ -280,4 +279,5 @@ public class CardFactory : MonoBehaviour
         card.AddEffect(new ScrapCostMultiply(new Basic(combat: 1), CardLocation.TRADE_ROW, force: true), "main");
         card.AddEffect(new DrawCard(1), "ally");
     }
+    */
 }

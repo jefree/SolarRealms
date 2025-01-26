@@ -5,10 +5,9 @@ namespace Template
         public CardType type;
         public int maxCost;
 
-        public override void Populate(Action action)
+        public override Effect.Base CreateEffect(Action action)
         {
-            var effect = new Effect.AcquireCard(type, maxCost);
-            action.AddEffect(effect, isManual);
+            return new Effect.AcquireCard(type, maxCost);
         }
     }
 }

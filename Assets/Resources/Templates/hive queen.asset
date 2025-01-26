@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ddce843cddeffb4aa8cf9db5df44d9f, type: 3}
   m_Name: ally/basic
   m_EditorClassIdentifier: 
-  action: {fileID: -2929860069642107593}
+  container: {fileID: -2929860069642107593}
   isManual: 0
   combat: 3
   trade: 0
@@ -29,7 +29,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ddce843cddeffb4aa8cf9db5df44d9f, type: 3}
   m_Name: main/basic
   m_EditorClassIdentifier: 
-  action: {fileID: -3318903889426209475}
+  container: {fileID: -3318903889426209475}
   isManual: 0
   combat: 7
   trade: 0
@@ -46,7 +46,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ddce843cddeffb4aa8cf9db5df44d9f, type: 3}
   m_Name: doubleAlly/basic
   m_EditorClassIdentifier: 
-  action: {fileID: -6514364030569032325}
+  container: {fileID: -6514364030569032325}
   isManual: 0
   combat: 3
   trade: 0
@@ -63,10 +63,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c68cd7bcf53f7534b93e643ac0fb52ed, type: 3}
   m_Name: doubleAlly
   m_EditorClassIdentifier: 
-  card: {fileID: 11400000}
-  type: 2
   effects:
   - {fileID: -6737076287628965290}
+  card: {fileID: 11400000}
+  type: 2
 --- !u!114 &-3318903889426209475
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -79,11 +79,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c68cd7bcf53f7534b93e643ac0fb52ed, type: 3}
   m_Name: main
   m_EditorClassIdentifier: 
-  card: {fileID: 11400000}
-  type: 0
   effects:
   - {fileID: -7144681383449797644}
   - {fileID: -169690262648172971}
+  card: {fileID: 11400000}
+  type: 0
 --- !u!114 &-2929860069642107593
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -96,10 +96,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c68cd7bcf53f7534b93e643ac0fb52ed, type: 3}
   m_Name: ally
   m_EditorClassIdentifier: 
-  card: {fileID: 11400000}
-  type: 1
   effects:
   - {fileID: -8657649688299729602}
+  card: {fileID: 11400000}
+  type: 1
 --- !u!114 &-169690262648172971
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -112,7 +112,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ecffe452507cf84c9228f692e4665af, type: 3}
   m_Name: main/draw card
   m_EditorClassIdentifier: 
-  action: {fileID: -3318903889426209475}
+  container: {fileID: -3318903889426209475}
   isManual: 0
   count: 1
 --- !u!114 &11400000

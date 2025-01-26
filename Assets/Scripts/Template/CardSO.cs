@@ -18,6 +18,12 @@ namespace Template
 
         public List<ActionSO> actions = new();
 
+
+        public void OnEnable()
+        {
+            actions.ForEach(action => action.card = this);
+        }
+
         public void Populate(Card card)
         {
             card.image.sprite = sprite;
@@ -60,8 +66,7 @@ namespace Template
         {
             if (actions.Any(action => action.name == type))
             {
-                Debug.LogError($"A Card cannot have multiple actions of name {type}");
-                return;
+                throw new ArgumentException($"A Card cannot have multiple actions of name {type}");
             }
 
             ActionSO action = CreateInstance<ActionSO>();

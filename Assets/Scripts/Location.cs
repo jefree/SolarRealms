@@ -9,6 +9,6 @@ public enum CardLocation
     TRADE_ROW = 16,
     DECK = 32,
     DISCARD_PILE = 64,
-    TRASH = 128,
+    SCRAP_HEAP = 128,
     HAND_OR_DISCARD = HAND | DISCARD_PILE
 }
