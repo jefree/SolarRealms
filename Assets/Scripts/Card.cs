@@ -258,8 +258,8 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
     public void OnPointerDown(PointerEventData data)
     {
         // invalidate click on cards outside card list
-        if (game.discardPileList.gameObject.activeSelf && location != CardLocation.DISCARD_PILE)
-            return;
+        // if (game.discardPileList.gameObject.activeSelf && location != CardLocation.DISCARD_PILE)
+        //     return;
 
         if (location == CardLocation.DISCARD_PILE && !game.discardPileList.gameObject.activeSelf)
         {
@@ -267,63 +267,23 @@ public class Card : NetworkBehaviour, IPointerEnterHandler, IPointerExitHandler,
             return;
         }
 
-        // click other player's hand card
-        if (
-            game.activePlayer != game.localPlayer ||
-            (location == CardLocation.HAND && player != game.localPlayer)
-        )
-        {
-            return;
-        }
+        // if (
+        //     game.state == GameState.DO_BASIC &&
+        //     location == CardLocation.PLAY_AREA
+        // )
+        // {
+        //     game.ShowEffectList(this);
+        //     return;
+        // }
 
-        if (
-           game.state == GameState.CHOOSE_CARD &&
-           game.localPlayer.IsOurTurn()
-        )
-        {
-            game.ChooseCard(this);
-            return;
-        }
-
-
-        // probably attacking a base
-        if (
-            game.state == GameState.DO_BASIC &&
-            location == CardLocation.PLAY_AREA &&
-            game.localPlayer != player &&
-            type == CardType.BASE
-        )
-        {
-            game.localPlayer.CmdAttackBase(this);
-            return;
-        }
-
-        if (
-            game.state == GameState.DO_BASIC &&
-            location == CardLocation.PLAY_AREA
-        )
-        {
-            game.ShowEffectList(this);
-            return;
-        }
-
-        if (
-            game.state == GameState.DO_BASIC &&
-            location == CardLocation.HAND
-        )
-        {
-            player.CmdPlayCard(this);
-            return;
-        }
-
-        if (
-            game.state == GameState.DO_BASIC &&
-            location == CardLocation.TRADE_ROW
-        )
-        {
-            game.localPlayer.CmdBuyCard(this);
-            return;
-        }
+        // if (
+        //    game.state == GameState.CHOOSE_CARD &&
+        //    game.localPlayer.IsOurTurn()
+        // )
+        // {
+        //     game.ChooseCard(this);
+        //     return;
+        // }
     }
 
     public void OnPointerEnter(PointerEventData data)

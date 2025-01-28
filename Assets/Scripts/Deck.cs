@@ -154,21 +154,23 @@ public class Deck : NetworkBehaviour
 
         List<Card> initial = new();
 
-        for (int i = 0; i < INITIAL_SCOUT_AMOUNT; i++)
-        {
-            initial.Add(CardFactory.FromSO("scout", game, cardPrefab, this.gameObject, player: player));
-        }
+        // for (int i = 0; i < INITIAL_SCOUT_AMOUNT; i++)
+        // {
+        //     initial.Add(CardFactory.FromSO("scout", game, cardPrefab, this.gameObject, player: player));
+        // }
 
-        for (int i = 0; i < INITIAL_VIPER_AMOUNT; i++)
-        {
-            initial.Add(CardFactory.FromSO("viper", game, cardPrefab, this.gameObject, player: player));
-        }
+        // for (int i = 0; i < INITIAL_VIPER_AMOUNT; i++)
+        // {
+        //     initial.Add(CardFactory.FromSO("viper", game, cardPrefab, this.gameObject, player: player));
+        // }
 
+        initial.Add(CardFactory.FromSO("blob miner", game, cardPrefab, gameObject, player: player));
         initial.Add(CardFactory.FromSO("conversion yard", game, cardPrefab, gameObject, player: player));
-        initial.Add(CardFactory.FromSO("conversion yard", game, cardPrefab, gameObject, player: player));
-        //initial.Add(CardFactory.FromSO("mobile market", game, cardPrefab, gameObject, player: player));
-        //initial.Add(CardFactory.GenerateCard("neural nexus", game, cardPrefab, gameObject, player: player));
-        //initial.Add(CardFactory.GenerateCard("neural nexus", game, cardPrefab, gameObject, player: player));
+        initial.Add(CardFactory.FromSO("pulverizer", game, cardPrefab, gameObject, player: player));
+        initial.Add(CardFactory.FromSO("repair mech", game, cardPrefab, gameObject, player: player));
+        initial.Add(CardFactory.FromSO("mobile market", game, cardPrefab, gameObject, player: player));
+        // initial.Add(CardFactory.GenerateCard("neural nexus", game, cardPrefab, gameObject, player: player));
+        // initial.Add(CardFactory.GenerateCard("neural nexus", game, cardPrefab, gameObject, player: player));
 
         Util.Shuffle(initial);
 

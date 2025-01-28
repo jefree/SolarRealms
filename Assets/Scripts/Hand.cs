@@ -45,7 +45,6 @@ public class Hand : NetworkBehaviour
 
         if (!card.player.isLocalPlayer)
         {
-            Debug.Log(card.cardName);
             card.Hide();
         }
 

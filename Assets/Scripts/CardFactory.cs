@@ -9,20 +9,22 @@ public class CardFactory : MonoBehaviour
 
     static Dictionary<string, Action<Card>> cards = new();
 
+    [Server]
     public static Card FromSO(string name, Game game, GameObject cardPrefab, GameObject parent, Player player = null)
     {
         GameObject cardGameObject = Instantiate(cardPrefab);
         Card card = cardGameObject.GetComponent<Card>();
 
-        Populate(name, card);
-
         card.game = game;
         card.player = player;
+
+        Populate(name, card);
 
         NetworkServer.Spawn(cardGameObject);
 
         return card;
     }
+
     public static void Populate(string name, Card card)
     {
         var template = Resources.Load<CardSO>($"Templates/{name}");

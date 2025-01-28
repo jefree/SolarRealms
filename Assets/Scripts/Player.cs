@@ -165,14 +165,14 @@ public class Player : NetworkBehaviour
         game.StartChooseCard();
     }
 
-    [Command]
-    public void CmdChooseCard(Card card)
-    {
-        if (game.activePlayer != this)
-            return;
+    // [Command]
+    // public void CmdChooseCard(Card card)
+    // {
+    //     if (game.activePlayer != this)
+    //         return;
 
-        game.ChooseCard(card);
-    }
+    //     game.ChooseCard(card);
+    // }
 
     [Command]
     public void CmdSetCurrentEffect(NetEffect netEffect)

@@ -3,13 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 using System;
-
-public enum GameState
-{
-    DO_BASIC, //play card from hand, activate ship or base, buy card, check discard pile
-    RESOLVING_CARD,
-    CHOOSE_CARD
-}
+using GameStates;
+using Effect;
 
 public enum TurnEffect
 {
@@ -23,10 +18,8 @@ public class Game : NetworkBehaviour
     public const float CARD_WIDTH = 2.14f;
     public const float CARD_PADDING = 0.07f;
 
-
     [HideInInspector, SyncVar] public Player activePlayer;
     public readonly SyncList<Player> players = new();
-    [HideInInspector, SyncVar] public GameState state;
     [HideInInspector] public Card currentCard;
     [SyncVar] public List<TurnEffect> turnEffects = new();
 
@@ -48,14 +41,15 @@ public class Game : NetworkBehaviour
     [HideInInspector]
     //Queue<Card> playCardsQueue = new();
 
-    StateHandler stateHandler;
+    GameStates.Handler stateHandler;
+    Effect.ICardReceiver currentReceiver;
 
     void Start()
     {
         tradeScoreText = GameObject.Find("TradeText").GetComponent<TMPro.TextMeshProUGUI>();
         combatScoreText = GameObject.Find("CombatText").GetComponent<TMPro.TextMeshProUGUI>();
 
-        state = GameState.DO_BASIC;
+        state = GameStates.DO_BASIC;
         stateHandler = new(this);
         ShowLocalMessage("Esperando otro jugador", persist: true);
     }
@@ -78,29 +72,29 @@ public class Game : NetworkBehaviour
         player.deck.Init(player);
 
         //Temporary logic to allow 1 player game
-        // activePlayer = player;
-        // player.playerName = "Player";
-        // tradeRow.CreateTradeDeck();
-        // Invoke("StartGame", 2.0f);
+        activePlayer = player;
+        player.playerName = "Player";
+        tradeRow.CreateTradeDeck();
+        Invoke("StartGame", 2.0f);
 
-        if (players.Count == 2)
-        {
-            player.playerName = "Enemy";
-            tradeRow.CreateTradeDeck();
-            Invoke("StartGame", 2.0f);
-        }
-        else
-        {
-            activePlayer = player;
-            player.playerName = "Player";
-        }
+        // if (players.Count == 2)
+        // {
+        //     player.playerName = "Enemy";
+        //     tradeRow.CreateTradeDeck();
+        //     Invoke("StartGame", 2.0f);
+        // }
+        // else
+        // {
+        //     activePlayer = player;
+        //     player.playerName = "Player";
+        // }
     }
 
     [Server]
     void StartGame()
     {
         //TODO: enable this for 2 players game
-        TargetSetPlayerTwoView(players[1].GetComponent<NetworkIdentity>().connectionToClient);
+        // TargetSetPlayerTwoView(players[1].GetComponent<NetworkIdentity>().connectionToClient);
 
         tradeRow.Init();
 
@@ -119,7 +113,7 @@ public class Game : NetworkBehaviour
 
         // enqueue cards with pending effects so remaining effects has a chance to activate if valid
         // activePlayer.playArea.PendingCards().ForEach(card => playCardsQueue.Enqueue(card));
-        activePlayer.playArea.PendingCards().ForEach(card => stateHandler.ProcessCard(card));
+        // activePlayer.playArea.PendingCards().ForEach(card => stateHandler.ProcessCard(card));
 
         // if (playCardsQueue.Count > 0)
         // {
@@ -177,7 +171,7 @@ public class Game : NetworkBehaviour
     // ResolveCard -> card.Activate -> ResolveAction -> action.Activate -> effect.Activate -> EffectResolved
     void ResolveCard(Card card)
     {
-        state = GameState.RESOLVING_CARD;
+        state = GameStates.RESOLVING_CARD;
         currentCard = card;
 
         currentCard.Activate();
@@ -186,7 +180,7 @@ public class Game : NetworkBehaviour
     [Server]
     public void OnCardResolved(Card card)
     {
-        state = GameState.DO_BASIC;
+        state = GameStates.DO_BASIC;
         currentCard = null;
 
         // if (playCardsQueue.Count > 0)
@@ -219,8 +213,15 @@ public class Game : NetworkBehaviour
     [Server]
     public void ResolveManualEffect(Effect.Base effect)
     {
-        SetCurrentEffect(effect);
-        effect.action.ActivateEffect(effect);
+        // SetCurrentEffect(effect);
+        // effect.action.ActivateEffect(effect);
+
+        if (!effect.action.SatisfyConditions())
+        {
+            throw new ArgumentException("Action do not satisfy conditions");
+        }
+
+        stateHandler.Add(effect.action, effect);
     }
 
     [Server]
@@ -252,7 +253,7 @@ public class Game : NetworkBehaviour
 
         ShowNetMessage("Tu turno");
 
-        state = GameState.DO_BASIC;
+        state = GameStates.DO_BASIC;
 
         activePlayer.StartTurn();
     }
@@ -270,14 +271,18 @@ public class Game : NetworkBehaviour
     [Server]
     public void StartChooseCard()
     {
-        state = GameState.CHOOSE_CARD;
+        stateHandler.StartChooseCard();
         ShowNetMessage("Escoge un carta");
     }
 
     public void ChooseCard(Card card)
     {
-        var cardReceiver = (Effect.ICardReceiver)currentCard.currentAction.currentEffect;
-        cardReceiver.SetCard(this, card);
+        if (currentReceiver == null)
+        {
+            throw new InvalidOperationException("there is no current receiver");
+        }
+
+        currentReceiver.SetCard(this, card);
     }
 
     [Client]
@@ -388,13 +393,14 @@ public class Game : NetworkBehaviour
     public void TargetStartConfirm(NetworkConnectionToClient conn, Effect.NetEffect netEffect)
     {
         var effect = (Effect.Manual)netEffect.GetEffect();
-        SetLocalCurrentEffect(effect);
+        currentReceiver = (Effect.ICardReceiver)effect;
         effect.ManualActivate(this);
     }
 
     [TargetRpc]
     public void TargetCloseConfirm(NetworkConnectionToClient conn)
     {
+        currentReceiver = null;
         confirmDialog.Close();
     }
 
